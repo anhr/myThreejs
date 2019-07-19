@@ -3,6 +3,7 @@
 node.js version of the myThreejs.
 
 I use myThreejs into my projects for displaying of my 3D objects in the canvas.
+[Example](https://raw.githack.com/anhr/controllerPlay/master/Examples/html/).
 
 Uses in my projects:
  * [DropdownMenu](https://github.com/anhr/DropdownMenu)
@@ -129,9 +130,9 @@ Android 6.0.1
 
 	Chrome 74 
 
-	Samsung Galaxy S5
+	Samsung Galaxy S5 incorrect slider width
 
-	FireFox 67
+	FireFox 67 incorrect slider width
 
 	Opera 52
 

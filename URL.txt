@@ -18,6 +18,51 @@ Building menu
 Open "Node.js command prompt"
 
 d:
-cd "D:\WebFeatures\GoogleSite\nodejs\myThreejs"
+//cd "D:\WebFeatures\GoogleSite\nodejs\myThreejs"
+cd "D:\My documents\MyProjects\webgl\three.js\GitHub\nodejs\myThreejs"
 npm install
 npm run build
+
+WARNINGS!!!
+------------
+
+(!) Unresolved dependencies
+https://github.com/rollup/rollup/wiki/Troubleshooting#treating-module-as-external-dependency
+http://localhost/threejs/three.js/build/three.module.js (imported by index.js)
+http://localhost/threejs/three.js/examples/jsm/objects/SpriteText.js (imported by index.js)
+
+edit rollup.config.js file:
+
+export default {
+  ...
+  external: ['http://localhost/threejs/three.js/build/three.module.js', 'http://localhost/threejs/three.js/examples/jsm/objects/SpriteText.js'],
+};
+
+(!) Missing global variable names
+Use options.globals to specify browser global variable names corresponding to external modules
+http://localhost/threejs/three.js/build/three.module.js (guessing 'THREE')
+http://localhost/threejs/three.js/examples/jsm/objects/SpriteText.js (guessing 'SpriteText_js')
+
+edit rollup.config.js and rollup.config.min.js files:
+
+	output: [{
+		globals: {
+			'http://localhost/threejs/three.js/build/three.module.js': 'THREE',
+			'http://localhost/threejs/three.js/examples/jsm/objects/SpriteText.js': 'SpriteText_js'
+		},
+  ...
+  }],
+
+ERROR
+------------
+Error: Couldn't find preset "env" relative to directory  "D:\\My documents\\MyProjects\\webgl\\three.js\\GitHub\\nodejs\\commonNodeJS"
+
+Заменить относительный путь
+
+import OrbitControlsGui from '../commonNodeJS/OrbitControlsGui.js';
+
+На абсолютный
+
+import OrbitControlsGui from 'http://localhost/threejs/nodejs/commonNodeJS/OrbitControlsGui.js';
+
+

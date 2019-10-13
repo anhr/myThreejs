@@ -14,7 +14,6 @@
 
 import { AxesHelper, Color, Fog, Group, PerspectiveCamera, PointLight, Raycaster, Scene, SpriteText, Vector2, Vector3, WebGLRenderer } from 'http://localhost/threejs/three.js/build/three.module.js';
 import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
-import OrbitControlsGui from 'http://localhost/threejs/nodejs/commonNodeJS/OrbitControlsGui.js';
 
 function myRequest(options) {
 	this.loadXMLDoc = function () {
@@ -496,6 +495,7 @@ function create(create3Dobjects, options) {
 					gui.__closeButton.click();
 				elContainer.querySelector('#my-gui-container').appendChild(gui.domElement);
 			}
+			create3Dobjects(group);
 			if (options.controllerPlay) {
 				var colorRed = new Color(0xff0000);
 				playController = controllerPlay.create(group, {
@@ -529,7 +529,6 @@ function create(create3Dobjects, options) {
 				});
 				if (gui !== undefined) gui.add(playController);
 			}
-			create3Dobjects(group);
 			if (stereoEffect !== undefined && typeof gui !== 'undefined') var spatialMultiplexsIndexs = options.stereoEffect.spatialMultiplexsIndexs;
 			stereoEffect.gui(gui, {
 				getLanguageCode: getLanguageCode,

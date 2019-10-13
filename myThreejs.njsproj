@@ -39,6 +39,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="package.json" />
+    <Content Include="player.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="README.md" />
     <Content Include="rollup.config.js" />
     <Content Include="rollup.config.min.js" />

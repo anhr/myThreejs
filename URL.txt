@@ -1,5 +1,7 @@
 ﻿-------------------------------------------
-ВНИМАНИЕ!!!! обязательно вставить файл .babelrc Иначе будет появляться ошибка 
+ВНИМАНИЕ!!!! обязательно вставить файл .babelrc в
+D:\My documents\MyProjects\webgl\three.js\GitHub\nodejs\myThreejs
+Иначе будет появляться ошибка 
 Error transforming bundle with 'uglify' plugin: Unexpected token: name (...)
 при выполнении команды "npm run build".
 
@@ -65,4 +67,7 @@ import OrbitControlsGui from '../commonNodeJS/OrbitControlsGui.js';
 
 import OrbitControlsGui from 'http://localhost/threejs/nodejs/commonNodeJS/OrbitControlsGui.js';
 
-
+ERROR
+-----------
+(babel plugin) ReferenceError: Unknown plugin "external-helpers" specified in "base" at 1, attempted to resolve relative to
+"D:\\My documents\\MyProjects\\webgl\\three.js\\GitHub\\three.js\\build"

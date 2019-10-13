@@ -33,6 +33,7 @@
     <Content Include="canvasContainer.html">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="Examples\html\index.html" />
     <Content Include="index.js" />
     <Content Include="licenseBanner.txt" />
     <Content Include="myThreejs.js">
@@ -46,6 +47,10 @@
     <Content Include="rollup.config.js" />
     <Content Include="rollup.config.min.js" />
     <Content Include="URL.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Examples\" />
+    <Folder Include="Examples\html\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
   <ProjectExtensions>

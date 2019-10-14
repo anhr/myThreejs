@@ -15,10 +15,10 @@
  */
 
 //Please download https://github.com/anhr/loadScriptNodeJS into ../loadScriptNodeJS folder
-import loadScript from '../../loadScriptNodeJS/loadScript.js';
+import loadScript from '../../loadScriptNodeJS/master/loadScript.js';
 
 //Please download https://github.com/anhr/loadFileNodeJS into ../loadFileNodeJS folder
-import loadFile from '../../loadFileNodeJS/loadFile.js';
+import loadFile from '../../loadFileNodeJS/master/loadFile.js';
 
 //https://threejs.org/docs/#manual/en/introduction/Import-via-modules
 import {
@@ -64,7 +64,7 @@ import OrbitControlsGui from '../../commonNodeJS/OrbitControlsGui.js';
 
 import AxesHelperGui from '../../commonNodeJS/AxesHelperGui.js';
 import clearThree from '../../commonNodeJS/clearThree.js';
-import ColorPicker from '../../colorpicker/colorpicker.js';
+import ColorPicker from '../../colorpicker/master/colorpicker.js';
 import PositionController from '../../commonNodeJS/PositionController.js';
 import ScaleController from '../../commonNodeJS/ScaleController.js';
 

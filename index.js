@@ -53,7 +53,7 @@ import cookie from '../../cookieNodeJS/cookie.js';
 import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
 
 
-import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
+import controllerPlay from '../../../controllerPlay/master/controllerPlay.js';
 import menuPlay from '../../menuPlay/menuPlay.js';
 import Player from './player.js';
 

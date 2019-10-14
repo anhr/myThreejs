@@ -54,7 +54,7 @@ import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/maste
 
 
 import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
-import menuPlay from '../../menuPlay/menuPlay.js';
+import menuPlay from '../../menuPlay/master/menuPlay.js';
 import Player from './player.js';
 
 //import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';

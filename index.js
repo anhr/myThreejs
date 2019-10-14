@@ -47,7 +47,7 @@ import {
 } from '../../three.js/dev/build/three.module.js';//'http://localhost/threejs/three.js/build/three.module.js';
 
 
-import cookie from '../../cookieNodeJS/cookie.js';
+import cookie from '../../cookieNodeJS/master/cookie.js';
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 
 import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';

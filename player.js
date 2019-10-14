@@ -12,7 +12,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import cookie from '../../nodejs/cookieNodeJS/cookie.js';
+import cookie from '../../cookieNodeJS/cookie.js';
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 
 /**

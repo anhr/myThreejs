@@ -15,10 +15,10 @@
  */
 
 //Please download https://github.com/anhr/loadScriptNodeJS into ../loadScriptNodeJS folder
-import loadScript from '../../nodejs/loadScriptNodeJS/loadScript.js';
+import loadScript from '../../loadScriptNodeJS/loadScript.js';
 
 //Please download https://github.com/anhr/loadFileNodeJS into ../loadFileNodeJS folder
-import loadFile from '../../nodejs/loadFileNodeJS/loadFile.js';
+import loadFile from '../../loadFileNodeJS/loadFile.js';
 
 //https://threejs.org/docs/#manual/en/introduction/Import-via-modules
 import {
@@ -47,26 +47,26 @@ import {
 } from '../../three.js/dev/build/three.module.js';//'http://localhost/threejs/three.js/build/three.module.js';
 
 
-import cookie from '../../nodejs/cookieNodeJS/cookie.js';
+import cookie from '../../cookieNodeJS/cookie.js';
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 
 import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
 
 
 import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
-import menuPlay from '../../nodejs/menuPlay/menuPlay.js';
+import menuPlay from '../../menuPlay/menuPlay.js';
 import Player from './player.js';
 
 //import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';
 //import OrbitControlsGui from 'http://localhost/threejs/nodejs/commonNodeJS/OrbitControlsGui.js';
 //import OrbitControlsGui from 'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js';
-import OrbitControlsGui from '../../nodejs/commonNodeJS/OrbitControlsGui.js';
+import OrbitControlsGui from '../../commonNodeJS/OrbitControlsGui.js';
 
-import AxesHelperGui from '../../nodejs/commonNodeJS/AxesHelperGui.js';
-import clearThree from '../../nodejs/commonNodeJS/clearThree.js';
-import ColorPicker from '../../nodejs/colorpicker/colorpicker.js';
-import PositionController from '../../nodejs/commonNodeJS/PositionController.js';
-import ScaleController from '../../nodejs/commonNodeJS/ScaleController.js';
+import AxesHelperGui from '../../commonNodeJS/AxesHelperGui.js';
+import clearThree from '../../commonNodeJS/clearThree.js';
+import ColorPicker from '../../colorpicker/colorpicker.js';
+import PositionController from '../../commonNodeJS/PositionController.js';
+import ScaleController from '../../commonNodeJS/ScaleController.js';
 
 var palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
 palette.toColor = function ( value, min, max ) {
@@ -1774,12 +1774,12 @@ export function create( createXDobjects, options ) {
 	if ( options.dat !== undefined ) {
 
 		//loadScript.sync( 'http://' + url + '/nodejs/dropdownMenu/styles/gui.css', optionsStyle );
-		loadScript.sync( debug ? 'http://' + url + '/nodejs/dropdownMenu/styles/gui.css' :
+		loadScript.sync( debug ? 'http://' + url + '/dropdownMenu/styles/gui.css' :
 			'https://raw.githack.com/anhr/DropdownMenu/master/styles/gui.css', optionsStyle );
 
 		//for .container class
 		//loadScript.sync( 'http://' + url + '/nodejs/dropdownMenu/styles/menu.css', optionsStyle );
-		loadScript.sync( debug ? 'http://' + url + '/nodejs/dropdownMenu/styles/menu.css' :
+		loadScript.sync( debug ? 'http://' + url + '/dropdownMenu/styles/menu.css' :
 			'https://raw.githack.com/anhr/DropdownMenu/master/styles/menu.css', optionsStyle );
 
 	}

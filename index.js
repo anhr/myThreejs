@@ -44,7 +44,7 @@ import {
 	Points,
 	PointsMaterial,
 
-} from '../../three.js/build/three.module.js';//'http://localhost/threejs/three.js/build/three.module.js';
+} from '../../three.js/dev/build/three.module.js';//'http://localhost/threejs/three.js/build/three.module.js';
 
 
 import cookie from '../cookieNodeJS/cookie.js';

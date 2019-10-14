@@ -13,7 +13,7 @@ html (553,4)
 ---------------------------------------------------------
 test page
 https://raw.githack.com/anhr/controllerPlay/master/Examples/html/
-http://localhost/nodejs/controllerPlay/Examples/html/
+http://localhost/threejs/nodejs/myThreejs/Examples/html/
 -------------------------------------------
 Building menu
 

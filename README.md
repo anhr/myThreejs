@@ -3,7 +3,7 @@
 node.js version of the myThreejs.
 
 I use myThreejs into my projects for displaying of my 3D objects in the canvas.
-[Example](https://raw.githack.com/anhr/controllerPlay/master/Examples/html/).
+[Example](https://raw.githack.com/anhr/myThreejs/master/Examples/html/).
 
 Uses in my projects:
  * [DropdownMenu](https://github.com/anhr/DropdownMenu)

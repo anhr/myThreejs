@@ -1773,14 +1773,18 @@ export function create( createXDobjects, options ) {
 	];
 	if ( options.dat !== undefined ) {
 
-		//loadScript.sync( 'http://' + url + '/nodejs/dropdownMenu/styles/gui.css', optionsStyle );
+/*
 		loadScript.sync( debug ? 'http://' + url + '/dropdownMenu/master/styles/gui.css' :
 			'https://raw.githack.com/anhr/DropdownMenu/master/styles/gui.css', optionsStyle );
+*/
+		loadScript.sync( '../../../../dropdownMenu/master/styles/gui.css', optionsStyle );
 
 		//for .container class
-		//loadScript.sync( 'http://' + url + '/nodejs/dropdownMenu/styles/menu.css', optionsStyle );
+/*
 		loadScript.sync( debug ? 'http://' + url + '/dropdownMenu/master/styles/menu.css' :
 			'https://raw.githack.com/anhr/DropdownMenu/master/styles/menu.css', optionsStyle );
+*/
+		loadScript.sync( '../../../../dropdownMenu/master/styles/menu.css', optionsStyle );
 
 	}
 

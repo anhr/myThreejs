@@ -1,6 +1,6 @@
 # myThreejs
 
-node.js version of the myThreejs c.
+node.js version of the myThreejs.
 
 I use myThreejs into my projects for displaying of my 3D objects in the canvas.
 [Example](https://raw.githack.com/anhr/myThreejs/master/Examples/html/).

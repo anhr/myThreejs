@@ -58,15 +58,15 @@ import menuPlay from '../../menuPlay/master/menuPlay.js';
 import Player from './player.js';
 
 //import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';
-//import OrbitControlsGui from 'http://localhost/threejs/nodejs/commonNodeJS/OrbitControlsGui.js';
+//import OrbitControlsGui from 'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js';
 //import OrbitControlsGui from 'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js';
-import OrbitControlsGui from '../../commonNodeJS/OrbitControlsGui.js';
+import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';
 
-import AxesHelperGui from '../../commonNodeJS/AxesHelperGui.js';
-import clearThree from '../../commonNodeJS/clearThree.js';
+import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
+import clearThree from '../../commonNodeJS/master/clearThree.js';
 import ColorPicker from '../../colorpicker/master/colorpicker.js';
-import PositionController from '../../commonNodeJS/PositionController.js';
-import ScaleController from '../../commonNodeJS/ScaleController.js';
+import PositionController from '../../commonNodeJS/master/PositionController.js';
+import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 
 var palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
 palette.toColor = function ( value, min, max ) {

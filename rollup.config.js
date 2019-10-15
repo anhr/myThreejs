@@ -27,7 +27,7 @@ export default {
 		'http://localhost/threejs/three.js/build/three.module.js': 'THREE',
 		'http://localhost/threejs/three.js/examples/jsm/objects/SpriteText.js': 'SpriteText_js',
 		'https://raw.githack.com/anhr/commonNodeJS/master/lang.js': 'lang_js',
-		'http://localhost/threejs/nodejs/commonNodeJS/OrbitControlsGui.js': 'OrbitControlsGui',
+		'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js': 'OrbitControlsGui',
 		'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js': 'OrbitControlsGui',
     },
     // TODO: Remove default exports, and this line, in v0.8.0.
@@ -60,7 +60,7 @@ export default {
 		'http://localhost/threejs/three.js/build/three.module.js',
 		'http://localhost/threejs/three.js/examples/jsm/objects/SpriteText.js',
 		'https://raw.githack.com/anhr/commonNodeJS/master/lang.js',
-		'http://localhost/threejs/nodejs/commonNodeJS/OrbitControlsGui.js',
+		'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js',
 		'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js',
 	],
 

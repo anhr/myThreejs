@@ -61,11 +61,11 @@ Error: Couldn't find preset "env" relative to directory  "D:\\My documents\\MyPr
 
 Заменить относительный путь
 
-import OrbitControlsGui from '../commonNodeJS/OrbitControlsGui.js';
+import OrbitControlsGui from '../commonNodeJS/master/OrbitControlsGui.js';
 
 На абсолютный
 
-import OrbitControlsGui from 'http://localhost/threejs/nodejs/commonNodeJS/OrbitControlsGui.js';
+import OrbitControlsGui from 'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js';
 
 ERROR
 -----------

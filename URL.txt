@@ -15,6 +15,21 @@ test page
 https://raw.githack.com/anhr/controllerPlay/master/Examples/html/
 http://localhost/threejs/nodejs/myThreejs/Examples/html/
 -------------------------------------------
+Настройка локального хоста
+Go to IIS and add PC2014/Sites/Default Web Site/anhr
+Physical Path: D:\My documents\MyProjects\webgl\three.js\GitHub
+
+Папка anhr нужна для выполнения
+loadScript.sync( '/anhr/colorpicker/master/colorpicker.css', optionsStyle );
+в D:\My documents\MyProjects\webgl\three.js\GitHub\colorpicker\master\index.js
+Можно было бы испоьзовать
+loadScript.sync( 'https://raw.githack.com/anhr/colorPicker/master/colorpicker.css', optionsStyle );
+Но тогда появится сообщение:
+A cookie associated with a cross-site resource at http://githack.com/ was set without the `SameSite` attribute. A future release of Chrome will only deliver cookies with cross-site requests if they are set with `SameSite=None` and `Secure`. You can review cookies in developer tools under Application>Storage>Cookies and see more details at https://www.chromestatus.com/feature/5088147346030592 and https://www.chromestatus.com/feature/5633521622188032.
+
+Папка anhr это мое имя в github. Cоздал для совместимости с сайтом https://raw.githack.com
+
+----------------------------------------
 Building menu
 
 Open "Node.js command prompt"

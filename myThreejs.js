@@ -14,11 +14,12 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import { create } from './index.js';
+import { create, Points } from './index.js';
 
 var myThreejs = {
 
 	create: create,
+	Points: Points,
 
 }
 export default myThreejs;

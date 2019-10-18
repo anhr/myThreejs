@@ -11,13 +11,15 @@
 	<meta name="author" content="Andrej Hristoliubov https://anhr.github.io/AboutMe/">
 
 	<!--<script src="https://raw.githack.com/anhr/loadScriptNodeJS/master/build/loadScript.js"></script>-->
-	<script src="https://raw.githack.com/anhr/loadScriptNodeJS/master/build/loadScript.min.js"></script>
-	<!--<script src="../../../loadScriptNodeJS/master/build/loadScript.js"></script>-->
+	<!--<script src="https://raw.githack.com/anhr/loadScriptNodeJS/master/build/loadScript.min.js"></script>-->
+	<script src="/anhr/loadScriptNodeJS/master/build/loadScript.js"></script>
 	<!--<script src="build/loadScript.min.js"></script>-->
+
 	<!--<script src="https://raw.githack.com/anhr/three.js/dev/examples/js/libs/dat.gui.js"></script>-->
-	<script src="https://raw.githack.com/anhr/three.js/dev/examples/js/libs/dat.gui.min.js"></script>
+	<!--<script src="https://raw.githack.com/anhr/three.js/dev/examples/js/libs/dat.gui.min.js"></script>-->
 	<!--<script src="../../../../three.js/examples/js/libs/dat.gui.min.js"></script>-->
-	<!--<script src="../../../../three.js/examples/js/libs/dat.gui.js"></script>-->
+	<script src="/anhr/three.js/dev/examples/js/libs/dat.gui.js"></script>
+
 	<!--<script src="http://localhost/threejs/three.js/src/objects/SpriteText.js"></script>-->
 	<!--for debugging
 	https://github.com/vorg/webgl-debug
@@ -38,7 +40,7 @@
 	<script nomodule>alert( 'Fatal error: Your browser do not support modular JavaScript code.' );</script>
 	<script type="module">
 
-		//import * as THREE from '../../../../three.js/build/three.module.js';
+		//import * as THREE from '../../../../three.js/dev/build/three.module.js';
 		import {
 
 			Vector2,
@@ -53,6 +55,7 @@
 			Mesh,
 			CubeGeometry,
 			MeshLambertMaterial,
+			Euler,
 
 		} from '../../../../three.js/dev/build/three.module.js';
 		import { OrbitControls } from '../../../../three.js/dev/examples/jsm/controls/OrbitControls.js';
@@ -106,11 +109,26 @@
 				new Vector4( 0, 0, 0, new Function( 't', 'return 1-2*t' ) ),//color is f(t)
 				new Vector4( 0.25, 0, 0, new Color( "rgb(255, 127, 0)" ) ),//yellow point
 			]
+			
+			group.add( myThreejs.Points( [
+
+				new Vector3( -0.5, 0.5, -1 ),//3D point
+				new Vector3( 0.5, 0.5, 0.5 ),//3D point
+
+			], options, {
+
+				//tMin: tMin,
+				//position: new Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
+				//scale: new Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 0 ),
+//				rotation: new Euler( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+				rotation: new Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+
+			} ) );//
+/*
 			var points = new Points( new BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
 				new PointsMaterial( { size: 0.05, vertexColors: VertexColors } ) );
 			points.name = 'Wave';
 			points.geometry.addAttribute( 'color', new Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
-			//			points.userData.color = points.material.color;
 			points.userData.arrayFuncs = arrayFuncs;
 			points.userData.raycaster = {
 
@@ -128,22 +146,31 @@
 			}
 			points.userData.selectPlayScene = function ( t, setAttributes ) {
 
-				//				setAttributes( points.geometry.attributes, t, arrayFuncs, a, b );
+				var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
+				points.rotation.set( angle, 0, 0 );
 				setAttributes( a, b );
 
 			}
 			points.position.copy( new Vector3( 0.1, 0.2, 0.3 ) );
 			points.scale.copy( new Vector3( 1.1, 1.2, 1.3 ) );
 			group.add( points );
-
+*/
 			arrayFuncs = [
 				new Vector3( -0.5, 0.5, -1 ),//3D point
 				new Vector4( -1.5, 0.5, 1, 25 ),//4D point. white color
 			]
-			points = new Points( new BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
+			var points2 = new Points( new BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
 				new PointsMaterial( { size: 0.05, vertexColors: VertexColors } ) );
-			points.geometry.addAttribute( 'color', new Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
-			group.add( points );
+			points2.geometry.addAttribute( 'color', new Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+			/*
+			points2.userData.selectPlayScene = function ( t, setAttributes ) {
+
+				var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
+				points2.rotation.set( angle, 0, 0 );
+
+			}
+			*/
+			//group.add( points2 );
 
 			//cubes
 			var cubeType = 'cube';
@@ -315,7 +342,7 @@
 			points.scale.copy( new Vector3( 2, 2, 1 ) );
 			points.userData.color = points.material.color;
 			group.add( points );
-
+/*
 			//cubes
 			loadScript.sync( [
 
@@ -350,6 +377,7 @@
 					},
 
 				} );
+*/
 
 		},
 			{

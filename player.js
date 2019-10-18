@@ -89,8 +89,8 @@ function Player( options, onSelectScene ) {
 
 	//Play/Pause
 
-//	this.controllers = [];
-	var playing = false, controllers = []/*this.controllers*/, time, timeNext, settings = { interval: 1 }, cookieName = 'Player';//, timerId
+	this.controllers = [];
+	var playing = false, controllers = this.controllers, time, timeNext, settings = { interval: 1 }, cookieName = 'Player';//, timerId
 
 	options.cookie.getObject( cookieName, settings, settings );
 

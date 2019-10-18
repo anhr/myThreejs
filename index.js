@@ -21,6 +21,7 @@ import loadScript from '../../loadScriptNodeJS/master/loadScript.js';
 import loadFile from '../../loadFileNodeJS/master/loadFile.js';
 
 //https://threejs.org/docs/#manual/en/introduction/Import-via-modules
+/*
 import {
 
 	Vector2,
@@ -45,7 +46,8 @@ import {
 	PointsMaterial,
 
 } from '../../three.js/dev/build/three.module.js';//'http://localhost/threejs/three.js/build/three.module.js';
-
+*/
+import * as THREE from '../../three.js/dev/build/three.module.js';
 
 import cookie from '../../cookieNodeJS/master/cookie.js';
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
@@ -74,7 +76,7 @@ palette.toColor = function ( value, min, max ) {
 	var c = this.hsv2rgb( value, min, max );
 	if ( c === undefined )
 		c = { r: 255, g: 255, b: 255 }
-	return new Color( "rgb(" + c.r + ", " + c.g + ", " + c.b + ")" );
+	return new THREE.Color( "rgb(" + c.r + ", " + c.g + ", " + c.b + ")" );
 
 }
 
@@ -233,7 +235,7 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( 'https://raw.githack.com/anhr/myThreejs/master/canvasContainer.html' );//'http://' + url + '/nodejs/myThreejs/canvasContainer.html'
 		elContainer = elContainer.querySelector( '.container' );
 
-		var camera, defaultCameraPosition = new Vector3( 0.4, 0.4, 2 ), scene, renderer, cursor, controls, stereoEffect, group, player,
+		var camera, defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ), scene, renderer, cursor, controls, stereoEffect, group, player,
 			playController, canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
 			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault,
 			//https://www.khronos.org/webgl/wiki/HandlingContextLost
@@ -312,19 +314,19 @@ export function create( createXDobjects, options ) {
 
 			// CAMERA
 
-			camera = new PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 );
+			camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 );
 			camera.position.copy( defaultCameraPosition );
 //			camera.position.set( 0.4, 0.4, 2 );
 
 			// SCENE
 
-			scene = new Scene();
-			scene.background = new Color( 0x000000 );
-			scene.fog = new Fog( 0x000000, 250, 1400 );
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0x000000 );
+			scene.fog = new THREE.Fog( 0x000000, 250, 1400 );
 
 			//
 
-			renderer = new WebGLRenderer( {
+			renderer = new THREE.WebGLRenderer( {
 
 				antialias: true,
 				canvas: canvas,
@@ -378,12 +380,12 @@ export function create( createXDobjects, options ) {
 
 			//Light
 /*
-			var light = new PointLight( 0xffffff, 1 );
-			light.position.copy( new Vector3( 1, 1, 1 ) );
+			var light = new THREE.PointLight( 0xffffff, 1 );
+			light.position.copy( new THREE.Vector3( 1, 1, 1 ) );
 			scene.add( light );
 
-			light = new PointLight( 0xffffff, 1 );
-			light.position.copy( new Vector3( -2, -2, -2 ) );
+			light = new THREE.PointLight( 0xffffff, 1 );
+			light.position.copy( new THREE.Vector3( -2, -2, -2 ) );
 			scene.add( light );
 */
 			//A light that gets emitted from a single point in all directions.
@@ -391,8 +393,8 @@ export function create( createXDobjects, options ) {
 
 				var strLight = 'mathBoxLight',
 					light,// = scene.getObjectByName( strLight ),
-					position = new Vector3( 0.5 * options.scale, 0.5 * options.scale, 0.5 * options.scale ), controllers = {},
-					axesEnum = AxesHelperOptions.axesEnum, multiplier = 2 * options.scale;
+					position = new THREE.Vector3( 0.5 * options.scale, 0.5 * options.scale, 0.5 * options.scale ), controllers = {},
+					axesEnum = THREE.AxesHelperOptions.axesEnum, multiplier = 2 * options.scale;
 
 				function isLight() {
 
@@ -404,7 +406,7 @@ export function create( createXDobjects, options ) {
 					position = positionCur || position;
 					if ( !isLight() ) {
 
-						light = new PointLight( 0xffffff, 1 );
+						light = new THREE.PointLight( 0xffffff, 1 );
 						light.position.copy( position );
 						light.name = strLight;
 						scene.add( light );
@@ -438,10 +440,10 @@ export function create( createXDobjects, options ) {
 							function getPoints( pointVerticesSrc, color ) {
 
 								var geometry = Array.isArray( pointVerticesSrc ) ?
-									new BufferGeometry().setFromPoints( pointVerticesSrc ) : pointVerticesSrc;
+									new THREE.BufferGeometry().setFromPoints( pointVerticesSrc ) : pointVerticesSrc;
 								var threshold = 0.05 * options.scale;
-								return new Points( geometry,
-									new PointsMaterial( {
+								return new THREE.Points( geometry,
+									new THREE.PointsMaterial( {
 
 										color: color === undefined ? 0xffffff : color,
 										//map: texture,
@@ -519,19 +521,19 @@ export function create( createXDobjects, options ) {
 
 			};
 			var pointLight1 = new pointLight();
-			pointLight1.add( new Vector3( 2 * options.scale, 2 * options.scale, 2 * options.scale ) );
+			pointLight1.add( new THREE.Vector3( 2 * options.scale, 2 * options.scale, 2 * options.scale ) );
 			var pointLight2 = new pointLight();
-			pointLight2.add( new Vector3( -2 * options.scale, -2 * options.scale, -2 * options.scale ) );
+			pointLight2.add( new THREE.Vector3( -2 * options.scale, -2 * options.scale, -2 * options.scale ) );
 
 			//
 
-			group = new Group();
+			group = new THREE.Group();
 			scene.add( group );
 
 			function setColorAttribute( colorAttribute, i, color ) {
 
 				if ( typeof color === "string" )
-					color = new Color( color );
+					color = new THREE.Color( color );
 				colorAttribute.setX( i, color.r );
 				colorAttribute.setY( i, color.g );
 				colorAttribute.setZ( i, color.b );
@@ -540,8 +542,8 @@ export function create( createXDobjects, options ) {
 			}
 			function guiSelectPoint() {
 
-				var f3DObjects, fPoint, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,//, fPoints, mechScaleDefault = new Vector3()
-					cScaleX, cScaleY, cScaleZ, cPosition = new Vector3(), cRotations = new Vector3(),//, cPositionX, cPositionY, cPositionZ;
+				var f3DObjects, fPoint, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,//, fPoints, mechScaleDefault = new THREE.Vector3()
+					cScaleX, cScaleY, cScaleZ, cPosition = new THREE.Vector3(), cRotations = new THREE.Vector3(),//, cPositionX, cPositionY, cPositionZ;
 					cPoints, selectedPointIndex = -1;
 				var controllerX, controllerY, controllerZ, controllerW, controllerColor;
 
@@ -572,7 +574,7 @@ export function create( createXDobjects, options ) {
 						else {
 
 							var func = intersectionSelected.object.userData.arrayFuncs[intersectionSelected.index];
-							controllerColor.setValue( '#' + new Color( func.w.r, func.w.g, func.w.b ).getHexString() );
+							controllerColor.setValue( '#' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() );
 							controllerColor.userData = { intersection: intersectionSelected, }
 
 						}
@@ -786,7 +788,7 @@ export function create( createXDobjects, options ) {
 							getLanguageCode: getLanguageCode,
 
 						} ) );
-					var scale = new Vector3();
+					var scale = new THREE.Vector3();
 					function setScale( axesName, value ) {
 
 						mesh.scale[axesName] = value;
@@ -842,7 +844,7 @@ export function create( createXDobjects, options ) {
 							setPositionControllers();
 
 						}
-						var position = new Vector3();
+						var position = new THREE.Vector3();
 
 						cPosition[name] = dat.controllerZeroStep( f, position, name, function ( value ) { setPosition( value ); } );
 						dat.controllerNameAndTitle( cPosition[name], axesName );
@@ -869,11 +871,11 @@ export function create( createXDobjects, options ) {
 					//rotation
 
 					var fRotation = fMesh.addFolder( lang.rotation );
-//						vRotation = new Vector3(),
+//						vRotation = new THREE.Vector3(),
 //						exRotation = { min: 0, max: Math.PI * 2, step: 1 / 360 };
 					function addRotationControllers( name ) {
 
-						cRotations[name] = fRotation.add( new Vector3(), name, 0, Math.PI * 2, 1 / 360 ).
+						cRotations[name] = fRotation.add( new THREE.Vector3(), name, 0, Math.PI * 2, 1 / 360 ).
 							onChange( function ( value ) {
 
 								mesh.rotation[name] = value;
@@ -1072,6 +1074,11 @@ export function create( createXDobjects, options ) {
 							onChange( function ( value ) {
 
 //								movePointAxes( axesId, value );
+								/*
+								//dotLines
+								if ( axesHelper !== undefined )
+									axesHelper.exposePosition( getPosition( intersection ) );
+								*/
 
 							} );
 
@@ -1080,7 +1087,7 @@ export function create( createXDobjects, options ) {
 						return controller;
 
 					}
-					var axesEnum = AxesHelperOptions.axesEnum;
+					var axesEnum = THREE.AxesHelperOptions.axesEnum;
 					controllerX = axesGui( axesEnum.x );//, optionsGui.onChangeX ),
 					controllerY = axesGui( axesEnum.y );//, optionsGui.onChangeY ),
 					controllerZ = axesGui( axesEnum.z );//, optionsGui.onChangeZ );
@@ -1313,7 +1320,7 @@ export function create( createXDobjects, options ) {
 					options.scales.t.marks = options.scales.t.marks || 2;
 
 				}
-				axesHelper = new AxesHelper( 1 * scale, {
+				axesHelper = new THREE.AxesHelper( 1 * scale, {
 
 					cookie: cookie,
 					scene: scene,
@@ -1385,7 +1392,7 @@ export function create( createXDobjects, options ) {
 									var color = palette.toColor( value, min, max );
 									setColorAttribute( attributes.color, i, color );
 
-								} else if ( funcs.w instanceof Color ) {
+								} else if ( funcs.w instanceof THREE.Color ) {
 
 									var color = funcs.w;
 									setColorAttribute( attributes.color, i, color );
@@ -1460,20 +1467,20 @@ export function create( createXDobjects, options ) {
 
 				mesh.userData.default = mesh.userData.default || {};
 
-				mesh.userData.default.scale = new Vector3();
+				mesh.userData.default.scale = new THREE.Vector3();
 				mesh.userData.default.scale.copy( mesh.scale );
 
-				mesh.userData.default.position = new Vector3();
+				mesh.userData.default.position = new THREE.Vector3();
 				mesh.userData.default.position.copy( mesh.position );
 
-				mesh.userData.default.rotation = new Euler();
+				mesh.userData.default.rotation = new THREE.Euler();
 				mesh.userData.default.rotation.copy( mesh.rotation );
 
 			} );
 
 			if ( gui !== undefined ) {
 
-				//AxesHelper gui
+				//THREE.AxesHelper gui
 				if ( ( options.scene === undefined ) && ( typeof scene !== 'undefined' ) )
 					options.scene = scene;
 				options.cookie = cookie;
@@ -1508,7 +1515,7 @@ export function create( createXDobjects, options ) {
 				dat.controllerNameAndTitle( gui.add( {
 					defaultF: function ( value ) {
 
-						controls.target = new Vector3();
+						controls.target = new THREE.Vector3();
 						camera.position.copy( defaultCameraPosition );
 						controls.object.position.copy( camera.position );
 						controls.update();
@@ -1527,7 +1534,7 @@ export function create( createXDobjects, options ) {
 
 					if ( raycaster === undefined ) {
 
-						raycaster = new Raycaster();
+						raycaster = new THREE.Raycaster();
 						raycaster.params.Points.threshold = item.material.size / 3;//0.03;
 						if ( raycaster.setStereoEffect !== undefined )
 							raycaster.setStereoEffect( {
@@ -1582,13 +1589,13 @@ export function create( createXDobjects, options ) {
 					height: renderer.domElement.style.height,
 
 				},
-					sizeOriginal = new Vector2();
+					sizeOriginal = new THREE.Vector2();
 				renderer.getSize( sizeOriginal );
 				return {
 
 					onFullScreenToggle: function ( fullScreen ) {
 
-						var size = new Vector2();
+						var size = new THREE.Vector2();
 						renderer.getSize( size );
 						if ( fullScreen === undefined )
 							fullScreen = ( size.x === window.innerWidth ) && ( size.y === window.innerHeight );
@@ -1636,7 +1643,7 @@ export function create( createXDobjects, options ) {
 		}
 		function onResize() {
 
-			var size = new Vector2();
+			var size = new THREE.Vector2();
 			renderer.getSize( size );
 			camera.aspect = size.x / size.y;
 			camera.updateProjectionMatrix();
@@ -1659,7 +1666,7 @@ export function create( createXDobjects, options ) {
 					event.preventDefault();
 					var left = renderer.domElement.offsetLeft,
 						top = renderer.domElement.offsetTop,
-						size = new Vector2;
+						size = new THREE.Vector2;
 					renderer.getSize( size );
 					mouse.x = ( event.clientX / size.x ) * 2 - 1 - ( left / size.x ) * 2;
 					mouse.y = -( event.clientY / size.y ) * 2 + 1 + ( top / size.y ) * 2;
@@ -1795,7 +1802,7 @@ export function create( createXDobjects, options ) {
 		var points = [];
 		arrayFuncs.forEach( function ( funcs ) {
 
-			points.push( new Vector4(
+			points.push( new THREE.Vector4(
 				typeof funcs.x === "function" ? funcs.x( t, a, b ) : funcs.x,
 				typeof funcs.y === "function" ? funcs.y( t, a, b ) : funcs.y,
 				typeof funcs.z === "function" ? funcs.z( t, a, b ) : funcs.z,
@@ -1822,11 +1829,11 @@ export function create( createXDobjects, options ) {
 
 			} else {
 
-				max = funcs instanceof Vector4 ? funcs.w : 1;
+				max = funcs instanceof THREE.Vector4 ? funcs.w : 1;
 				min = max - 1;
 
 			}
-			var color = palette.toColor( funcs instanceof Vector4 ? funcs.w : max, min, max );
+			var color = palette.toColor( funcs instanceof THREE.Vector4 ? funcs.w : max, min, max );
 			colors.push( color.r, color.g, color.b );
 
 		} );
@@ -1844,13 +1851,13 @@ export function create( createXDobjects, options ) {
 		if ( findSpriteTextIntersection( scene ) )
 			return;
 		var func = intersection.object.userData.arrayFuncs[intersection.index];
-		spriteTextIntersection = new SpriteText(
+		spriteTextIntersection = new THREE.SpriteText(
 			       options.scales.x.name + ': ' + position.x +
 			'\n' + options.scales.y.name + ': ' + position.y +
 			'\n' + options.scales.z.name + ': ' + position.z
-			+ ( position instanceof Vector4 && !isNaN( position.w ) && ( options.scales.w !== undefined ) ?
+			+ ( position instanceof THREE.Vector4 && !isNaN( position.w ) && ( options.scales.w !== undefined ) ?
 			'\n' + options.scales.w.name + ': ' + position.w :
-				isNaN( position.w ) ? '\n' + lang.color + ': ' + new Color( func.w.r, func.w.g, func.w.b ).getHexString() : '' ), {
+				isNaN( position.w ) ? '\n' + lang.color + ': ' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() : '' ), {
 
 				textHeight: 0.2,
 				fontColor: textColor,
@@ -1864,7 +1871,7 @@ export function create( createXDobjects, options ) {
 
 				},
 				position: position,//.multiply( intersection.object.scale ),
-				center: new Vector2( 0.5, 0 ),
+				center: new THREE.Vector2( 0.5, 0 ),
 
 			} );
 		spriteTextIntersection.name = spriteTextIntersectionName;
@@ -2004,9 +2011,9 @@ function getObjectPosition( object, index ) {
 	var attributesPosition = object.geometry.attributes.position;
 	if ( index !== undefined ) {
 
-		var position = attributesPosition.itemSize >= 4 ? new Vector4( 0, 0, 0, 0 ) : new Vector3(),
-			position2 = attributesPosition.itemSize >= 4 ? new Vector4( 0, 0, 0, 0 ) : new Vector3(),
-			positionAngle = new Vector3();
+		var position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
+			position2 = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
+			positionAngle = new THREE.Vector3();
 		position2.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
 		position = position2.clone();
 
@@ -2023,5 +2030,146 @@ function getObjectPosition( object, index ) {
 
 	}
 	return object.position;
+
+}
+
+/**
+ * Displaying points
+ * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array
+ * THREE.Vector4: 4D point.
+ * THREE.Vector3: 3D point. w = 1
+ * THREE.Vector2: 2D point. w = 1, z = 0
+ * Vector's x, y, z, w is position of the point.
+ * Can be as:
+ * float - position of the point.
+ * [float] - array of positions of the point.
+ * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
+ * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
+ * if arrayFuncs.length === 0 then push new THREE.Vector3().
+ * @param {object} options see myThreejs.create options for details
+ * @param {object} [pointsOptions] followed points options is availablee:
+ * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.
+ * @param {number} [pointsOptions.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
+ * @param {number} [pointsOptions.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
+ * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
+ * @param {THREE.Vector3} [pointsOptions.position] position of the points. Default is new THREE.Vector3( 0, 0, 0 ).
+ * Vector's x, y, z is position of the points.
+ * Can be as:
+ * float - position of the points.
+ * [float] - array of positions of the points.
+ * Function - position of the points is function of the t. Example: new Function( 't', 'return 0.1 + t' )
+ * @param {THREE.Vector3} [pointsOptions.scale] scale of the points. Default is new THREE.Vector3( 1, 1, 1 ).
+ * Vector's x, y, z is scale of the points.
+ * Can be as:
+ * float - scale of the points.
+ * [float] - array of scales of the points.
+ * Function - scale of the points is function of the t. Example: new Function( 't', 'return 1.1 + t' )
+ * @param {THREE.Vector3} [pointsOptions.rotation] rotation of the points. Default is new THREE.Vector3( 0, 0, 0 ).
+ * Vector's x, y, z is rotation of the points.
+ * Can be as:
+ * float - rotation of the points.
+ * [float] - array of rotations of the points.
+ * Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' )
+ */
+export function Points( arrayFuncs, options, pointsOptions ) {
+
+	if ( arrayFuncs.length === 0 )
+		arrayFuncs.push( new THREE.Vector3() );
+	pointsOptions = pointsOptions || {};
+	pointsOptions.tMin = pointsOptions.tMin || 0;
+	pointsOptions.a = pointsOptions.a || 1;
+	pointsOptions.b = pointsOptions.b || 0;
+	pointsOptions.name = pointsOptions.name || '';
+	pointsOptions.position = pointsOptions.position || new THREE.Vector3( 0, 0, 0 );
+	pointsOptions.scale = pointsOptions.scale || new THREE.Vector3( 1, 1, 1 );
+//	pointsOptions.rotation = pointsOptions.rotation || new THREE.Euler();
+	pointsOptions.rotation = pointsOptions.rotation || new THREE.Vector3();
+
+	var points = new THREE.Points(
+		new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, pointsOptions.a, pointsOptions.b ), 4 ),
+		new THREE.PointsMaterial( { size: 0.05, vertexColors: THREE.VertexColors } )
+	);
+	points.name = pointsOptions.name;//'Wave';
+	points.geometry.addAttribute( 'color',
+		new THREE.Float32BufferAttribute( options.getСolors( pointsOptions.tMin, arrayFuncs, options.scales.w ), 3 ) );
+	points.userData.arrayFuncs = arrayFuncs;
+	points.userData.raycaster = {
+
+		onIntersection: function ( raycaster, intersection, scene ) {
+
+			options.addSpriteTextIntersection( raycaster, intersection, scene );
+
+		},
+		onIntersectionOut: function ( scene ) {
+
+			options.removeSpriteTextIntersection( scene );
+
+		},
+
+	}
+	points.userData.selectPlayScene = function ( t, setAttributes ) {
+
+/*
+		var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
+		points.rotation.set( angle, 0, 0 );
+*/
+		setPositions( t );
+		setScales( t );
+		setRotations( t );
+		setAttributes( pointsOptions.a, pointsOptions.b );
+
+	}
+	function setPositions( t ) {
+
+		t = t || pointsOptions.tMin;
+		function setPosition( axisName ) {
+
+			points.position[axisName] = typeof pointsOptions.position[axisName] === "function" ?
+				pointsOptions.position[axisName]( t, pointsOptions.a, pointsOptions.b ) :
+				pointsOptions.position[axisName];
+
+		}
+		setPosition( 'x' );
+		setPosition( 'y' );
+		setPosition( 'z' );
+
+	}
+	//setPositions();
+//	points.position.copy( pointsOptions.position );
+	function setScales( t ) {
+
+		t = t || pointsOptions.tMin;
+		function setScale( axisName ) {
+
+			points.scale[axisName] = typeof pointsOptions.scale[axisName] === "function" ?
+				pointsOptions.scale[axisName]( t, pointsOptions.a, pointsOptions.b ) :
+				pointsOptions.scale[axisName];
+
+		}
+		setScale( 'x' );
+		setScale( 'y' );
+		setScale( 'z' );
+
+	}
+//	points.scale.copy( pointsOptions.scale );
+	function setRotations( t ) {
+
+		t = t || pointsOptions.tMin;
+		function setRotation( axisName ) {
+
+			points.rotation[axisName] = typeof pointsOptions.rotation[axisName] === "function" ?
+				pointsOptions.rotation[axisName]( t, pointsOptions.a, pointsOptions.b ) :
+				pointsOptions.rotation[axisName];
+			while ( points.rotation[axisName] > Math.PI * 2 )
+				points.rotation[axisName] -= Math.PI * 2
+
+		}
+		setRotation( 'x' );
+		setRotation( 'y' );
+		setRotation( 'z' );
+
+	}
+//	points.rotation.copy(pointsOptions.rotation);
+	return points;
 
 }

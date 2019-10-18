@@ -768,6 +768,14 @@ export function create( createXDobjects, options ) {
 					fMesh.domElement.style.display = 'none';
 					fMesh.open();
 
+					function exposePosition() {
+
+						var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
+						if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
+							axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
+
+					}
+
 					//Scale
 
 					var fScale = fMesh.addFolder( lang.scale );
@@ -780,6 +788,12 @@ export function create( createXDobjects, options ) {
 						mesh.needsUpdate = true;
 
 						setScaleControllers();
+						exposePosition();
+/*
+						var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
+						if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
+							axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
+*/
 
 					},
 						{
@@ -814,6 +828,7 @@ export function create( createXDobjects, options ) {
 							mesh.needsUpdate = true; 
 
 							setScaleControllers();
+							exposePosition();
 
 						},
 
@@ -833,6 +848,12 @@ export function create( createXDobjects, options ) {
 							mesh.needsUpdate = true;
 
 							setPositionControllers();
+							exposePosition();
+/*
+							var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
+							if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
+								axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
+*/
 
 						}, { getLanguageCode: getLanguageCode, } ) );
 
@@ -863,6 +884,7 @@ export function create( createXDobjects, options ) {
 							mesh.needsUpdate = true;
 
 							setPositionControllers();
+							exposePosition();
 
 						},
 
@@ -881,6 +903,12 @@ export function create( createXDobjects, options ) {
 								mesh.rotation[name] = value;
 								mesh.needsUpdate = true;
 
+//								setRotationControllers();
+
+								var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
+								if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
+									axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
+
 							} );
 						dat.controllerNameAndTitle( cRotations.x, options.scales.x.name );
 
@@ -888,30 +916,6 @@ export function create( createXDobjects, options ) {
 					addRotationControllers( 'x' );
 					addRotationControllers( 'y' );
 					addRotationControllers( 'z' );
-/*
-					cRotations.x = fRotation.add( vRotation, 'x', exRotation.min, exRotation.max, exRotation.step ).
-						onChange( function ( value ) {
-
-							mesh.position[name] += shift;
-							mesh.needsUpdate = true;
-
-						} );
-					dat.controllerNameAndTitle( cRotations.x, options.scales.x.name );
-					cRotations.y = fRotation.add( vRotation, 'y', exRotation.min, exRotation.max, exRotation.step ).
-						onChange( function ( value ) {
-
-							console.warn( 'rotation = ' + value );
-
-						} );
-					dat.controllerNameAndTitle( cRotations.y, options.scales.y.name );
-					cRotations.z = fRotation.add( vRotation, 'z', 0, exRotation.min, exRotation.max, exRotation.step ).
-						onChange( function ( value ) {
-
-							console.warn( 'rotation = ' + value );
-
-						} );
-					dat.controllerNameAndTitle( cRotations.z, options.scales.z.name );
-*/
 
 					//Default rotation button
 					dat.controllerNameAndTitle( fRotation.add( {
@@ -922,6 +926,7 @@ export function create( createXDobjects, options ) {
 							mesh.needsUpdate = true;
 
 							setRotationControllers();
+							exposePosition();
 
 						},
 

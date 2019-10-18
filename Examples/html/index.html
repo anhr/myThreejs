@@ -113,15 +113,20 @@
 			group.add( myThreejs.Points( [
 
 				new Vector3( -0.5, 0.5, -1 ),//3D point
-				new Vector3( 0.5, 0.5, 0.5 ),//3D point
+				//new Vector3( 0.5, 0.5, 0.5 ),//3D point
 
 			], options, {
 
-				//tMin: tMin,
+				name: 'Wave',
+				tMin: tMin,
+				a: a,
+				b: b,
 				//position: new Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
-				//scale: new Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 0 ),
+				//scale: new Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
+				//scale: new Vector3( 2, 1, 1 ),
 //				rotation: new Euler( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
-				rotation: new Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+				//rotation: new Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+				//rotation: new Vector3( Math.PI / 2, 0 ),
 
 			} ) );//
 /*

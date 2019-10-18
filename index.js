@@ -1945,7 +1945,7 @@ var lang = {
 
 	defaultButton: 'Default',
 	defaultTitle: 'Restore Orbit controls settings.',
-	point: 'Point',
+	point: 'Point position',
 	points: 'Points',
 	mesh: 'Mesh',
 	meshs: 'Meshs',
@@ -1976,7 +1976,7 @@ switch ( getLanguageCode() ) {
 	case 'ru'://Russian language
 		lang.defaultButton = 'Восстановить';
 		lang.defaultTitle = 'Восстановить положение осей координат по умолчанию.';
-		lang.point = 'Точка';
+		lang.point = 'Позиция точки';
 		lang.points = 'Точки';
 		lang.mesh = '3D объект';
 		lang.meshs = '3D объекты';
@@ -2019,8 +2019,14 @@ function getObjectPosition( object, index ) {
 		var position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
 			position2 = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
 			positionAngle = new THREE.Vector3();
+/*
+var target = new THREE.Vector3();
+object.getWorldPosition( target );
+*/
 		position2.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
 		position = position2.clone();
+
+		position.multiply( object.scale );
 
 		//rotation
 		positionAngle.copy( position );
@@ -2029,8 +2035,8 @@ function getObjectPosition( object, index ) {
 		position.y = positionAngle.y;
 		position.z = positionAngle.z;
 
-		position.multiply( object.scale );
 		position.add( object.position );
+
 		return position;
 
 	}

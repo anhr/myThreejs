@@ -147,6 +147,8 @@ var arrayCreates = [];
  * @param {object} [options.axesHelper] axesHelper options. Default the axes is not visible
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
  * @param {object} [options.t] time options
+ * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
+ * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
  * @param {object} [options.scales] axes scales. Default is {}
  * @param {object} [options.scales.w] w axis scale options of 4D objects. Default is {}
  * @param {string} [options.scales.w.name] axis name. Default is "W".
@@ -203,6 +205,10 @@ export function create( createXDobjects, options ) {
 		return;
 
 	options = options || {};
+
+	options.a = options.a || 1;
+	options.b = options.b || 0;
+
 	options.scale = 1;
 
 	options.scales = options.scales || {};
@@ -221,6 +227,8 @@ export function create( createXDobjects, options ) {
 	if ( options.scales.w !== undefined )
 		options.scales.w = getAxis( options.scales.w, 'W', 0, 100 );
 
+	var camera;
+
 	function onloadScripts() {
 
 		var elContainer = options.elContainer === undefined ? document.getElementById( "containerDSE" ) :
@@ -235,7 +243,7 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( 'https://raw.githack.com/anhr/myThreejs/master/canvasContainer.html' );//'http://' + url + '/nodejs/myThreejs/canvasContainer.html'
 		elContainer = elContainer.querySelector( '.container' );
 
-		var camera, defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ), scene, renderer, cursor, controls, stereoEffect, group, player,
+		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ), scene, renderer, cursor, controls, stereoEffect, group, player,
 			playController, canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
 			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault,
 			//https://www.khronos.org/webgl/wiki/HandlingContextLost
@@ -248,13 +256,14 @@ export function create( createXDobjects, options ) {
 		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 		document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
-		function onIntersection( intersects ) {
+		function onIntersection( intersects, mouse ) {
 
 			intersects.forEach( function ( intersection ) {
 
 				if ( intersection.object.userData.raycaster !== undefined ) {
 
-					intersection.object.userData.raycaster.onIntersection( raycaster, intersection, scene, intersection.object );
+//					intersection.object.userData.raycaster.onIntersection( raycaster, intersection, scene, intersection.object );
+					intersection.object.userData.raycaster.onIntersection( raycaster, intersection, scene, mouse );
 					INTERSECTED.push( intersection.object );
 
 				}
@@ -542,25 +551,48 @@ export function create( createXDobjects, options ) {
 			}
 			function guiSelectPoint() {
 
-				var f3DObjects, fPoint, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,//, fPoints, mechScaleDefault = new THREE.Vector3()
+				var f3DObjects, fPoint, fPointWorld, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,//, fPoints, mechScaleDefault = new THREE.Vector3()
 					cScaleX, cScaleY, cScaleZ, cPosition = new THREE.Vector3(), cRotations = new THREE.Vector3(),//, cPositionX, cPositionY, cPositionZ;
-					cPoints, selectedPointIndex = -1;
-				var controllerX, controllerY, controllerZ, controllerW, controllerColor;
+					cPoints, selectedPointIndex = -1,
+					controllerX, controllerY, controllerZ, controllerW, controllerColor,
+					controllerWorld = new THREE.Vector3();
 
+				function exposePosition() {
+
+					var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
+					if ( selectedPointIndex === -1 )
+						return;
+
+					var position = getObjectPosition( mesh, selectedPointIndex );
+
+					if ( axesHelper !== undefined )
+						axesHelper.exposePosition( position );
+
+					controllerWorld.x.setValue( position.x );
+					controllerWorld.y.setValue( position.y );
+					controllerWorld.z.setValue( position.z );
+
+				}
+				function setValue( controller, v ) {
+
+					controller.object[controller.property] = v;
+					if ( controller.__onChange )
+						controller.__onChange.call( controller, v );
+					controller.updateDisplay();
+					return controller;
+
+				}
 				function setPosition( position, intersectionSelected ) {
 
-					function setValue( controller, v ) {
-
-						controller.object[controller.property] = v;
-						if ( controller.__onChange )
-							controller.__onChange.call( controller, v );
-						controller.updateDisplay();
-						return controller;
-
-					}
 					setValue( controllerX, position.x );
 					setValue( controllerY, position.y );
 					setValue( controllerZ, position.z );
+
+					var positionLocal = getObjectLocalPosition( intersectionSelected.object, intersectionSelected.index );
+					setValue( controllerWorld.x, positionLocal.x );
+					setValue( controllerWorld.y, positionLocal.y );
+					setValue( controllerWorld.z, positionLocal.z );
+					
 					var displayControllerW, displayControllerColor, none = 'none', block = 'block';
 					if ( isNaN( position.w ) ) {
 
@@ -574,6 +606,16 @@ export function create( createXDobjects, options ) {
 						else {
 
 							var func = intersectionSelected.object.userData.arrayFuncs[intersectionSelected.index];
+//console.warn( options + group );
+							if ( func.w === undefined ) {
+
+								//2D or 3D point
+								var attributesColor = intersectionSelected.object.geometry.attributes.color,
+									color = attributesColor.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3();
+								color.fromArray( attributesColor.array, intersectionSelected.index * attributesColor.itemSize );
+								func.w = { r: color.x, g: color.y, b: color.z }//Default color for 2D and 3D points is white
+
+							}
 							controllerColor.setValue( '#' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() );
 							controllerColor.userData = { intersection: intersectionSelected, }
 
@@ -655,6 +697,7 @@ export function create( createXDobjects, options ) {
 					fPonts.open();
 					cPoints.__select[intersectionSelected.index + 1].selected = true;
 					fPoint.domElement.style.display = 'block';
+					fPointWorld.domElement.style.display = 'block';
 					intersection = intersectionSelected;
 					setPosition( position, intersectionSelected );
 					
@@ -748,8 +791,9 @@ export function create( createXDobjects, options ) {
 								cPoints.__select.remove( cPoints.__select.length - 1 );
 							for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
-								var opt = document.createElement( 'option' );
-								opt.innerHTML = i;
+								var opt = document.createElement( 'option' ),
+									name = mesh.userData.arrayFuncs === undefined ? undefined : mesh.userData.arrayFuncs[i].name;
+								opt.innerHTML = i + ( name === undefined ? '' : ' ' + name );
 								opt.setAttribute( 'value', i );
 								cPoints.__select.appendChild( opt );
 
@@ -767,14 +811,6 @@ export function create( createXDobjects, options ) {
 					fMesh = f3DObjects.addFolder( lang.mesh );
 					fMesh.domElement.style.display = 'none';
 					fMesh.open();
-
-					function exposePosition() {
-
-						var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
-						if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
-							axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
-
-					}
 
 					//Scale
 
@@ -904,10 +940,12 @@ export function create( createXDobjects, options ) {
 								mesh.needsUpdate = true;
 
 //								setRotationControllers();
-
+								exposePosition();
+/*
 								var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
 								if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
 									axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
+*/
 
 							} );
 						dat.controllerNameAndTitle( cRotations.x, options.scales.x.name );
@@ -953,14 +991,21 @@ export function create( createXDobjects, options ) {
 						if ( axesHelper !== undefined )
 							axesHelper.exposePosition( position );
 						fPoint.domElement.style.display = display;
+						fPointWorld.domElement.style.display = display;
 
 					} );
 					cPoints.__select[0].selected = true;
 					dat.controllerNameAndTitle( cPoints, lang.select );
 
+					//Points attribute position
 					fPoint = fPonts.addFolder( lang.point );
 					fPoint.domElement.style.display = 'none';
-					fPoint.open();
+//					fPoint.open();
+
+					//Points world position
+					fPointWorld = fPonts.addFolder( lang.pointWorld );
+					fPointWorld.domElement.style.display = 'none';
+					fPointWorld.open();
 
 					//Restore default settings of all 3d objects button.
 					dat.controllerNameAndTitle( f3DObjects.add( {
@@ -970,11 +1015,15 @@ export function create( createXDobjects, options ) {
 							group.children.forEach( function ( mesh ) {
 
 								mesh.scale.copy( mesh.userData.default.scale );
+								mesh.position.copy( mesh.userData.default.position );
+								mesh.rotation.copy( mesh.userData.default.rotation );
 								mesh.needsUpdate = true; 
 
-								setScaleControllers();
-
 							} );
+							setScaleControllers();
+							setPositionControllers();
+							setRotationControllers();
+							exposePosition();
 
 						},
 
@@ -997,29 +1046,11 @@ export function create( createXDobjects, options ) {
 
 					}
 
-					//Point's axes controllers
+					//Point's attribute position axes controllers
 
 					function axesGui( axesId, onChange ) {
 
 						var axesName, scale, controller;
-/*
-						function movePointAxes( axesId, value ) {
-*/
-/*
-							var points = intersection.object, axesName = axesEnum.getName( axesId );;
-							points.geometry.attributes.position.array
-							[axesId + intersection.index * points.geometry.attributes.position.itemSize] =
-								( value - ( axesId > 2 ? 0 : intersection.object.position[axesName] ) ) /
-								( axesId > 2 ? 1 : intersection.object.scale[axesName] );
-							points.geometry.attributes.position.needsUpdate = true;
-*/
-/*
-							//dotLines
-							if ( axesHelper !== undefined )
-								axesHelper.exposePosition( getPosition( intersection ) );
-
-						}
-*/
 						if ( axesId > axesEnum.z ) {
 
 							//W axis
@@ -1042,7 +1073,7 @@ export function create( createXDobjects, options ) {
 									setColorAttribute( attributes.color, i, color );
 
 									//update of the w axis value
-//									movePointAxes( axesId, value );
+									//									movePointAxes( axesId, value );
 
 								} );
 							controller.domElement.querySelector( '.slider-fg' ).style.height = '40%';
@@ -1065,7 +1096,7 @@ export function create( createXDobjects, options ) {
 							axesName = axesEnum.getName( axesId );
 
 							//если я буду использовать эту строку то экстремумы шкал буду устанавливатся по умолчанию а не текущие
-//							scale = options.scales[axesName];
+							//							scale = options.scales[axesName];
 
 							scale = axesHelper.options.scales[axesName];
 							controller = fPoint.add( {
@@ -1073,19 +1104,35 @@ export function create( createXDobjects, options ) {
 								value: scale.min,
 
 							}, 'value',
-							scale.min,
-							scale.max,
-							( scale.max - scale.min ) / 100 ).
-							onChange( function ( value ) {
+								scale.min,
+								scale.max,
+								( scale.max - scale.min ) / 100 ).
+								onChange( function ( value ) {
 
-//								movePointAxes( axesId, value );
-								/*
-								//dotLines
-								if ( axesHelper !== undefined )
-									axesHelper.exposePosition( getPosition( intersection ) );
-								*/
+									var points = intersection.object;
+									points.geometry.attributes.position.array
+									[axesId + intersection.index * points.geometry.attributes.position.itemSize] = value;
+									points.geometry.attributes.position.needsUpdate = true;
 
-							} );
+									exposePosition();
+									/*
+																		//dotLines
+																		if ( axesHelper !== undefined )
+																			axesHelper.exposePosition( getPosition( intersection ) );
+									*/
+
+								} );
+							/*
+							controller = fPointWorld.add( {
+
+								value: scale.min,
+
+							}, 'value'),
+								scale.min,
+								scale.max,
+								( scale.max - scale.min ) / 100 ).
+								onChange( function ( value ) {
+								} );*/
 
 						}
 						dat.controllerNameAndTitle( controller, scale.name );
@@ -1104,7 +1151,6 @@ export function create( createXDobjects, options ) {
 					}, 'color').
 						onChange( function ( value ) {
 
-							//console.warn( controllerColor);
 							if ( controllerColor.userData === undefined )
 								return;
 							var intersection = controllerColor.userData.intersection;
@@ -1113,10 +1159,54 @@ export function create( createXDobjects, options ) {
 						} );
 
 					//read only
+					/*
 					controllerColor.domElement.querySelector( 'input' ).readOnly = true;
 					controllerColor.domElement.querySelector( '.selector' ).style.display = 'none';
+					*/
 
 					dat.controllerNameAndTitle( controllerColor, lang.color );
+
+					//Point's world position axes controllers
+
+					function axesWorldGui( axesId, onChange ) {
+
+						var axesName = axesEnum.getName( axesId ), scale = axesHelper.options.scales[axesName],
+							controller = dat.controllerZeroStep( fPointWorld, { value: scale.min, }, 'value' );
+						controller.domElement.querySelector( 'input' ).readOnly = true;
+						dat.controllerNameAndTitle( controller, scale.name );
+						return controller;
+
+					}
+					controllerWorld.x = axesWorldGui( axesEnum.x );
+					controllerWorld.y = axesWorldGui( axesEnum.y );
+					controllerWorld.z = axesWorldGui( axesEnum.z );
+
+					//Restore default local position.
+					dat.controllerNameAndTitle( fPoint.add( {
+
+						defaultF: function () {
+
+							var positionDefault = intersection.object.userData.arrayFuncs[intersection.index];
+							controllerX.setValue( typeof positionDefault.x === "function" ?
+								positionDefault.x( group.userData.t, options.a, options.b ) : positionDefault.x );
+							controllerY.setValue( typeof positionDefault.y === "function" ?
+								positionDefault.y( group.userData.t, options.a, options.b ) : positionDefault.y );
+							controllerZ.setValue( typeof positionDefault.z === "function" ?
+								positionDefault.z( group.userData.t, options.a, options.b ) :
+								positionDefault.z === undefined ? 0 ://default Z axis of 2D point is 0
+									positionDefault.z );
+
+							if ( positionDefault.w.r !== undefined )
+								controllerColor.setValue( '#' +
+									new THREE.Color( positionDefault.w.r, positionDefault.w.g, positionDefault.w.b ).getHexString() );
+							else if ( typeof positionDefault.z === "function" )
+								setValue( controllerW, positionDefault.w( group.userData.t ) );
+							else console.error( 'Restore default local position: Invalid W axis.' );
+
+
+						},
+
+					}, 'defaultF' ), lang.defaultButton, lang.defaultLocalPositionTitle );
 
 				}
 				this.windowRange = function ( options ) {
@@ -1346,6 +1436,7 @@ export function create( createXDobjects, options ) {
 
 			function selectPlayScene( t ) {
 
+				group.userData.t = t;
 				group.children.forEach( function ( mesh ) {
 
 					if ( mesh.userData.selectPlayScene !== undefined ) {
@@ -1800,21 +1891,77 @@ export function create( createXDobjects, options ) {
 
 	}
 
+	/**
+	 * Get array of THREE.Vector4 points.
+	 * @param {number} t first parameter of the arrayFuncs item function. Start time of the player.
+	 * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array
+	 * THREE.Vector4: 4D point.
+	 * THREE.Vector3: 3D point. w = 1. Default is white color
+	 * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
+	 * Vector's x, y, z, w is position of the point.
+	 * Can be as:
+	 * float - position of the point.
+	 * [float] - array of positions of the point.
+	 * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
+	 * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
+	 * 
+	 * object: {
+	 *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
+	 *   name: point name
+	 * }
+	 * @param {number} a second parameter of the arrayFuncs item function. Default is 1.
+	 * @param {number} b third parameter of the arrayFuncs item function. Default is 0.
+	 * @returns array of THREE.Vector4 points.
+	 */
 	options.getPoints = function ( t, arrayFuncs, a, b ) {
 
 		if ( t === undefined )
 			console.error( 'getPoints: t = ' + t );
 		var points = [];
-		arrayFuncs.forEach( function ( funcs ) {
+//		arrayFuncs.forEach( function ( funcs )
+		for ( var i = 0; i < arrayFuncs.length; i++ ){
 
-			points.push( new THREE.Vector4(
+			var funcs = arrayFuncs[i];
+			function getAxis(axisName) {
+
+				if ( ( funcs instanceof THREE.Vector2 ) || ( funcs instanceof THREE.Vector3 ) || ( funcs instanceof THREE.Vector4 ) )
+					return typeof funcs[axisName] === "function" ? funcs[axisName]( t, a, b ) : funcs[axisName];
+				if ( funcs.vector === undefined ) {
+
+					console.error( 'options.getPoints: funcs.vector = ' + funcs.vector );
+					return;
+
+				}
+				if ( funcs.name !== undefined )
+					funcs.vector.name = funcs.name;
+				arrayFuncs[i] = funcs.vector;
+				funcs = funcs.vector;
+/*
+				var vector = new THREE.Vector4();
+				vector.copy();
+*/
+				return typeof funcs[axisName] === "function" ? funcs[axisName]( t, a, b ) : funcs[axisName];
+
+			}
+			var point = new THREE.Vector4( getAxis( 'x' ), getAxis( 'y' ), getAxis( 'z' ), getAxis( 'w' ), );
+/*
+			var point = new THREE.Vector4(
 				typeof funcs.x === "function" ? funcs.x( t, a, b ) : funcs.x,
 				typeof funcs.y === "function" ? funcs.y( t, a, b ) : funcs.y,
 				typeof funcs.z === "function" ? funcs.z( t, a, b ) : funcs.z,
 				typeof funcs.w === "function" ? funcs.w( t, a, b ) : funcs.w,
-			) );
+			);
+*/
 
-		} );
+			if ( funcs.w === undefined )
+				point.w = {};//Если тут поставить NaN то в points.geometry.attributes.position.array он преобразуется в 0.
+			//Тогда в gui появится ненужный орган управления controllerW
+			//от балды поставил пустой объект что бы при создании points.geometry.attributes.position.array
+			//это зачение преобразвалось в NaN.
+
+			points.push( point );
+
+		}
 		return points;
 
 	}
@@ -1838,50 +1985,96 @@ export function create( createXDobjects, options ) {
 				min = max - 1;
 
 			}
+			if ( funcs instanceof THREE.Vector4 ) {
+
+				var color = palette.toColor( funcs.w, min, max );
+				colors.push( color.r, color.g, color.b );
+
+			} else colors.push( 1, 1, 1 );//white
+
+/*
 			var color = palette.toColor( funcs instanceof THREE.Vector4 ? funcs.w : max, min, max );
 			colors.push( color.r, color.g, color.b );
+*/
 
 		} );
 		return colors;
 
 	}
 
-	options.addSpriteTextIntersection = function ( raycaster, intersection, scene ) {
+	options.addSpriteTextIntersection = function ( raycaster, intersection, scene, mouse ) {
 
 		var spriteTextIntersection = findSpriteTextIntersection( scene );
+/*
 		if ( spriteTextIntersection !== undefined )
 			return;
+*/
 		var textColor = 'rgb( 128, 128, 128 )',
 			position = getPosition( intersection );//raycaster.stereo === undefined ? getPosition( intersection ) : raycaster.stereo.getPosition( intersection );//, true );
+/*
 		if ( findSpriteTextIntersection( scene ) )
 			return;
-		var func = intersection.object.userData.arrayFuncs[intersection.index];
-		spriteTextIntersection = new THREE.SpriteText(
-			       options.scales.x.name + ': ' + position.x +
-			'\n' + options.scales.y.name + ': ' + position.y +
-			'\n' + options.scales.z.name + ': ' + position.z
-			+ ( position instanceof THREE.Vector4 && !isNaN( position.w ) && ( options.scales.w !== undefined ) ?
-			'\n' + options.scales.w.name + ': ' + position.w :
-				isNaN( position.w ) ? '\n' + lang.color + ': ' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() : '' ), {
+*/
+		var func = intersection.object.userData.arrayFuncs === undefined ? undefined : intersection.object.userData.arrayFuncs[intersection.index];
 
-				textHeight: 0.2,
-				fontColor: textColor,
-				rect: {
+		// Make the spriteText follow the mouse
+		//https://stackoverflow.com/questions/36033879/three-js-object-follows-mouse-position
+		var vector = new THREE.Vector3( mouse.x, mouse.y, 0 );
+		vector.unproject( camera );
+		var dir = vector.sub( camera.position ).normalize();
+		var pos = camera.position.clone().add( dir.multiplyScalar( 1 ) );
+/*
+		var distance = - camera.position.z / dir.z;
+		var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+*/
+/*
+		//Project world position to screen coordinate system
+		//https://discourse.threejs.org/t/project-world-position-to-screen-coordinate-system/2477
+		camera.updateMatrixWorld();
+		var positionProject = new THREE.Vector3().copy( position ).project( camera );
+		positionProject.z = 0;
+*/
 
-					displayRect: true,
-					borderThickness: 3,
-					borderRadius: 10,
-					borderColor: textColor,
-					backgroundColor: 'rgba( 0, 0, 0, 1 )',
+		if ( spriteTextIntersection === undefined ) {
 
-				},
-				position: position,//.multiply( intersection.object.scale ),
-				center: new THREE.Vector2( 0.5, 0 ),
+			var pointName = intersection.index === undefined ? undefined : intersection.object.userData.arrayFuncs[intersection.index].name;
+			spriteTextIntersection = new THREE.SpriteText(
+				( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
+				( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
+				options.scales.x.name + ': ' + position.x +
+				'\n' + options.scales.y.name + ': ' + position.y +
+				'\n' + options.scales.z.name + ': ' + position.z +
+				(
+					intersection.index === undefined ?
+						'' :
+						intersection.object.userData.arrayFuncs[intersection.index] instanceof THREE.Vector4 ?
+							isNaN( position.w ) ?
+								'\n' + lang.color + ': ' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() :
+								'\n' + options.scales.w.name + ': ' + position.w :
+							''
 
-			} );
-		spriteTextIntersection.name = spriteTextIntersectionName;
-		spriteTextIntersection.scale.divide( scene.scale );
-		scene.add( spriteTextIntersection );
+				), {
+
+					textHeight: 0.2,
+					fontColor: textColor,
+					rect: {
+
+						displayRect: true,
+						borderThickness: 3,
+						borderRadius: 10,
+						borderColor: textColor,
+						backgroundColor: 'rgba( 0, 0, 0, 1 )',
+
+					},
+					position: pos,//position,//positionProject,
+					center: new THREE.Vector2( 0.5, 0 ),
+
+				} );
+			spriteTextIntersection.name = spriteTextIntersectionName;
+			spriteTextIntersection.scale.divide( scene.scale );
+			scene.add( spriteTextIntersection );
+
+		} else spriteTextIntersection.position.copy( pos );
 
 	}
 
@@ -1945,10 +2138,12 @@ var lang = {
 
 	defaultButton: 'Default',
 	defaultTitle: 'Restore Orbit controls settings.',
-	point: 'Point position',
+	point: 'Point local position',
+	pointWorld: 'Point world position',
 	points: 'Points',
 	mesh: 'Mesh',
 	meshs: 'Meshs',
+	pointName: 'Point Name',
 	select: 'Select',
 	notSelected: 'Not selected',
 	scale: 'Scale',
@@ -1963,6 +2158,7 @@ var lang = {
 	defaultPositionTitle: 'Restore default 3d object position.',
 	default3DObjectTitle: 'Restore default settings of all 3d objects.',
 	defaultRotationTitle: 'Restore default 3d object rotation.',
+	defaultLocalPositionTitle: 'Restore default local position.',
 
 	light: 'Light',
 	displayLight: 'Display',
@@ -1976,15 +2172,18 @@ switch ( getLanguageCode() ) {
 	case 'ru'://Russian language
 		lang.defaultButton = 'Восстановить';
 		lang.defaultTitle = 'Восстановить положение осей координат по умолчанию.';
-		lang.point = 'Позиция точки';
+		lang.point = 'Локальная позиция точки';
+		lang.pointWorld = 'Абсолютная позиция точки';
 		lang.points = 'Точки';
 		lang.mesh = '3D объект';
 		lang.meshs = '3D объекты';
+		lang.pointName = 'Имя точки';
 		lang.select = 'Выбрать';
 		lang.notSelected = 'Не выбран';
 		lang.scale = 'Масштаб';
 		lang.rotation = 'Вращение';
 		lang.position = 'Позиция';
+		lang.name = 'Имя';
 		lang.color = 'Цвет';
 		lang.settings = 'Настройки';
 		lang.webglcontextlost = 'Пользовательский агент обнаружил, что буфер рисунка, связанный с объектом WebGLRenderingContext, потерян.';
@@ -1994,6 +2193,7 @@ switch ( getLanguageCode() ) {
 		lang.defaultPositionTitle = 'Восстановить позицию 3D объекта по умолчанию.';
 		lang.default3DObjectTitle = 'Восстановить настройки всех 3D объектов по умолчанию.';
 		lang.defaultRotationTitle = 'Восстановить поворот 3D объекта по умолчанию.';
+		lang.defaultLocalPositionTitle = 'Восстановить локальную позицию точки по умолчанию.';
 
 		lang.light = 'Свет';
 		lang.displayLight = 'Показать';
@@ -2011,45 +2211,47 @@ function getPosition( intersection ) {
 	return getObjectPosition( intersection.object, intersection.index );
 
 }
+function getObjectLocalPosition( object, index ) {
+
+	var attributesPosition = object.geometry.attributes.position,
+		position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3();
+	position.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
+	return position;
+
+}
 function getObjectPosition( object, index ) {
 
 	var attributesPosition = object.geometry.attributes.position;
-	if ( index !== undefined ) {
+	if ( index === undefined )
+		return object.position;
+	var position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
+//		position2 = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
+		position2 = getObjectLocalPosition( object, index ),
+		positionAngle = new THREE.Vector3();
+//	position2.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
+	position = position2.clone();
 
-		var position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
-			position2 = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
-			positionAngle = new THREE.Vector3();
-/*
-var target = new THREE.Vector3();
-object.getWorldPosition( target );
-*/
-		position2.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
-		position = position2.clone();
+	position.multiply( object.scale );
 
-		position.multiply( object.scale );
+	//rotation
+	positionAngle.copy( position );
+	positionAngle.applyEuler( object.rotation );
+	position.x = positionAngle.x;
+	position.y = positionAngle.y;
+	position.z = positionAngle.z;
 
-		//rotation
-		positionAngle.copy( position );
-		positionAngle.applyEuler( object.rotation );
-		position.x = positionAngle.x;
-		position.y = positionAngle.y;
-		position.z = positionAngle.z;
+	position.add( object.position );
 
-		position.add( object.position );
-
-		return position;
-
-	}
-	return object.position;
+	return position;
 
 }
 
 /**
  * Displaying points
- * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array
+ * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2|object]} arrayFuncs points.geometry.attributes.position array
  * THREE.Vector4: 4D point.
- * THREE.Vector3: 3D point. w = 1
- * THREE.Vector2: 2D point. w = 1, z = 0
+ * THREE.Vector3: 3D point. w = 1. Default is white color
+ * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
  * Vector's x, y, z, w is position of the point.
  * Can be as:
  * float - position of the point.
@@ -2057,11 +2259,14 @@ object.getWorldPosition( target );
  * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
  * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
  * if arrayFuncs.length === 0 then push new THREE.Vector3().
+ * 
+ * object: {
+ *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
+ *   name: point name
+ * }
  * @param {object} options see myThreejs.create options for details
  * @param {object} [pointsOptions] followed points options is availablee:
  * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.
- * @param {number} [pointsOptions.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
- * @param {number} [pointsOptions.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
  * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
  * @param {THREE.Vector3} [pointsOptions.position] position of the points. Default is new THREE.Vector3( 0, 0, 0 ).
  * Vector's x, y, z is position of the points.
@@ -2088,8 +2293,6 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 		arrayFuncs.push( new THREE.Vector3() );
 	pointsOptions = pointsOptions || {};
 	pointsOptions.tMin = pointsOptions.tMin || 0;
-	pointsOptions.a = pointsOptions.a || 1;
-	pointsOptions.b = pointsOptions.b || 0;
 	pointsOptions.name = pointsOptions.name || '';
 	pointsOptions.position = pointsOptions.position || new THREE.Vector3( 0, 0, 0 );
 	pointsOptions.scale = pointsOptions.scale || new THREE.Vector3( 1, 1, 1 );
@@ -2097,7 +2300,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 	pointsOptions.rotation = pointsOptions.rotation || new THREE.Vector3();
 
 	var points = new THREE.Points(
-		new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, pointsOptions.a, pointsOptions.b ), 4 ),
+		new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, options.a, options.b ), 4 ),
 		new THREE.PointsMaterial( { size: 0.05, vertexColors: THREE.VertexColors } )
 	);
 	points.name = pointsOptions.name;//'Wave';
@@ -2106,9 +2309,9 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 	points.userData.arrayFuncs = arrayFuncs;
 	points.userData.raycaster = {
 
-		onIntersection: function ( raycaster, intersection, scene ) {
+		onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-			options.addSpriteTextIntersection( raycaster, intersection, scene );
+			options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
 
 		},
 		onIntersectionOut: function ( scene ) {
@@ -2120,14 +2323,10 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 	}
 	points.userData.selectPlayScene = function ( t, setAttributes ) {
 
-/*
-		var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
-		points.rotation.set( angle, 0, 0 );
-*/
 		setPositions( t );
 		setScales( t );
 		setRotations( t );
-		setAttributes( pointsOptions.a, pointsOptions.b );
+		setAttributes( options.a, options.b );
 
 	}
 	function setPositions( t ) {
@@ -2136,7 +2335,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 		function setPosition( axisName ) {
 
 			points.position[axisName] = typeof pointsOptions.position[axisName] === "function" ?
-				pointsOptions.position[axisName]( t, pointsOptions.a, pointsOptions.b ) :
+				pointsOptions.position[axisName]( t, options.a, options.b ) :
 				pointsOptions.position[axisName];
 
 		}
@@ -2153,7 +2352,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 		function setScale( axisName ) {
 
 			points.scale[axisName] = typeof pointsOptions.scale[axisName] === "function" ?
-				pointsOptions.scale[axisName]( t, pointsOptions.a, pointsOptions.b ) :
+				pointsOptions.scale[axisName]( t, options.a, options.b ) :
 				pointsOptions.scale[axisName];
 
 		}
@@ -2169,7 +2368,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 		function setRotation( axisName ) {
 
 			points.rotation[axisName] = typeof pointsOptions.rotation[axisName] === "function" ?
-				pointsOptions.rotation[axisName]( t, pointsOptions.a, pointsOptions.b ) :
+				pointsOptions.rotation[axisName]( t, options.a, options.b ) :
 				pointsOptions.rotation[axisName];
 			while ( points.rotation[axisName] > Math.PI * 2 )
 				points.rotation[axisName] -= Math.PI * 2

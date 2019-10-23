@@ -90,7 +90,7 @@
 		new myThreejs.create( function ( group, options ) {
 
 			//Points
-			var a = 1, b = 0.2;
+			var a = options.a, b = options.b;
 			var tMin = playerOptions.min === undefined ? 0 : playerOptions.min;
 			var arrayFuncs = [
 				//				new Vector2( 1, 1 ),//2D point
@@ -112,15 +112,28 @@
 			
 			group.add( myThreejs.Points( [
 
-				new Vector3( -0.5, 0.5, -1 ),//3D point
-				//new Vector3( 0.5, 0.5, 0.5 ),//3D point
+				{
+
+					vector: new Vector3( new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ), -0.5, 0.5 ),
+					name: 'First',
+
+				},
+				new Vector2( 0, 0 ),//2D point. White color
+				new Vector3( -0.5, 0.5, -1 ),//3D point. White color
+				new Vector4( 0.5, 0.5, 0.5, new Color( "rgb(255, 0, 0)" ) ),//3D point
+				new Vector4(
+					new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
+					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
+					//new Function( 't', 'a', 'b', 'return 0' ),
+					//new Function( 't', 'a', 'b', 'return 0.2' ),
+					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
+					new Function( 't', 'return 1-2*t' )//w
+				),//Animated 4D point
 
 			], options, {
 
 				name: 'Wave',
 				tMin: tMin,
-				a: a,
-				b: b,
 				//position: new Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
 				//scale: new Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
 				//scale: new Vector3( 1, 2, 1 ),
@@ -179,7 +192,7 @@
 
 			//cubes
 			var cubeType = 'cube';
-			function addCube( cubePosition, color, selectPlayScene ) {
+			function addCube( cubePosition, color, selectPlayScene, name ) {
 
 				var cube = new Mesh( new ConvexBufferGeometry( new CubeGeometry( 0.4, 0.4, 0.4 ).vertices ),
 					new MeshLambertMaterial( {
@@ -191,20 +204,24 @@
 					} ) );
 				cube.position.copy( cubePosition );
 				cube.type = cubeType;
+				if ( name !== undefined )
+					cube.name = name;
 				cube.userData.color = cube.material.color;
 				cube.userData.raycaster = {
 
-					onIntersection: function ( raycaster, intersection, scene, INTERSECTED ) {
+					onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
 						if ( cube.userData.currentHex === undefined )
 							cube.userData.currentHex = cube.material.emissive.getHex();
 						cube.material.emissive.setHex( 0xff0000 );
+						options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
 
 					},
 					onIntersectionOut: function ( scene, INTERSECTED ) {
 
 						if ( cube.userData.currentHex !== undefined ) cube.material.emissive.setHex( cube.userData.currentHex );
 						cube.userData.currentHex = undefined;
+						options.removeSpriteTextIntersection( scene );
 
 					},
 					onMouseDown: function ( raycaster, intersection, scene ) {
@@ -233,12 +250,12 @@
 				var angle = t * Math.PI * 2 + Math.PI / 4;//45 degree
 				this.cube.rotation.set( angle, angle / 2, angle / 4 );
 				/*
-								this.cube.position.x = t;
-								this.cube.position.y = t;
-								this.cube.position.z = t;
+				this.cube.position.x = t;
+				this.cube.position.y = t;
+				this.cube.position.z = t;
 				*/
 
-			} );
+			}, 'White cube' );
 			var position = new Vector3( -0.5, 0.5, -0.5 );
 			addCube( position, 'green', function ( t ) {
 
@@ -274,6 +291,8 @@
 				menuPlay: true,
 				dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
 				player: playerOptions,//3D objects animation.
+				a: 1.1,
+				b: 0.3,
 				canvas: {
 
 					width: window.innerWidth / 2,

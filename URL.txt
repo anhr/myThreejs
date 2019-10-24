@@ -13,6 +13,7 @@ html (553,4)
 ---------------------------------------------------------
 test page
 https://raw.githack.com/anhr/controllerPlay/master/Examples/html/
+https://raw.githack.com/anhr/myThreejs/master/Examples/html/
 http://localhost/threejs/nodejs/myThreejs/Examples/html/
 -------------------------------------------
 Настройка локального хоста

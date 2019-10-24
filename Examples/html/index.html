@@ -92,25 +92,8 @@
 			//Points
 			var a = options.a, b = options.b;
 			var tMin = playerOptions.min === undefined ? 0 : playerOptions.min;
-			var arrayFuncs = [
-				//				new Vector2( 1, 1 ),//2D point
-				//new Vector2( 1, [{t:0,v:1}] ),//2D point. Array
-				new Vector2( new Function( 't', 'a', 'b', 'return 1' ), 1 ),//2D point
-				//				new Vector3( -0.5, 0.5, -1 ),//3D point
-				new Vector4(
-					new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
-					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
-					//new Function( 't', 'a', 'b', 'return 0' ),
-					//new Function( 't', 'a', 'b', 'return 0.2' ),
-					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
-					new Function( 't', 'return 1-2*t' )//w
-				),//Animated 3D point
-				//				new Vector4( -1.5, 0.5, 1, 25 ),//4D point. white color
-				new Vector4( 0, 0, 0, new Function( 't', 'return 1-2*t' ) ),//color is f(t)
-				new Vector4( 0.25, 0, 0, new Color( "rgb(255, 127, 0)" ) ),//yellow point
-			]
 			
-			group.add( myThreejs.Points( [
+			/*group.add( myThreejs.Points( [
 
 				{
 
@@ -141,18 +124,36 @@
 				//rotation: new Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 				//rotation: new Vector3( Math.PI / 2, 0 ),
 
-			} ) );//
-/*
+				} ) );
+			*/
+
+			var arrayFuncs = [
+				//				new Vector2( 1, 1 ),//2D point
+				//new Vector2( 1, [{t:0,v:1}] ),//2D point. Array
+				new Vector2( new Function( 't', 'a', 'b', 'return 1' ), 1 ),//2D point
+				//				new Vector3( -0.5, 0.5, -1 ),//3D point
+				new Vector4(
+					new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
+					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
+					//new Function( 't', 'a', 'b', 'return 0' ),
+					//new Function( 't', 'a', 'b', 'return 0.2' ),
+					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
+					new Function( 't', 'return 1-2*t' )//w
+				),//Animated 3D point
+				//				new Vector4( -1.5, 0.5, 1, 25 ),//4D point. white color
+				new Vector4( 0, 0, 0, new Function( 't', 'return 1-2*t' ) ),//color is f(t)
+				new Vector4( 0.25, 0, 0, new Color( "rgb(255, 127, 0)" ) ),//yellow point
+			]
 			var points = new Points( new BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
 				new PointsMaterial( { size: 0.05, vertexColors: VertexColors } ) );
-			points.name = 'Wave';
+			points.name = 'Points';
 			points.geometry.addAttribute( 'color', new Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
-			points.userData.arrayFuncs = arrayFuncs;
+			points.userData.arrayFuncs = arrayFuncs;//Display the "Restore default local position" button.
 			points.userData.raycaster = {
 
-				onIntersection: function ( raycaster, intersection, scene ) {
+				onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-					options.addSpriteTextIntersection( raycaster, intersection, scene );
+					options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
 
 				},
 				onIntersectionOut: function ( scene ) {
@@ -172,10 +173,10 @@
 			points.position.copy( new Vector3( 0.1, 0.2, 0.3 ) );
 			points.scale.copy( new Vector3( 1.1, 1.2, 1.3 ) );
 			group.add( points );
-*/
+
 			arrayFuncs = [
-				new Vector3( -0.5, 0.5, -1 ),//3D point
-				new Vector4( -1.5, 0.5, 1, 25 ),//4D point. white color
+				new Vector3( -0.6, 0.6, -1 ),//3D point
+				new Vector4( -1.6, 0.6, 1, 25 ),//4D point. white color
 			]
 			var points2 = new Points( new BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
 				new PointsMaterial( { size: 0.05, vertexColors: VertexColors } ) );
@@ -207,6 +208,22 @@
 				if ( name !== undefined )
 					cube.name = name;
 				cube.userData.color = cube.material.color;
+
+				myThreejs.setArrayFuncs( cube );
+/*
+				cube.userData.arrayFuncs = [];//Display the "Restore default local position" button.
+function getObjectLocalPosition( object, index ) {
+
+	var attributesPosition = object.geometry.attributes.position,
+		position = attributesPosition.itemSize >= 4 ? new Vector4( 0, 0, 0, 0 ) : new Vector3();
+	position.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
+	return position;
+
+				}
+				for ( var i = 0; i < cube.geometry.attributes.position.count; i++ ) {
+					cube.userData.arrayFuncs.push(getObjectLocalPosition( cube, i ));
+				}
+*/				
 				cube.userData.raycaster = {
 
 					onIntersection: function ( raycaster, intersection, scene, mouse ) {

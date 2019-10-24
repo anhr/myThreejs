@@ -551,7 +551,7 @@ export function create( createXDobjects, options ) {
 			}
 			function guiSelectPoint() {
 
-				var f3DObjects, fPoint, fPointWorld, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,//, fPoints, mechScaleDefault = new THREE.Vector3()
+				var f3DObjects, fPoint, cRestoreDefaultLocalPosition, fPointWorld, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,//, fPoints, mechScaleDefault = new THREE.Vector3()
 					cScaleX, cScaleY, cScaleZ, cPosition = new THREE.Vector3(), cRotations = new THREE.Vector3(),//, cPositionX, cPositionY, cPositionZ;
 					cPoints, selectedPointIndex = -1,
 					controllerX, controllerY, controllerZ, controllerW, controllerColor,
@@ -600,6 +600,34 @@ export function create( createXDobjects, options ) {
 						displayControllerColor = block;
 
 						//color
+						if ( intersectionSelected.object.userData.arrayFuncs === undefined )
+							displayControllerColor = none;
+						else {
+
+							var func = intersectionSelected.object.userData.arrayFuncs[intersectionSelected.index];
+							//console.warn( options + group );
+							if ( func.w === undefined ) {
+
+								//2D or 3D point
+								var attributesColor = intersectionSelected.object.geometry.attributes.color;
+								if ( attributesColor !== undefined ) {
+
+									var color = attributesColor.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3();
+									color.fromArray( attributesColor.array, intersectionSelected.index * attributesColor.itemSize );
+									func.w = { r: color.x, g: color.y, b: color.z }//Default color for 2D and 3D points is white
+
+								}
+
+							}
+							if ( func.w !== undefined ) {
+
+								controllerColor.setValue( '#' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() );
+								controllerColor.userData = { intersection: intersectionSelected, }
+
+							} else displayControllerColor = none;
+
+						}
+/*
 						var display = 'block';
 						if ( intersectionSelected.object.userData.arrayFuncs === undefined )
 							display = 'none';
@@ -610,10 +638,14 @@ export function create( createXDobjects, options ) {
 							if ( func.w === undefined ) {
 
 								//2D or 3D point
-								var attributesColor = intersectionSelected.object.geometry.attributes.color,
-									color = attributesColor.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3();
-								color.fromArray( attributesColor.array, intersectionSelected.index * attributesColor.itemSize );
-								func.w = { r: color.x, g: color.y, b: color.z }//Default color for 2D and 3D points is white
+								var attributesColor = intersectionSelected.object.geometry.attributes.color;
+								if ( attributesColor !== undefined ) {
+
+									var color = attributesColor.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3();
+									color.fromArray( attributesColor.array, intersectionSelected.index * attributesColor.itemSize );
+									func.w = { r: color.x, g: color.y, b: color.z }//Default color for 2D and 3D points is white
+
+								}
 
 							}
 							controllerColor.setValue( '#' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() );
@@ -621,6 +653,7 @@ export function create( createXDobjects, options ) {
 
 						}
 						controllerColor.domElement.style.display = display;
+*/
 
 					} else {
 
@@ -673,8 +706,9 @@ export function create( createXDobjects, options ) {
 					}
 
 				}
-				this.select = function ( position, intersectionSelected ) {
+				this.select = function ( intersectionSelected ) {
 
+					var position = getObjectLocalPosition( intersectionSelected.object, intersectionSelected.index );
 					if ( f3DObjects === undefined ) {
 
 						selectedPointIndex = intersectionSelected.index || -1;
@@ -684,22 +718,39 @@ export function create( createXDobjects, options ) {
 						return;//options.dat !== true and gui === undefined. Do not use dat.gui
 
 					}
-					f3DObjects.open();
+
+					f3DObjects.close();//если тут не закрывать папку, то ингода прорпадает скроллинг окна dat.GUI
+					//for testing:
+					//Open https://raw.githack.com/anhr/myThreejs/master/Examples/html/
+					//Set browser window height about 500 pixels.
+					//Click Full Screen button.
+					//Open Controls
+					//Click a point.The "Meshs" folder opens and you can see the scrolling of the dat.gui window.
 
 					//select mesh
 					var index = intersectionSelected.object.userData.index;
 					cMeshs.__select[index].selected = true;
 					cMeshs.__onChange( index - 1 );
 
-					//select point
-					if ( intersectionSelected.index === undefined )
-						return;
-					fPonts.open();
-					cPoints.__select[intersectionSelected.index + 1].selected = true;
-					fPoint.domElement.style.display = 'block';
-					fPointWorld.domElement.style.display = 'block';
-					intersection = intersectionSelected;
-					setPosition( position, intersectionSelected );
+					function selectPoint() {
+
+						if ( intersectionSelected.index === undefined )
+							return;
+						fPonts.open();
+						cPoints.__select[intersectionSelected.index + 1].selected = true;
+						var block = 'block';
+						fPoint.domElement.style.display = block;
+						fPointWorld.domElement.style.display = block;
+						intersection = intersectionSelected;
+						setPosition( position, intersectionSelected );//непонятно зачем сюда засунул эту строку. Если ее оставить, то при выборе точки ее положение сдвигается
+
+						cRestoreDefaultLocalPosition.domElement.parentElement.parentElement.style.display =
+							intersection.object.userData.arrayFuncs === undefined ? 'none' : block;
+
+					}
+					selectPoint();
+
+					f3DObjects.open();
 					
 				}
 				this.isSelectedMesh = function ( meshCur ) { return mesh === meshCur }
@@ -984,12 +1035,15 @@ export function create( createXDobjects, options ) {
 						} else {
 
 							display = 'block';
+							_this.select( { object: mesh, index: value } );
+/*
 							position = getObjectPosition( mesh, value );
 							_this.select( position, { object: mesh, index: value } );
+*/
 
 						}
-						if ( axesHelper !== undefined )
-							axesHelper.exposePosition( position );
+						if ( ( axesHelper !== undefined ) && ( mesh !== undefined ) )
+							axesHelper.exposePosition( getObjectPosition( mesh, value ) );
 						fPoint.domElement.style.display = display;
 						fPointWorld.domElement.style.display = display;
 
@@ -1182,7 +1236,7 @@ export function create( createXDobjects, options ) {
 					controllerWorld.z = axesWorldGui( axesEnum.z );
 
 					//Restore default local position.
-					dat.controllerNameAndTitle( fPoint.add( {
+					cRestoreDefaultLocalPosition = fPoint.add( {
 
 						defaultF: function () {
 
@@ -1196,17 +1250,22 @@ export function create( createXDobjects, options ) {
 								positionDefault.z === undefined ? 0 ://default Z axis of 2D point is 0
 									positionDefault.z );
 
-							if ( positionDefault.w.r !== undefined )
-								controllerColor.setValue( '#' +
-									new THREE.Color( positionDefault.w.r, positionDefault.w.g, positionDefault.w.b ).getHexString() );
-							else if ( typeof positionDefault.z === "function" )
-								setValue( controllerW, positionDefault.w( group.userData.t ) );
-							else console.error( 'Restore default local position: Invalid W axis.' );
+							if ( positionDefault.w !== undefined ) {
+
+								if ( positionDefault.w.r !== undefined )
+									controllerColor.setValue( '#' +
+										new THREE.Color( positionDefault.w.r, positionDefault.w.g, positionDefault.w.b ).getHexString() );
+								else if ( typeof positionDefault.w === "function" )
+									setValue( controllerW, positionDefault.w( group.userData.t ) );
+								else console.error( 'Restore default local position: Invalid W axis.' );
+
+							}
 
 
 						},
 
-					}, 'defaultF' ), lang.defaultButton, lang.defaultLocalPositionTitle );
+					}, 'defaultF' );
+					dat.controllerNameAndTitle( cRestoreDefaultLocalPosition, lang.defaultButton, lang.defaultLocalPositionTitle );
 
 				}
 				this.windowRange = function ( options ) {
@@ -1540,14 +1599,6 @@ export function create( createXDobjects, options ) {
 									index: selectedPointIndex,
 
 								} );
-/*
-								guiSelectPoint.select( position, {
-
-									object: mesh,
-									index: selectedPointIndex,
-
-								} );
-*/
 
 						}
 
@@ -1650,16 +1701,12 @@ export function create( createXDobjects, options ) {
 										intersection.object.userData.raycaster.onMouseDown( raycaster, intersection, scene );
 
 									}
-									var position = getPosition( intersection );
-//									if ( gui !== undefined )
-									guiSelectPoint.select( position, intersection );
-									if ( intersection.object.type === "Points" ) {
-
-//										selectedPointIndex = intersection.index;
-										if ( axesHelper !== undefined )
-											axesHelper.exposePosition( position );
-
-									}
+//									var position = getPosition( intersection );
+//									var position = getObjectLocalPosition( intersection.object, intersection.index );
+//									guiSelectPoint.select( position, intersection );
+									guiSelectPoint.select( intersection );
+									if ( ( intersection.object.type === "Points" ) && ( axesHelper !== undefined ) )
+										axesHelper.exposePosition( getPosition( intersection ) );
 
 								}
 
@@ -2381,5 +2428,12 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 	}
 //	points.rotation.copy(pointsOptions.rotation);
 	return points;
+
+}
+export function setArrayFuncs( mesh ) {
+
+	mesh.userData.arrayFuncs = [];//Display the "Restore default local position" button.
+	for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
+		mesh.userData.arrayFuncs.push( getObjectLocalPosition( mesh, i ) );
 
 }

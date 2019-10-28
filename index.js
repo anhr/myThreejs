@@ -227,7 +227,75 @@ export function create( createXDobjects, options ) {
 	if ( options.scales.w !== undefined )
 		options.scales.w = getAxis( options.scales.w, 'W', 0, 100 );
 
-	var camera;
+	function setColorAttribute( colorAttribute, i, color ) {
+
+		if ( typeof color === "string" )
+			color = new THREE.Color( color );
+		colorAttribute.setX( i, color.r );
+		colorAttribute.setY( i, color.g );
+		colorAttribute.setZ( i, color.b );
+		colorAttribute.needsUpdate = true;
+
+	}
+	function traceLine() {
+
+		//Thanks to https://stackoverflow.com/questions/31399856/drawing-a-line-with-three-js-dynamically/31411794#31411794
+		var MAX_POINTS = options.player.marks,
+			line;//, drawCount = 0;
+		this.addPoint = function ( point, index, color ) {
+
+/*
+			if ( typeof color === "function" )
+				color = color( group.userData.t, options.a, options.b );
+*/
+			if ( line === undefined ) {
+
+
+				// geometry
+				var geometry = new THREE.BufferGeometry();
+
+				// attributes
+				var positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
+				geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+				var colors = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
+				geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+
+				// draw range
+				geometry.setDrawRange( index, index );
+				line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors } ) );
+//				group.add( line );
+				scene.add( line );
+
+			}
+
+			//point position
+			point = new THREE.Vector3().copy( point );
+			point.toArray( line.geometry.attributes.position.array, index * line.geometry.attributes.position.itemSize );
+			line.geometry.attributes.position.needsUpdate = true;
+
+			//point color
+			if ( color === undefined )
+				color = new THREE.Color( 1, 1, 1 );//White
+			setColorAttribute( line.geometry.attributes.color, index, color );
+
+			//set draw range
+			var start = line.geometry.drawRange.start, count = index + 1 - start;
+			if ( start > index ) {
+
+				var stop = start + line.geometry.drawRange.count;
+				start = index;
+				count = stop - start;
+
+			}
+			line.geometry.setDrawRange( start, count );
+
+		}
+		this.visible = function ( visible ) { line.visible = visible; }
+		this.isVisible = function () { return line.visible; }
+
+	}
+
+	var camera, group, scene;
 
 	function onloadScripts() {
 
@@ -243,7 +311,7 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( 'https://raw.githack.com/anhr/myThreejs/master/canvasContainer.html' );//'http://' + url + '/nodejs/myThreejs/canvasContainer.html'
 		elContainer = elContainer.querySelector( '.container' );
 
-		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ), scene, renderer, cursor, controls, stereoEffect, group, player,
+		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ), renderer, cursor, controls, stereoEffect, player,
 			playController, canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
 			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault,
 			//https://www.khronos.org/webgl/wiki/HandlingContextLost
@@ -538,25 +606,46 @@ export function create( createXDobjects, options ) {
 
 			group = new THREE.Group();
 			scene.add( group );
-
-			function setColorAttribute( colorAttribute, i, color ) {
-
-				if ( typeof color === "string" )
-					color = new THREE.Color( color );
-				colorAttribute.setX( i, color.r );
-				colorAttribute.setY( i, color.g );
-				colorAttribute.setZ( i, color.b );
-				colorAttribute.needsUpdate = true;
-
-			}
 			function guiSelectPoint() {
 
 				var f3DObjects, fPoint, cRestoreDefaultLocalPosition, fPointWorld, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,//, fPoints, mechScaleDefault = new THREE.Vector3()
 					cScaleX, cScaleY, cScaleZ, cPosition = new THREE.Vector3(), cRotations = new THREE.Vector3(),//, cPositionX, cPositionY, cPositionZ;
 					cPoints, selectedPointIndex = -1,
-					controllerX, controllerY, controllerZ, controllerW, controllerColor,
+					controllerX, controllerY, controllerZ, controllerW, cTrace, controllerColor,
 					controllerWorld = new THREE.Vector3();
 
+				//function visibleTraceLine( point, value, index )
+				function visibleTraceLine( intersection, value ) {
+
+					var index = intersection.index || 0, point = intersection.object.userData.arrayFuncs[index];
+					var line = point.line;
+					if ( line !== undefined )
+						line.visible( value );
+					if ( !value )
+						return;
+					if ( point.line !== undefined )
+						return;
+					point.line = new traceLine();
+
+					//color
+					var color = intersection.object.geometry.attributes.color;
+					if ( color === undefined )
+						color = new THREE.Color( 0xffffff );//white
+					else {
+						var vector = new THREE.Vector3().fromArray( color.array, index * color.itemSize )
+						color = new THREE.Color( vector.x, vector.y, vector.z );
+					}
+
+					point.line.addPoint(
+
+						getObjectPosition( mesh, index ),
+						player.getSelectSceneIndex(),
+						//								point.w//color
+						color
+
+					);
+
+				}
 				function exposePosition() {
 
 					var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
@@ -582,8 +671,10 @@ export function create( createXDobjects, options ) {
 					return controller;
 
 				}
-				function setPosition( position, intersectionSelected ) {
+//				function setPosition( position, intersectionSelected )
+				function setPosition( intersectionSelected ) {
 
+/*если это оставить то attribute.position выбранной точки будет неправильной если начать проигрывание player.selectScene
 					setValue( controllerX, position.x );
 					setValue( controllerY, position.y );
 					setValue( controllerZ, position.z );
@@ -592,6 +683,16 @@ export function create( createXDobjects, options ) {
 					setValue( controllerWorld.x, positionLocal.x );
 					setValue( controllerWorld.y, positionLocal.y );
 					setValue( controllerWorld.z, positionLocal.z );
+*/
+					var positionLocal = getObjectLocalPosition( intersectionSelected.object, intersectionSelected.index );
+					setValue( controllerX, positionLocal.x );
+					setValue( controllerY, positionLocal.y );
+					setValue( controllerZ, positionLocal.z );
+
+					var position = getObjectPosition( intersectionSelected.object, intersectionSelected.index );
+					setValue( controllerWorld.x, position.x );
+					setValue( controllerWorld.y, position.y );
+					setValue( controllerWorld.z, position.z );
 					
 					var displayControllerW, displayControllerColor, none = 'none', block = 'block';
 					if ( isNaN( position.w ) ) {
@@ -608,6 +709,8 @@ export function create( createXDobjects, options ) {
 							//console.warn( options + group );
 							if ( func.w === undefined ) {
 
+								displayControllerColor = none;
+								/*
 								//2D or 3D point
 								var attributesColor = intersectionSelected.object.geometry.attributes.color;
 								if ( attributesColor !== undefined ) {
@@ -617,6 +720,7 @@ export function create( createXDobjects, options ) {
 									func.w = { r: color.x, g: color.y, b: color.z }//Default color for 2D and 3D points is white
 
 								}
+								*/
 
 							}
 							if ( func.w !== undefined ) {
@@ -695,11 +799,8 @@ export function create( createXDobjects, options ) {
 						var option = cMeshs.__select[i];
 						if ( option.selected && ( parseInt( option.getAttribute( 'value' ) ) === intersectionSelected.object.userData.index - 1 ) ) {
 
-/*
-							if ( axesHelper !== undefined )
-								axesHelper.exposePosition( position );
-*/
-							setPosition( position, intersectionSelected );
+//							setPosition( position, intersectionSelected );
+							setPosition( intersectionSelected );
 
 						}
 
@@ -742,7 +843,12 @@ export function create( createXDobjects, options ) {
 						fPoint.domElement.style.display = block;
 						fPointWorld.domElement.style.display = block;
 						intersection = intersectionSelected;
-						setPosition( position, intersectionSelected );//непонятно зачем сюда засунул эту строку. Если ее оставить, то при выборе точки ее положение сдвигается
+//						setPosition( position, intersectionSelected );
+						setPosition( intersectionSelected );
+
+//						var line = mesh.userData.arrayFuncs[selectedPointIndex].line;
+						var line = mesh.userData.arrayFuncs[intersectionSelected.index].line;
+						cTrace.setValue( line === undefined ? false : line.isVisible() )
 
 						cRestoreDefaultLocalPosition.domElement.parentElement.parentElement.style.display =
 							intersection.object.userData.arrayFuncs === undefined ? 'none' : block;
@@ -1053,13 +1159,31 @@ export function create( createXDobjects, options ) {
 
 					//Points attribute position
 					fPoint = fPonts.addFolder( lang.point );
+					dat.folderNameAndTitle( fPoint, lang.point, lang.pointTitle );
 					fPoint.domElement.style.display = 'none';
 //					fPoint.open();
 
 					//Points world position
 					fPointWorld = fPonts.addFolder( lang.pointWorld );
+					dat.folderNameAndTitle( fPointWorld, lang.pointWorld, lang.pointWorldTitle );
 					fPointWorld.domElement.style.display = 'none';
 					fPointWorld.open();
+
+					//displays the trace of the movement of all points of the mesh
+					cTrace = fPonts.add( { trace: false }, 'trace' ).onChange( function ( value ) {
+
+						for ( var i = 0; i < mesh.userData.arrayFuncs.length; i++ )
+							visibleTraceLine( { object: mesh, index: i }, value );
+/*
+						mesh.userData.arrayFuncs.forEach( function ( funcs ) {
+
+							visibleTraceLine( funcs, value );
+
+						} );
+*/
+
+					} );
+					dat.controllerNameAndTitle( cTrace, lang.trace, lang.traceAllTitle );
 
 					//Restore default settings of all 3d objects button.
 					dat.controllerNameAndTitle( f3DObjects.add( {
@@ -1220,6 +1344,37 @@ export function create( createXDobjects, options ) {
 
 					dat.controllerNameAndTitle( controllerColor, lang.color );
 
+					//displays the trace of the point movement
+					cTrace = fPoint.add( { trace: false }, 'trace' ).onChange( function ( value ) {
+
+//						visibleTraceLine( intersection.object.userData.arrayFuncs[intersection.index], value, intersection.index );
+						visibleTraceLine( intersection, value );
+/*
+						var point = intersection.object.userData.arrayFuncs[intersection.index],
+							line = point.line;
+						if ( line !== undefined )
+							line.visible( value );
+						if ( value ) {
+
+							if ( point.line === undefined ) {
+
+								point.line = new traceLine();
+								point.line.addPoint(
+
+									getObjectPosition( intersection.object, intersection.index ),
+									player.getSelectSceneIndex(),
+									point.w//color
+
+								);
+
+							}
+
+						}
+*/
+
+					} );
+					dat.controllerNameAndTitle( cTrace, lang.trace, lang.traceTitle );
+
 					//Point's world position axes controllers
 
 					function axesWorldGui( axesId, onChange ) {
@@ -1368,7 +1523,8 @@ export function create( createXDobjects, options ) {
 				player = new Player( options.player, function ( index ) {
 
 					var t = ( ( options.player.max - options.player.min ) / ( options.player.marks - 1 ) ) * index + options.player.min;
-					selectPlayScene( t );
+//					group.userData.index = index;
+					selectPlayScene( t, index );
 					if ( canvasMenu !== undefined )
 						canvasMenu.setIndex( index, options.player.name + ': ' + t );
 
@@ -1493,7 +1649,7 @@ export function create( createXDobjects, options ) {
 
 			createXDobjects( group, options );
 
-			function selectPlayScene( t ) {
+			function selectPlayScene( t, index ) {
 
 				group.userData.t = t;
 				group.children.forEach( function ( mesh ) {
@@ -1528,6 +1684,7 @@ export function create( createXDobjects, options ) {
 									needsUpdate = true;
 
 								}
+								let color;
 								if ( typeof funcs.w === "function" ) {
 
 									attributes.position.setW( i, funcs.w( t, a, b ) );
@@ -1544,17 +1701,22 @@ export function create( createXDobjects, options ) {
 										min = max - 1;
 
 									}
-									var color = palette.toColor( value, min, max );
-									setColorAttribute( attributes.color, i, color );
+									color = palette.toColor( value, min, max );
+									//									setColorAttribute( attributes.color, i, color );
 
 								} else if ( funcs.w instanceof THREE.Color ) {
 
-									var color = funcs.w;
-									setColorAttribute( attributes.color, i, color );
+									color = funcs.w;
+									//									setColorAttribute( attributes.color, i, color );
 
-								}
+								} else color = new THREE.Color( 1, 1, 1 );//white
+								if ( attributes.color !== undefined )
+									setColorAttribute( attributes.color, i, color );
 								if ( needsUpdate )
 									attributes.position.needsUpdate = true;
+
+								if ( funcs.line !== undefined )
+									funcs.line.addPoint( getObjectPosition( mesh, i ), index, color );
 
 							};
 /*
@@ -1607,7 +1769,8 @@ export function create( createXDobjects, options ) {
 				} );
 
 			}
-			selectPlayScene( options.player === undefined ? 0 : options.player.min );
+//			group.userData.index = 0;
+			selectPlayScene( options.player === undefined ? 0 : options.player.min, 0 );
 
 			//default setting for each 3D object
 			group.children.forEach( function ( mesh ) {
@@ -1954,7 +2117,8 @@ export function create( createXDobjects, options ) {
 	 * 
 	 * object: {
 	 *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
-	 *   name: point name
+	 *   [name]: point name. Default is undefined.
+	 *   [trace]: true - displays the trace of the point movement. Default is undefined.
 	 * }
 	 * @param {number} a second parameter of the arrayFuncs item function. Default is 1.
 	 * @param {number} b third parameter of the arrayFuncs item function. Default is 0.
@@ -1981,24 +2145,23 @@ export function create( createXDobjects, options ) {
 				}
 				if ( funcs.name !== undefined )
 					funcs.vector.name = funcs.name;
+				if ( funcs.trace ) {
+
+					if ( options.player === undefined )
+						console.warn( 'Please define the options.player for displays the trace of the point movement.' );
+					else {
+
+						funcs.vector.line = new traceLine();
+
+					}
+
+				}
 				arrayFuncs[i] = funcs.vector;
 				funcs = funcs.vector;
-/*
-				var vector = new THREE.Vector4();
-				vector.copy();
-*/
 				return typeof funcs[axisName] === "function" ? funcs[axisName]( t, a, b ) : funcs[axisName];
 
 			}
 			var point = new THREE.Vector4( getAxis( 'x' ), getAxis( 'y' ), getAxis( 'z' ), getAxis( 'w' ), );
-/*
-			var point = new THREE.Vector4(
-				typeof funcs.x === "function" ? funcs.x( t, a, b ) : funcs.x,
-				typeof funcs.y === "function" ? funcs.y( t, a, b ) : funcs.y,
-				typeof funcs.z === "function" ? funcs.z( t, a, b ) : funcs.z,
-				typeof funcs.w === "function" ? funcs.w( t, a, b ) : funcs.w,
-			);
-*/
 
 			if ( funcs.w === undefined )
 				point.w = {};//Если тут поставить NaN то в points.geometry.attributes.position.array он преобразуется в 0.
@@ -2186,7 +2349,9 @@ var lang = {
 	defaultButton: 'Default',
 	defaultTitle: 'Restore Orbit controls settings.',
 	point: 'Point local position',
+	pointTitle: 'The position attribute of the selected point',
 	pointWorld: 'Point world position',
+	pointWorldTitle: 'The position of the selected point after scaling, moving and rotation of the mesh',
 	points: 'Points',
 	mesh: 'Mesh',
 	meshs: 'Meshs',
@@ -2212,6 +2377,10 @@ var lang = {
 	displayLightTitle: 'Display or hide the light source.',
 	restoreLightTitle: 'Restore position of the light source',
 	
+	trace: 'Trace',
+	traceTitle: 'Display the trace of the point movement.',
+	traceAllTitle: 'Display the trace of the movement of all points of the mesh.',
+
 };
 
 switch ( getLanguageCode() ) {
@@ -2220,7 +2389,9 @@ switch ( getLanguageCode() ) {
 		lang.defaultButton = 'Восстановить';
 		lang.defaultTitle = 'Восстановить положение осей координат по умолчанию.';
 		lang.point = 'Локальная позиция точки';
+		lang.pointTitle = 'Position attribute of the selected point';
 		lang.pointWorld = 'Абсолютная позиция точки';
+		lang.pointWorldTitle = 'Позиция выбранной точки после масштабирования, перемещения и вращения 3D объекта';
 		lang.points = 'Точки';
 		lang.mesh = '3D объект';
 		lang.meshs = '3D объекты';
@@ -2246,6 +2417,9 @@ switch ( getLanguageCode() ) {
 		lang.displayLight = 'Показать';
 		lang.displayLightTitle = 'Показать или скрыть источник света.';
 		lang.restoreLightTitle = 'Восстановить положение источника света';
+
+		lang.trace = 'Trace';
+		lang.traceTitle = 'Displays the trace of the point movement.';
 
 		break;
 
@@ -2283,6 +2457,7 @@ function getObjectPosition( object, index ) {
 	//rotation
 	positionAngle.copy( position );
 	positionAngle.applyEuler( object.rotation );
+	console.warn( 'position.z=' + position.z + ' positionAngle.z=' + positionAngle.z + ' object.rotation.x=' + object.rotation._x + ' _y=' + + object.rotation._y + ' _z=' + + object.rotation._z + ' name:' + object.name)
 	position.x = positionAngle.x;
 	position.y = positionAngle.y;
 	position.z = positionAngle.z;
@@ -2430,10 +2605,32 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 	return points;
 
 }
+/**
+ * Converts the mesh.geometry.attributes.position to mesh.userData.arrayFuncs.
+ * Used to restore the default point position.
+ * @param {THREE.Mesh} mesh
+ */
 export function setArrayFuncs( mesh ) {
 
 	mesh.userData.arrayFuncs = [];//Display the "Restore default local position" button.
 	for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
 		mesh.userData.arrayFuncs.push( getObjectLocalPosition( mesh, i ) );
+
+}
+/**
+ * Limits angles of rotations of the mesh between 0 and 360 degrees.
+ * @param {THREE.Euler} rotation angles for limitation
+ */
+export function limitAngles( rotation ) {
+
+	function limitAngle( axisName ) {
+
+		while ( rotation[axisName] > Math.PI * 2 )
+			rotation[axisName] -= Math.PI * 2
+
+	}
+	limitAngle( 'x' );
+	limitAngle( 'y' );
+	limitAngle( 'z' );
 
 }

@@ -92,54 +92,72 @@
 			//Points
 			var a = options.a, b = options.b;
 			var tMin = playerOptions.min === undefined ? 0 : playerOptions.min;
-			
-			/*group.add( myThreejs.Points( [
+
+			group.add( myThreejs.Points( [
 
 				{
 
-					vector: new Vector3( new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ), -0.5, 0.5 ),
+					vector: new Vector4(
+						new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
+						new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
+						//new Function( 't', 'a', 'b', 'return 0.2' ),//z
+						//new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
+						new Function( 't', 'a', 'b', 'return t' ),//z
+						new Function( 't', 'return 1-2*t' )//w
+						//new Color( "rgb(255, 255, 0)" )//w
+					),//Animated 4D point
 					name: 'First',
+					//trace: true,//Displays the trace of the point movement.
 
 				},
 				new Vector2( 0, 0 ),//2D point. White color
 				new Vector3( -0.5, 0.5, -1 ),//3D point. White color
-				new Vector4( 0.5, 0.5, 0.5, new Color( "rgb(255, 0, 0)" ) ),//3D point
-				new Vector4(
-					new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
-					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
-					//new Function( 't', 'a', 'b', 'return 0' ),
-					//new Function( 't', 'a', 'b', 'return 0.2' ),
-					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
-					new Function( 't', 'return 1-2*t' )//w
-				),//Animated 4D point
+				{
+
+					vector: new Vector4( 0.5,//new Function( 't', 'a', 'b', 'return 0.5-t' ),//0.5
+						0.5,
+						0.5,
+						new Color( "rgb(255, 0, 0)" ) ),//3D point
+					name: 'Second',
+					//trace: true,//Displays the trace of the point movement.
+
+				}
+				
 
 			], options, {
 
 				name: 'Wave',
 				tMin: tMin,
-				//position: new Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
-				//scale: new Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
+				position: new Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
+				scale: new Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
 				//scale: new Vector3( 1, 2, 1 ),
 //				rotation: new Euler( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
-				//rotation: new Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+				rotation: new Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 				//rotation: new Vector3( Math.PI / 2, 0 ),
 
 				} ) );
-			*/
 
-			var arrayFuncs = [
+			var arrayFuncs;
+
+			arrayFuncs = [
 				//				new Vector2( 1, 1 ),//2D point
 				//new Vector2( 1, [{t:0,v:1}] ),//2D point. Array
 				new Vector2( new Function( 't', 'a', 'b', 'return 1' ), 1 ),//2D point
 				//				new Vector3( -0.5, 0.5, -1 ),//3D point
-				new Vector4(
-					new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
-					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
-					//new Function( 't', 'a', 'b', 'return 0' ),
-					//new Function( 't', 'a', 'b', 'return 0.2' ),
-					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
-					new Function( 't', 'return 1-2*t' )//w
-				),//Animated 3D point
+				{
+
+					vector: new Vector4(
+						new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
+						new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
+						//new Function( 't', 'a', 'b', 'return 0' ),
+						//new Function( 't', 'a', 'b', 'return 0.2' ),
+						new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
+						new Function( 't', 'return 1-2*t' )//w
+					),//Animated 3D point
+					trace: true,//Displays the trace of the point movement.
+
+				},
+				
 				//				new Vector4( -1.5, 0.5, 1, 25 ),//4D point. white color
 				new Vector4( 0, 0, 0, new Function( 't', 'return 1-2*t' ) ),//color is f(t)
 				new Vector4( 0.25, 0, 0, new Color( "rgb(255, 127, 0)" ) ),//yellow point
@@ -165,8 +183,9 @@
 			}
 			points.userData.selectPlayScene = function ( t, setAttributes ) {
 
-				var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
+				var angle = t * Math.PI * 2 * 1.2;// + Math.PI / 4;//45 degree
 				points.rotation.set( angle, 0, 0 );
+				myThreejs.limitAngles( points.rotation );
 				setAttributes( a, b );
 
 			}
@@ -208,22 +227,7 @@
 				if ( name !== undefined )
 					cube.name = name;
 				cube.userData.color = cube.material.color;
-
-				myThreejs.setArrayFuncs( cube );
-/*
-				cube.userData.arrayFuncs = [];//Display the "Restore default local position" button.
-function getObjectLocalPosition( object, index ) {
-
-	var attributesPosition = object.geometry.attributes.position,
-		position = attributesPosition.itemSize >= 4 ? new Vector4( 0, 0, 0, 0 ) : new Vector3();
-	position.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
-	return position;
-
-				}
-				for ( var i = 0; i < cube.geometry.attributes.position.count; i++ ) {
-					cube.userData.arrayFuncs.push(getObjectLocalPosition( cube, i ));
-				}
-*/				
+				myThreejs.setArrayFuncs( cube );//Display the "Restore default local position" button.
 				cube.userData.raycaster = {
 
 					onIntersection: function ( raycaster, intersection, scene, mouse ) {
@@ -262,19 +266,19 @@ function getObjectLocalPosition( object, index ) {
 				group.add( cube );
 
 			}
-			addCube( new Vector3( -1, 0, 0 ), 0xffffff, function ( t ) {
+			addCube( new Vector3( -1, 0, 0 ), 0xffffff, function ( t, setAttributes ) {
 
 				var angle = t * Math.PI * 2 + Math.PI / 4;//45 degree
 				this.cube.rotation.set( angle, angle / 2, angle / 4 );
-				/*
-				this.cube.position.x = t;
-				this.cube.position.y = t;
-				this.cube.position.z = t;
-				*/
+				myThreejs.limitAngles( this.cube.rotation );
+				//this.cube.position.x = t;
+				//this.cube.position.y = t;
+				//this.cube.position.z = t;
+				setAttributes( options.a, options.b );//For trace of the cube points only
 
-			}, 'White cube' );
+			} );//, 'White cube' );
 			var position = new Vector3( -0.5, 0.5, -0.5 );
-			addCube( position, 'green', function ( t ) {
+			addCube( position, 'green', function ( t, setAttributes ) {
 
 				this.cube.scale.x = 1.4 + t;
 				this.cube.scale.y = 1.5 + t;
@@ -286,8 +290,11 @@ function getObjectLocalPosition( object, index ) {
 
 				var angle = t * Math.PI * 2 + Math.PI / 4;//45 degree
 				this.cube.rotation.set( angle / 2, angle / 4, angle );
+				myThreejs.limitAngles( this.cube.rotation );
 
-			} );
+				setAttributes( options.a, options.b );//For trace of the cube points only
+
+			}, 'Green cube' );
 
 		},
 			{

@@ -14,13 +14,14 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import { create, Points, setArrayFuncs } from './index.js';
+import { create, Points, setArrayFuncs, limitAngles } from './index.js';
 
 var myThreejs = {
 
 	create: create,
 	Points: Points,
 	setArrayFuncs: setArrayFuncs,
+	limitAngles: limitAngles,
 
 }
 export default myThreejs;

@@ -57,8 +57,16 @@ function Player( options, onSelectScene ) {
 			index = 0;
 		else if ( index < 0 )
 			index = options.marks - 1;
+		while ( selectSceneIndex !== index ) {
+			if ( selectSceneIndex < index )
+				selectSceneIndex++;
+			else selectSceneIndex--;
+			onSelectScene( selectSceneIndex );
+		}
+/*
 		selectSceneIndex = index;
 		onSelectScene( index );
+*/
 
 	}
 
@@ -207,7 +215,8 @@ function Player( options, onSelectScene ) {
 
 	}
 
-	this.getOptions = function() { return options; }
+	this.getOptions = function () { return options; }
+	this.getSelectSceneIndex = function () { return selectSceneIndex; }
 
 	/**
 	 * User has changed the rate of changing of animation scenes per second.

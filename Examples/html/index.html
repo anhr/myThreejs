@@ -181,12 +181,12 @@
 				},
 
 			}
-			points.userData.selectPlayScene = function ( t, setAttributes ) {
+			points.userData.selectPlayScene = function ( t ) {
 
 				var angle = t * Math.PI * 2 * 1.2;// + Math.PI / 4;//45 degree
 				points.rotation.set( angle, 0, 0 );
 				myThreejs.limitAngles( points.rotation );
-				setAttributes( a, b );
+//				setAttributes( a, b );
 
 			}
 			points.position.copy( new Vector3( 0.1, 0.2, 0.3 ) );
@@ -201,7 +201,7 @@
 				new PointsMaterial( { size: 0.05, vertexColors: VertexColors } ) );
 			points2.geometry.addAttribute( 'color', new Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
 			/*
-			points2.userData.selectPlayScene = function ( t, setAttributes ) {
+			points2.userData.selectPlayScene = function ( t ) {
 
 				var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
 				points2.rotation.set( angle, 0, 0 );
@@ -266,7 +266,7 @@
 				group.add( cube );
 
 			}
-			addCube( new Vector3( -1, 0, 0 ), 0xffffff, function ( t, setAttributes ) {
+			addCube( new Vector3( -1, 0, 0 ), 0xffffff, function ( t ) {
 
 				var angle = t * Math.PI * 2 + Math.PI / 4;//45 degree
 				this.cube.rotation.set( angle, angle / 2, angle / 4 );
@@ -274,11 +274,11 @@
 				//this.cube.position.x = t;
 				//this.cube.position.y = t;
 				//this.cube.position.z = t;
-				setAttributes( options.a, options.b );//For trace of the cube points only
+//				setAttributes( options.a, options.b );//For trace of the cube points only
 
 			} );//, 'White cube' );
 			var position = new Vector3( -0.5, 0.5, -0.5 );
-			addCube( position, 'green', function ( t, setAttributes ) {
+			addCube( position, 'green', function ( t ) {
 
 				this.cube.scale.x = 1.4 + t;
 				this.cube.scale.y = 1.5 + t;
@@ -292,7 +292,7 @@
 				this.cube.rotation.set( angle / 2, angle / 4, angle );
 				myThreejs.limitAngles( this.cube.rotation );
 
-				setAttributes( options.a, options.b );//For trace of the cube points only
+//				setAttributes( options.a, options.b );//For trace of the cube points only
 
 			}, 'Green cube' );
 

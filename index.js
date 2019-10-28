@@ -1656,7 +1656,8 @@ export function create( createXDobjects, options ) {
 
 					if ( mesh.userData.selectPlayScene !== undefined ) {
 
-						mesh.userData.selectPlayScene( t, function ( a, b ) {
+						mesh.userData.selectPlayScene( t );
+						function setAttributes( a, b ) {
 
 							var attributes = mesh.geometry.attributes,
 								arrayFuncs = mesh.userData.arrayFuncs;
@@ -1719,25 +1720,9 @@ export function create( createXDobjects, options ) {
 									funcs.line.addPoint( getObjectPosition( mesh, i ), index, color );
 
 							};
-/*
-							var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
-							if ( selectedPointIndex !== -1 ) {
 
-								var position = getObjectPosition( mesh, selectedPointIndex );
-								if ( axesHelper !== undefined )
-									axesHelper.exposePosition( position );
-								if ( gui !== undefined )
-									guiSelectPoint.setPosition( position, {
-
-										object: mesh,
-										index: selectedPointIndex,
-
-									} );
-
-							}
-*/
-
-						} );
+						}
+						setAttributes( options.a, options.b );
 						var message = 'myThreejs.create.onloadScripts.init.selectPlayScene: invalid mesh.scale.';
 						if ( mesh.scale.x <= 0 ) console.error( message + 'x = ' + mesh.scale.x );
 						if ( mesh.scale.y <= 0 ) console.error( message + 'y = ' + mesh.scale.y );
@@ -2457,7 +2442,7 @@ function getObjectPosition( object, index ) {
 	//rotation
 	positionAngle.copy( position );
 	positionAngle.applyEuler( object.rotation );
-	console.warn( 'position.z=' + position.z + ' positionAngle.z=' + positionAngle.z + ' object.rotation.x=' + object.rotation._x + ' _y=' + + object.rotation._y + ' _z=' + + object.rotation._z + ' name:' + object.name)
+//	console.warn( 'position.z=' + position.z + ' positionAngle.z=' + positionAngle.z + ' object.rotation.x=' + object.rotation._x + ' _y=' + + object.rotation._y + ' _z=' + + object.rotation._z + ' name:' + object.name)
 	position.x = positionAngle.x;
 	position.y = positionAngle.y;
 	position.z = positionAngle.z;
@@ -2543,12 +2528,12 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 		},
 
 	}
-	points.userData.selectPlayScene = function ( t, setAttributes ) {
+	points.userData.selectPlayScene = function ( t ) {
 
 		setPositions( t );
 		setScales( t );
 		setRotations( t );
-		setAttributes( options.a, options.b );
+//		setAttributes( options.a, options.b );
 
 	}
 	function setPositions( t ) {

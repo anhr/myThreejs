@@ -37,7 +37,6 @@ function Player( options, onSelectScene ) {
 
 	options.min = options.min || 0;
 	options.max = options.max || 1;
-//	scenesCount = scenesCount || 2;
 	options.marks = options.marks || 2;
 	options.repeat = options.repeat || false;
 //	options.controllers = [];

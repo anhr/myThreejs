@@ -611,7 +611,7 @@ export function create( createXDobjects, options ) {
 				var f3DObjects, fPoint, cRestoreDefaultLocalPosition, fPointWorld, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,//, fPoints, mechScaleDefault = new THREE.Vector3()
 					cScaleX, cScaleY, cScaleZ, cPosition = new THREE.Vector3(), cRotations = new THREE.Vector3(),//, cPositionX, cPositionY, cPositionZ;
 					cPoints, selectedPointIndex = -1,
-					controllerX, controllerY, controllerZ, controllerW, cTrace, controllerColor,
+					controllerX, controllerY, controllerZ, controllerW, cTrace, cTraceAll, controllerColor,
 					controllerWorld = new THREE.Vector3();
 
 				//function visibleTraceLine( point, value, index )
@@ -962,6 +962,9 @@ export function create( createXDobjects, options ) {
 						}
 						fMesh.domElement.style.display = display;
 
+						mesh.userData.traceAll = mesh.userData.traceAll || false;
+						cTraceAll.setValue( mesh.userData.traceAll );
+
 					} );
 					dat.controllerNameAndTitle( cMeshs, lang.select );
 
@@ -1170,20 +1173,14 @@ export function create( createXDobjects, options ) {
 					fPointWorld.open();
 
 					//displays the trace of the movement of all points of the mesh
-					cTrace = fPonts.add( { trace: false }, 'trace' ).onChange( function ( value ) {
+					cTraceAll = fPonts.add( { trace: false }, 'trace' ).onChange( function ( value ) {
 
+						mesh.userData.traceAll = value;
 						for ( var i = 0; i < mesh.userData.arrayFuncs.length; i++ )
 							visibleTraceLine( { object: mesh, index: i }, value );
-/*
-						mesh.userData.arrayFuncs.forEach( function ( funcs ) {
-
-							visibleTraceLine( funcs, value );
-
-						} );
-*/
 
 					} );
-					dat.controllerNameAndTitle( cTrace, lang.trace, lang.traceAllTitle );
+					dat.controllerNameAndTitle( cTraceAll, lang.trace, lang.traceAllTitle );
 
 					//Restore default settings of all 3d objects button.
 					dat.controllerNameAndTitle( f3DObjects.add( {
@@ -1347,30 +1344,7 @@ export function create( createXDobjects, options ) {
 					//displays the trace of the point movement
 					cTrace = fPoint.add( { trace: false }, 'trace' ).onChange( function ( value ) {
 
-//						visibleTraceLine( intersection.object.userData.arrayFuncs[intersection.index], value, intersection.index );
 						visibleTraceLine( intersection, value );
-/*
-						var point = intersection.object.userData.arrayFuncs[intersection.index],
-							line = point.line;
-						if ( line !== undefined )
-							line.visible( value );
-						if ( value ) {
-
-							if ( point.line === undefined ) {
-
-								point.line = new traceLine();
-								point.line.addPoint(
-
-									getObjectPosition( intersection.object, intersection.index ),
-									player.getSelectSceneIndex(),
-									point.w//color
-
-								);
-
-							}
-
-						}
-*/
 
 					} );
 					dat.controllerNameAndTitle( cTrace, lang.trace, lang.traceTitle );
@@ -2403,8 +2377,8 @@ switch ( getLanguageCode() ) {
 		lang.displayLightTitle = 'Показать или скрыть источник света.';
 		lang.restoreLightTitle = 'Восстановить положение источника света';
 
-		lang.trace = 'Trace';
-		lang.traceTitle = 'Displays the trace of the point movement.';
+		lang.trace = 'Трек';
+		lang.traceTitle = 'Показать трек перемещения точки.';
 
 		break;
 

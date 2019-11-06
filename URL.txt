@@ -12,9 +12,9 @@ SCRIPT5009: 'controllerPlay' is undefined
 html (553,4)
 ---------------------------------------------------------
 test page
-https://raw.githack.com/anhr/controllerPlay/master/Examples/html/
 https://raw.githack.com/anhr/myThreejs/master/Examples/html/
-http://localhost/threejs/nodejs/myThreejs/Examples/html/
+https://raw.githack.com/anhr/controllerPlay/master/Examples/html/
+http://localhost/anhr/myThreejs/master/Examples/html/
 -------------------------------------------
 Настройка локального хоста
 Go to IIS and add PC2014/Sites/Default Web Site/anhr

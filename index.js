@@ -1,4 +1,4 @@
-﻿/**
+/**
  * myThreejs
  * 
  * I use myThreejs in my projects for displaying of my 3D objects in the canvas.
@@ -52,7 +52,8 @@ import * as THREE from '../../three.js/dev/build/three.module.js';
 import cookie from '../../cookieNodeJS/master/cookie.js';
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 
-import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
+//import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
+import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 
 
 import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
@@ -73,6 +74,8 @@ import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 var palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
 palette.toColor = function ( value, min, max ) {
 
+	if ( value instanceof THREE.Color )
+		return value;
 	var c = this.hsv2rgb( value, min, max );
 	if ( c === undefined )
 		c = { r: 255, g: 255, b: 255 }
@@ -149,6 +152,8 @@ var arrayCreates = [];
  * @param {object} [options.t] time options
  * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
  * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
+ * @param {number} [options.point] point settings.
+ * @param {number} [options.point.size] point size. Default is 0.05.
  * @param {object} [options.scales] axes scales. Default is {}
  * @param {object} [options.scales.w] w axis scale options of 4D objects. Default is {}
  * @param {string} [options.scales.w.name] axis name. Default is "W".
@@ -211,6 +216,9 @@ export function create( createXDobjects, options ) {
 
 	options.scale = 1;
 
+	options.point = options.point || {};
+	options.point.size = options.point.size || 0.05;
+
 	options.scales = options.scales || {};
 	function getAxis( axix, name, min, max ) {
 
@@ -227,10 +235,13 @@ export function create( createXDobjects, options ) {
 	if ( options.scales.w !== undefined )
 		options.scales.w = getAxis( options.scales.w, 'W', 0, 100 );
 
-	function setColorAttribute( colorAttribute, i, color ) {
+	function setColorAttribute( attributes, i, color ) {
 
 		if ( typeof color === "string" )
 			color = new THREE.Color( color );
+		var colorAttribute = attributes.color || attributes.ca;
+		if ( colorAttribute === undefined )
+			return;
 		colorAttribute.setX( i, color.r );
 		colorAttribute.setY( i, color.g );
 		colorAttribute.setZ( i, color.b );
@@ -276,7 +287,7 @@ export function create( createXDobjects, options ) {
 			//point color
 			if ( color === undefined )
 				color = new THREE.Color( 1, 1, 1 );//White
-			setColorAttribute( line.geometry.attributes.color, index, color );
+			setColorAttribute( line.geometry.attributes, index, color );
 
 			//set draw range
 			var start = line.geometry.drawRange.start, count = index + 1 - start;
@@ -311,9 +322,10 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( 'https://raw.githack.com/anhr/myThreejs/master/canvasContainer.html' );//'http://' + url + '/nodejs/myThreejs/canvasContainer.html'
 		elContainer = elContainer.querySelector( '.container' );
 
-		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ), renderer, cursor, controls, stereoEffect, player,
+		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
+			renderer, cursor, controls, stereoEffect, player,
 			playController, canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
-			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault,
+			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault,// fullScreen,
 			//https://www.khronos.org/webgl/wiki/HandlingContextLost
 			requestId;//, gl, tex;
 		//https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/webglcontextlost_event
@@ -324,6 +336,21 @@ export function create( createXDobjects, options ) {
 		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 		document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
+		function isFullScreen() {
+
+			return canvasMenu.isFullScreen();
+			//return fullScreen;
+/*
+			if ( size === undefined ) {
+
+				size = new THREE.Vector2();
+				renderer.getSize( size );
+
+			}
+			return ( size.x === window.innerWidth ) && ( size.y === window.innerHeight );
+*/
+
+		}
 		function onIntersection( intersects, mouse ) {
 
 			intersects.forEach( function ( intersection ) {
@@ -617,6 +644,8 @@ export function create( createXDobjects, options ) {
 				//function visibleTraceLine( point, value, index )
 				function visibleTraceLine( intersection, value ) {
 
+					if ( intersection.object.userData.arrayFuncs === undefined )
+						return;
 					var index = intersection.index || 0, point = intersection.object.userData.arrayFuncs[index];
 					var line = point.line;
 					if ( line !== undefined )
@@ -843,11 +872,9 @@ export function create( createXDobjects, options ) {
 						fPoint.domElement.style.display = block;
 						fPointWorld.domElement.style.display = block;
 						intersection = intersectionSelected;
-//						setPosition( position, intersectionSelected );
 						setPosition( intersectionSelected );
 
-//						var line = mesh.userData.arrayFuncs[selectedPointIndex].line;
-						var line = mesh.userData.arrayFuncs[intersectionSelected.index].line;
+						var line = mesh.userData.arrayFuncs === undefined ? undefined : mesh.userData.arrayFuncs[intersectionSelected.index].line;//You can not trace points if you do not defined the mesh.userData.arrayFuncs
 						cTrace.setValue( line === undefined ? false : line.isVisible() )
 
 						cRestoreDefaultLocalPosition.domElement.parentElement.parentElement.style.display =
@@ -1176,7 +1203,12 @@ export function create( createXDobjects, options ) {
 					cTraceAll = fPonts.add( { trace: false }, 'trace' ).onChange( function ( value ) {
 
 						mesh.userData.traceAll = value;
-						for ( var i = 0; i < mesh.userData.arrayFuncs.length; i++ )
+/*
+						if ( mesh.userData.arrayFuncs !== undefined )//You can not trace points if you do not defined the mesh.userData.arrayFuncs
+							for ( var i = 0; i < mesh.userData.arrayFuncs.length; i++ )
+								visibleTraceLine( { object: mesh, index: i }, value );
+*/
+						for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
 							visibleTraceLine( { object: mesh, index: i }, value );
 
 					} );
@@ -1245,7 +1277,7 @@ export function create( createXDobjects, options ) {
 									var color = palette.toColor( value, controller.__min, controller.__max ),
 										attributes = intersection.object.geometry.attributes,
 										i = intersection.index;
-									setColorAttribute( attributes.color, i, color );
+									setColorAttribute( attributes, i, color );
 
 									//update of the w axis value
 									//									movePointAxes( axesId, value );
@@ -1329,7 +1361,7 @@ export function create( createXDobjects, options ) {
 							if ( controllerColor.userData === undefined )
 								return;
 							var intersection = controllerColor.userData.intersection;
-							setColorAttribute( intersection.object.geometry.attributes.color, intersection.index, value );
+							setColorAttribute( intersection.object.geometry.attributes, intersection.index, value );
 
 						} );
 
@@ -1536,9 +1568,9 @@ export function create( createXDobjects, options ) {
 								return;
 
 						}
-						rendererSizeDefault.onFullScreenToggle( !fullScreen );
+						//rendererSizeDefault.onFullScreenToggle( !fullScreen );
 
-						canvasMenu.setSpatialMultiplexs( mode );
+						canvasMenu.setSpatialMultiplexs( mode, { renderer: renderer, camera: camera } );
 
 					},
 
@@ -1557,9 +1589,9 @@ export function create( createXDobjects, options ) {
 						player: player,
 						//					play: options.play,
 						//					playController: playController,
-						onFullScreenToggle: function () {
+						onFullScreenToggle: function ( fullScreen ) {
 
-							return rendererSizeDefault.onFullScreenToggle();
+							return rendererSizeDefault.onFullScreenToggle( fullScreen );
 
 						},
 						onFullScreen: function ( fullScreen, elContainer ) {
@@ -1567,7 +1599,8 @@ export function create( createXDobjects, options ) {
 							rendererSizeDefault.onFullScreenToggle( !fullScreen );
 							//						arrayContainers.display( elContainer.parentElement, fullScreen );
 
-						}
+						},
+						THREE: THREE,
 
 					} );
 					options.canvasMenu = canvasMenu;
@@ -1635,6 +1668,8 @@ export function create( createXDobjects, options ) {
 
 							var attributes = mesh.geometry.attributes,
 								arrayFuncs = mesh.userData.arrayFuncs;
+							if ( arrayFuncs === undefined )
+								return;
 							if ( t === undefined )
 								console.error( 'setPosition: t = ' + t );
 
@@ -1677,16 +1712,14 @@ export function create( createXDobjects, options ) {
 
 									}
 									color = palette.toColor( value, min, max );
-									//									setColorAttribute( attributes.color, i, color );
 
 								} else if ( funcs.w instanceof THREE.Color ) {
 
 									color = funcs.w;
-									//									setColorAttribute( attributes.color, i, color );
 
 								} else color = new THREE.Color( 1, 1, 1 );//white
-								if ( attributes.color !== undefined )
-									setColorAttribute( attributes.color, i, color );
+//								if ( attributes.color !== undefined )
+								setColorAttribute( attributes, i, color );
 								if ( needsUpdate )
 									attributes.position.needsUpdate = true;
 
@@ -1780,6 +1813,54 @@ export function create( createXDobjects, options ) {
 				pointLight1.controls( group, fOptions, axesHelper.options.scales, lang.light + ' 1' );
 				pointLight2.controls( group, fOptions, axesHelper.options.scales, lang.light + ' 2' );
 
+				//point
+
+				var defaultSize = options.point.size, pointName = 'Point_' + getCanvasName();
+				cookie.getObject( pointName, options.point, options.point );
+
+				var fPoint = fOptions.addFolder( lang.pointSettings ),
+					fSize = fPoint.addFolder( lang.size );
+				dat.folderNameAndTitle( fSize, lang.size, lang.sizeTitle );
+
+				//point size
+				function setSize( value ) {
+
+					if ( value === undefined )
+						value = options.point.size;
+					if ( value < 0 )
+						value = 0;
+//					options.point.size = value;
+					size.setValue( value );
+					cookie.setObject( pointName, options.point );
+
+				}
+
+				fSize.add( new PositionController( function ( shift ) {
+
+					setSize( options.point.size + shift );
+
+				}, { offset: 0.01, min: 0.01, max: 0.1, step: 0.01 } ) );
+
+				//size
+				//	target = fX.add( orbitControls.target, 'x' );
+				var size = dat.controllerZeroStep( fSize, options.point, 'size', function ( value ) {
+
+					setSize( value );
+
+				} );
+				dat.controllerNameAndTitle( size, lang.size, lang.sizeTitle );
+
+				//point size default button
+				dat.controllerNameAndTitle( fSize.add( {
+
+					defaultF: function ( value ) {
+
+						setSize( defaultSize );
+
+					},
+
+				}, 'defaultF' ), lang.defaultButton, lang.defaultSizeTitle );
+
 				//default button
 				dat.controllerNameAndTitle( gui.add( {
 					defaultF: function ( value ) {
@@ -1804,7 +1885,9 @@ export function create( createXDobjects, options ) {
 					if ( raycaster === undefined ) {
 
 						raycaster = new THREE.Raycaster();
-						raycaster.params.Points.threshold = item.material.size / 3;//0.03;
+//item.material.size is NaN if item.material is ShaderMaterial
+//						raycaster.params.Points.threshold = item.material.size / 3;//0.03;
+						raycaster.params.Points.threshold = options.point.size / 3;//0.03;
 						if ( raycaster.setStereoEffect !== undefined )
 							raycaster.setStereoEffect( {
 
@@ -1842,7 +1925,6 @@ export function create( createXDobjects, options ) {
 				}
 
 			} );
-
 			function getRendererSize() {
 
 				var style = {
@@ -1858,12 +1940,17 @@ export function create( createXDobjects, options ) {
 				renderer.getSize( sizeOriginal );
 				return {
 
-					onFullScreenToggle: function ( fullScreen ) {
+					onFullScreenToggle: function ( fs ) {
 
+/*
 						var size = new THREE.Vector2();
 						renderer.getSize( size );
-						if ( fullScreen === undefined )
+						if ( fs === undefined ) {
+
 							fullScreen = ( size.x === window.innerWidth ) && ( size.y === window.innerHeight );
+							//							fullScreen = isFullScreen( size );
+
+						} else fullScreen = fs;
 						if ( fullScreen ) {
 
 							//restore size of the canvas
@@ -1890,11 +1977,15 @@ export function create( createXDobjects, options ) {
 						camera.updateProjectionMatrix();
 
 						fullScreen = !fullScreen;
-						arrayContainers.display( elContainer.parentElement, fullScreen );
+*/						
+						arrayContainers.display( elContainer.parentElement, !fs );//fullScreen );
+/*						
 						if ( canvasMenu !== undefined )
 							canvasMenu.setFullScreenButton( fullScreen );
 
 						return fullScreen;
+*/						
+						return { renderer: renderer, camera: camera };
 
 					},
 
@@ -1905,11 +1996,26 @@ export function create( createXDobjects, options ) {
 
 			window.addEventListener( 'resize', onResize, false );
 
+			function getCanvasName() {
+				return typeof options.elContainer === "object" ?
+					options.elContainer.id :
+					typeof options.elContainer === "string" ?
+						options.elContainer :
+						'';
+			}
+
 		}
 		function onResize() {
 
-			var size = new THREE.Vector2();
-			renderer.getSize( size );
+			var size;
+			if ( isFullScreen() )
+				size = new THREE.Vector2( window.innerWidth, window.innerHeight );
+			else {
+
+				size = new THREE.Vector2();
+				renderer.getSize( size );
+
+			}
 			camera.aspect = size.x / size.y;
 			camera.updateProjectionMatrix();
 
@@ -2014,6 +2120,39 @@ export function create( createXDobjects, options ) {
 				}
 
 			}
+
+			//set size of points with ShaderMaterial
+			//https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
+			//Example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
+			group.children.forEach( function ( mesh ) {
+
+				if ( ( mesh instanceof THREE.Points === false ) || ( mesh.geometry.attributes.size === undefined ) )
+					return;
+				//points with ShaderMaterial
+				for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
+
+					var position = getObjectPosition( mesh, i ),
+						distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( camera.position );
+
+					//scale
+					var parent = mesh.parent, scale = 1;
+					while ( parent !== null ) {
+
+						scale *= ( parent.scale.x + parent.scale.y + parent.scale.z ) / 3;
+						parent = parent.parent;
+
+					}
+					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance /
+						scale );
+//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 / scale );
+
+//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 );
+//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 * scene.scale.x );
+					mesh.geometry.attributes.size.needsUpdate = true;
+
+				}
+
+			} );
 
 		}
 
@@ -2174,17 +2313,9 @@ export function create( createXDobjects, options ) {
 	options.addSpriteTextIntersection = function ( raycaster, intersection, scene, mouse ) {
 
 		var spriteTextIntersection = findSpriteTextIntersection( scene );
-/*
-		if ( spriteTextIntersection !== undefined )
-			return;
-*/
 		var textColor = 'rgb( 128, 128, 128 )',
-			position = getPosition( intersection );//raycaster.stereo === undefined ? getPosition( intersection ) : raycaster.stereo.getPosition( intersection );//, true );
-/*
-		if ( findSpriteTextIntersection( scene ) )
-			return;
-*/
-		var func = intersection.object.userData.arrayFuncs === undefined ? undefined : intersection.object.userData.arrayFuncs[intersection.index];
+			position = getPosition( intersection ),
+			func = intersection.object.userData.arrayFuncs === undefined ? undefined : intersection.object.userData.arrayFuncs[intersection.index];
 
 		// Make the spriteText follow the mouse
 		//https://stackoverflow.com/questions/36033879/three-js-object-follows-mouse-position
@@ -2192,21 +2323,26 @@ export function create( createXDobjects, options ) {
 		vector.unproject( camera );
 		var dir = vector.sub( camera.position ).normalize();
 		var pos = camera.position.clone().add( dir.multiplyScalar( 1 ) );
+
+		var parent = intersection.object.parent;
+		while ( parent !== null ) {
+
+			pos.sub( parent.position );
+//			pos.multiply( parent.scale );
+			pos.divide( parent.scale );
 /*
-		var distance = - camera.position.z / dir.z;
-		var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+			pos.x /= parent.scale.x;
+			pos.y /= parent.scale.y;
+			pos.z /= parent.scale.z;
 */
-/*
-		//Project world position to screen coordinate system
-		//https://discourse.threejs.org/t/project-world-position-to-screen-coordinate-system/2477
-		camera.updateMatrixWorld();
-		var positionProject = new THREE.Vector3().copy( position ).project( camera );
-		positionProject.z = 0;
-*/
+			parent = parent.parent;
+
+		}
 
 		if ( spriteTextIntersection === undefined ) {
 
-			var pointName = intersection.index === undefined ? undefined : intersection.object.userData.arrayFuncs[intersection.index].name;
+			var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) );
+			var pointName = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs[intersection.index].name;
 			spriteTextIntersection = new THREE.SpriteText(
 				( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
 				( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
@@ -2214,7 +2350,7 @@ export function create( createXDobjects, options ) {
 				'\n' + options.scales.y.name + ': ' + position.y +
 				'\n' + options.scales.z.name + ': ' + position.z +
 				(
-					intersection.index === undefined ?
+					!isArrayFuncs ?
 						'' :
 						intersection.object.userData.arrayFuncs[intersection.index] instanceof THREE.Vector4 ?
 							isNaN( position.w ) ?
@@ -2335,6 +2471,11 @@ var lang = {
 	displayLight: 'Display',
 	displayLightTitle: 'Display or hide the light source.',
 	restoreLightTitle: 'Restore position of the light source',
+
+	pointSettings: 'Point',
+	size: 'Size',
+	sizeTitle: 'Size of the point with "ShaderMaterial" material',
+	defaultSizeTitle: 'Restore point size',
 	
 	trace: 'Trace',
 	traceTitle: 'Display the trace of the point movement.',
@@ -2377,6 +2518,11 @@ switch ( getLanguageCode() ) {
 		lang.displayLightTitle = 'Показать или скрыть источник света.';
 		lang.restoreLightTitle = 'Восстановить положение источника света';
 
+		lang.pointSettings = 'Точка';
+		lang.size = 'Размер';
+		lang.sizeTitle = 'Размер точки с материалом типа "ShaderMaterial"';
+		lang.defaultSizeTitle = 'Восстановить размер точек';
+
 		lang.trace = 'Трек';
 		lang.traceTitle = 'Показать трек перемещения точки.';
 
@@ -2405,18 +2551,26 @@ function getObjectPosition( object, index ) {
 	if ( index === undefined )
 		return object.position;
 	var position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
-//		position2 = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
 		position2 = getObjectLocalPosition( object, index ),
 		positionAngle = new THREE.Vector3();
-//	position2.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
 	position = position2.clone();
 
 	position.multiply( object.scale );
+/*
+	var parent = object;
+	while ( parent !== null ) {
 
+		//position.multiply( parent.scale );
+		position.x /= parent.scale.x;
+		position.y /= parent.scale.y;
+		position.z /= parent.scale.z;
+		parent = parent.parent;
+
+	}
+*/
 	//rotation
 	positionAngle.copy( position );
 	positionAngle.applyEuler( object.rotation );
-//	console.warn( 'position.z=' + position.z + ' positionAngle.z=' + positionAngle.z + ' object.rotation.x=' + object.rotation._x + ' _y=' + + object.rotation._y + ' _z=' + + object.rotation._z + ' name:' + object.name)
 	position.x = positionAngle.x;
 	position.y = positionAngle.y;
 	position.z = positionAngle.z;
@@ -2482,7 +2636,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 
 	var points = new THREE.Points(
 		new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, options.a, options.b ), 4 ),
-		new THREE.PointsMaterial( { size: 0.05, vertexColors: THREE.VertexColors } )
+		new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } )
 	);
 	points.name = pointsOptions.name;//'Wave';
 	points.geometry.addAttribute( 'color',

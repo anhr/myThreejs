@@ -124,7 +124,8 @@ Creates new canvas with my 3D objects.
 					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
 					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
 					new Function( 't', 'return 1-2*t' )//w
-				),//Animated 3D point
+				),
+				name: 'Animated 3D point',
 				trace: true,//Displays the trace of the point movement.
 
 			},
@@ -229,28 +230,8 @@ Displaying points.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| arrayFuncs | <code>Array of THREE.Vector4 or THREE.Vector3 or THREE.Vector2 or object</code> |  | points.geometry.attributes.position array |
-| [options] | <code>object</code> |  | followed options is available: |
-| [options.elContainer] | <code>HTMLElement or string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
-
- ### arrayFuncs item
-
- * THREE.Vector4: 4D point.
- * THREE.Vector3: 3D point. w = 1. Default is white color
- * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
- * Vector's x, y, z, w is position of the point.
- * Can be as:
- * float - position of the point.
- * [float] - array of positions of the point.
- * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
- * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
- * if arrayFuncs.length === 0 then push new THREE.Vector3().
- * 
- * object: {
- *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
- *   name: point name
- * }
- * @param {object} options see myThreejs.create options for details
+| [arrayFuncs](#arrayfuncs-item) | <code>Array of THREE.Vector4 or THREE.Vector3 or THREE.Vector2 or object</code> |  | points.geometry.attributes.position array |
+| [options] | <code>object</code> |  | options see [myThreejs.create](#mythreejscreate-createxdobjects-options-) options for details |
  * @param {object} [pointsOptions] followed points options is availablee:
  * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.
  * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
@@ -272,6 +253,25 @@ Displaying points.
  * float - rotation of the points.
  * [float] - array of rotations of the points.
  * Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' )
+
+ ### arrayFuncs item
+
+ * THREE.Vector4: 4D point.
+ * THREE.Vector3: 3D point. w = 1. Default is white color
+ * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
+ * Vector's x, y, z, w is position of the point.
+ * Can be as:
+ * float - position of the point.
+ * [float] - array of positions of the point.
+ * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
+ * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
+ * if arrayFuncs.length === 0 then push new THREE.Vector3().
+ * 
+ * object: {
+ *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
+ *   name: point name
+ *   trace: true - Displays the trace of the point movement.
+ * }
 
 ## Directory Contents
 

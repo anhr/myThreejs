@@ -2634,6 +2634,7 @@ function getObjectPosition( object, index ) {
  * object: {
  *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
  *   name: point name
+ *   trace: true - Displays the trace of the point movement. Default is false
  * }
  * @param {object} options see myThreejs.create options for details
  * @param {object} [pointsOptions] followed points options is availablee:

@@ -74,6 +74,7 @@ import ColorPicker from '../../colorpicker/master/colorpicker.js';
 import PositionController from '../../commonNodeJS/master/PositionController.js';
 import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 import { StereoEffect, spatialMultiplexsIndexs } from '/anhr/three.js/dev/examples/jsm/effects/StereoEffect.js';
+import { OrbitControls } from '/anhr/three.js/dev/examples/jsm/controls/OrbitControls.js';
 
 var palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
 palette.toColor = function ( value, min, max ) {
@@ -134,9 +135,9 @@ var arrayCreates = [];
  * @param {HTMLElement|string} [options.elContainer] If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui.
  * If a string, then is id of the HTMLElement.
  * Default is document.getElementById( "containerDSE" ) or a div element, child of body.
- * @param {any} [options.orbitControls] use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
- * @param {boolean} [options.orbitControlsGui] true - displays the orbit controls gui.
- * Available only if options.orbitControls is defined. Default is false.
+ * @param {object} [options.orbitControls] use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
+ * @param {boolean} [options.orbitControls.gui] true - displays the orbit controls gui. Default is false.
+ * @param {boolean} [options.axesHelper] true - displays the AxesHelper. Default the axes is not visible.
  * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.
  * @param {boolean} [options.stereoEffect] true - use stereoEffect https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js.
  * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
@@ -148,7 +149,6 @@ var arrayCreates = [];
  * @param {object} [options.canvas] canvas properties
  * @param {number} [options.canvas.width] width of the canvas
  * @param {number} [options.canvas.height] height of the canvas
- * @param {object} [options.axesHelper] axesHelper options. Default the axes is not visible
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
  * @param {object} [options.t] time options
  * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
@@ -1307,10 +1307,8 @@ export function create( createXDobjects, options ) {
 
 							axesName = axesEnum.getName( axesId );
 
-							//если я буду использовать эту строку то экстремумы шкал буду устанавливатся по умолчанию а не текущие
-							//							scale = options.scales[axesName];
-
-							scale = axesHelper.options.scales[axesName];
+							scale = axesHelper === undefined ? options.scales[axesName] : //если я буду использовать эту строку то экстремумы шкал буду устанавливатся по умолчанию а не текущие
+								axesHelper.options.scales[axesName];
 							controller = fPoint.add( {
 
 								value: scale.min,
@@ -1390,7 +1388,8 @@ export function create( createXDobjects, options ) {
 
 					function axesWorldGui( axesId, onChange ) {
 
-						var axesName = axesEnum.getName( axesId ), scale = axesHelper.options.scales[axesName],
+						var axesName = axesEnum.getName( axesId ), 
+							scale = axesHelper === undefined ? options.scales[axesName] : axesHelper.options.scales[axesName],
 							controller = dat.controllerZeroStep( fPointWorld, { value: scale.min, }, 'value' );
 						controller.domElement.querySelector( 'input' ).readOnly = true;
 						dat.controllerNameAndTitle( controller, scale.name );
@@ -1466,18 +1465,7 @@ export function create( createXDobjects, options ) {
 
 			//dat-gui JavaScript Controller Library
 			//https://github.com/dataarts/dat.gui
-			if ( ( options.dat !== undefined )
-/*
-				&& (
-					options.player//.controllerPlay
-					|| options.stereoEffect
-					|| options.axesHelper
-	//				|| options.axesHelperGui
-					|| options.orbitControls
-					|| ( typeof WebGLDebugUtils !== "undefined" )
-				)
-*/
-			) {
+			if ( ( options.dat !== undefined ) ) {
 
 				if ( gui !== undefined ) {
 
@@ -1617,7 +1605,7 @@ export function create( createXDobjects, options ) {
 			//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
 			if ( options.orbitControls ) {
 
-				controls = new options.orbitControls( camera, renderer.domElement );
+				controls = new OrbitControls( camera, renderer.domElement );
 				//				controls.target.set( 0, 0, 0 );
 				controls.target.set( scene.position.x * 2, scene.position.y * 2, scene.position.z * 2 );
 				controls.update();
@@ -1805,18 +1793,21 @@ export function create( createXDobjects, options ) {
 				
 				//OrbitControls gui
 
-				if ( options.orbitControlsGui === true )
+//				if ( options.orbitControlsGui === true )
+				if ( ( options.orbitControls !== undefined ) && ( options.orbitControls.gui ) )
 					OrbitControlsGui( fOptions, controls, {
 
 						getLanguageCode: getLanguageCode,
-						scales: options.axesHelper === undefined ? undefined : options.axesHelper.scales,
+						scales: options.scales,
+//						scales: options.axesHelper === undefined ? undefined : options.axesHelper.scales,
 
 					} );
 
 				// light
 
-				pointLight1.controls( group, fOptions, axesHelper.options.scales, lang.light + ' 1' );
-				pointLight2.controls( group, fOptions, axesHelper.options.scales, lang.light + ' 2' );
+				var scales = axesHelper === undefined ? options.scales : axesHelper.options.scales;
+				pointLight1.controls( group, fOptions, scales, lang.light + ' 1' );
+				pointLight2.controls( group, fOptions, scales, lang.light + ' 2' );
 
 				//point
 

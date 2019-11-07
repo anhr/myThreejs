@@ -37,22 +37,18 @@ Creates new canvas with my 3D objects.
 | [options] | <code>object</code> |  | followed options is available: |
 | [options.elContainer] | <code>HTMLElement or string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
 | [options.[orbitControls](https://threejs.org/docs/index.html#examples/en/controls/OrbitControls)] | <code>object</code> |  | use orbit controls allow the camera to orbit around a target.|
- * @param {boolean} [options.orbitControlsGui] true - displays the orbit controls gui.
- * Available only if options.orbitControls is defined. Default is false.
- * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.
- * @param {Object} [options.stereoEffect] use stereoEffect.
- * @param {Object} [options.stereoEffect.StereoEffect] https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
- * @param {Object} [options.stereoEffect.spatialMultiplexsIndexs] https://en.wikipedia.org/wiki/DVB_3D-TV
- * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
- * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui](https://github.com/anhr/dat.gui) for playing of 3D objects in my projects.
- * See nodejs\menuPlay\index.js
- * @param {object} [options.player] 3D objects animation.
- * @param {number} [options.player.min] Animation start time. Default is 0.
- * @param {number} [options.player.max] Animation end time. Default is 1.
- * @param {object} [options.canvas] canvas properties
- * @param {number} [options.canvas.width] width of the canvas
- * @param {number} [options.canvas.height] height of the canvas
- * @param {object} [options.axesHelper] axesHelper options. Default the axes is not visible
+| [options.orbitControls.gui] | <code>boolean</code> | false | true - displays the orbit controls gui. |
+| [options.axesHelper] | <code>boolean</code> |  | true - displays the AxesHelper. |
+| [options.axesHelperGui] | <code>boolean</code> | false | true - displays the AxesHelper gui. |
+| [options.stereoEffect] | <code>boolean</code> | false | true - use [stereoEffect](https://github.com/anhr/three.js/blob/dev/examples/jsm/effects/StereoEffect.js). |
+| [options.dat] | <code>boolean</code> | false | true - use [dat.gui](https://github.com/dataarts/dat.gui) JavaScript Controller Library. |
+| [options.menuPlay] | <code>boolean</code> | false | true - use my dropdown menu for canvas in my version of [dat.gui](https://github.com/anhr/dat.gui) for playing of 3D objects in my projects. |
+| [options.player] | <code>object</code> |  | 3D objects animation. |
+| [options.player.min] | <code>number</code> | 0 | Animation start time. |
+| [options.player.max] | <code>number</code> | 1 | Animation end time. |
+| [options.canvas] | <code>object</code> |  | canvas properties. |
+| [options.canvas.width] | <code>number</code> |  | width of the canvas. |
+| [options.canvas.height] | <code>number</code> |  | height of the canvas. |
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
  * @param {object} [options.t] time options
  * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.

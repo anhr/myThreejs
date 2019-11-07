@@ -152,13 +152,53 @@ var arrayCreates = [];
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
  * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
  * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
- * @param {number} [options.point] point settings.
+ * @param {object} [options.point] point settings.
  * @param {number} [options.point.size] point size. Default is 0.05.
+ * 
  * @param {object} [options.scales] axes scales. Default is {}
- * @param {object} [options.scales.w] w axis scale options of 4D objects. Default is {}
+ * @param {boolean} [options.scales.display] true - displays the label and scale of the axes. Default is false.
+ * @param {number} [options.scales.precision] Formats a scale marks into a specified length. Default is 4
+ *
+ * @param {object} [options.scales.x] X axis options.
+ * @param {number} [options.scales.x.zoomMultiplier] zoom multiplier. Default is 1.1
+ * @param {number} [options.scales.x.positionOffset] position offset. Default is 0.1
+ * @param {string} [options.scales.x.name] axis name. Default is "X".
+ * @param {number} [options.scales.x.min] Minimum range of the x axis. Default is -1.
+ * @param {number} [options.scales.x.max] Maximum range of the x axis. Default is 1.
+ * @param {number} [options.scales.x.marks] Number of x scale marks. Default is 5.
+ *
+ * @param {object} [options.scales.y] Y axis options.
+ * @param {number} [options.scales.y.zoomMultiplier] zoom multiplier. Default is 1.1
+ * @param {number} [options.scales.y.positionOffset] position offset. Default is 0.1
+ * @param {string} [options.scales.y.name] axis name. Default is "Y".
+ * @param {number} [options.scales.y.min] Minimum range of the y axis. Default is -1.
+ * @param {number} [options.scales.y.max] Maximum range of the y axis. Default is 1.
+ * @param {number} [options.scales.y.marks] Number of y scale marks. Default is 5.
+ *
+ * @param {object} [options.scales.z] Z axis options.
+ * @param {number} [options.scales.z.zoomMultiplier] zoom multiplier. Default is 1.1
+ * @param {number} [options.scales.z.positionOffset] position offset. Default is 0.1
+ * @param {string} [options.scales.z.name] axis name. Default is "Z".
+ * @param {number} [options.scales.z.min] Minimum range of the z axis. Default is -1.
+ * @param {number} [options.scales.z.max] Maximum range of the z axis. Default is 1.
+ * @param {number} [options.scales.z.marks] Number of z scale marks. Default is 5.
+ *
+ * @param {object} [options.scales.w] w axis options.
+ * @param {number} [options.scales.w.zoomMultiplier] zoom multiplier. Default is 1.1
+ * @param {number} [options.scales.w.positionOffset] position offset. Default is 0.1
  * @param {string} [options.scales.w.name] axis name. Default is "W".
- * @param {number} [options.scales.w.min] Minimum range of the w axis. Default is 0.
- * @param {number} [options.scales.w.max] Maximum range of the w axis. Default is 100.
+ * @param {number} [options.scales.w.min] Minimum range of the w axis. Default is -1.
+ * @param {number} [options.scales.w.max] Maximum range of the w axis. Default is 1.
+ *
+ * @param {object} [options.scales.t] Animation time. Default is {}
+ * @param {number} [options.scales.t.zoomMultiplier] zoom multiplier. Default is 2
+ * @param {number} [options.scales.t.positionOffset] position offset. Default is 1
+ * @param {string} [options.scales.t.name] Time name. Default is "T".
+ * @param {number} [options.scales.t.min] Animation start time. Default is 0.
+ * @param {number} [options.scales.t.max] Animation stop time. Default is 1.
+ * @param {number} [options.scales.t.marks] Number of scenes of 3D objects animation. Default is 2.
+ * @param {boolean} [options.scales.t.repeat] true - Infinite repeat of animation.. Default is false.
+*
  * @todo If you want to use raycaster (working out what objects in the 3d space the mouse is over) https://threejs.org/docs/index.html#api/en/core/Raycaster,
  * please add following object into your 3D Object userdata:
  * your3dObject.userData.raycaster = {

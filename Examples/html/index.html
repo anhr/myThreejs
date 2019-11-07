@@ -139,13 +139,13 @@
 
 		};
 
-		new myThreejs.create( function ( group, options ) {
+		myThreejs.create( function ( group, options ) {
 
 			//Points
 			var a = options.a, b = options.b;
 			var tMin = playerOptions.min === undefined ? 0 : playerOptions.min;
 
-			group.add( myThreejs.Points( [
+			group.add( myThreejs.Points( [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 
 				{
 
@@ -191,6 +191,7 @@
 
 			var arrayFuncs, sizes;
 
+			//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 			arrayFuncs = [
 				//				new THREE.Vector2( 1, 1 ),//2D point
 				//				new THREE.Vector2( 1, [{t:0,v:1}] ),//2D point. Array
@@ -260,6 +261,7 @@
 			//https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
 			//Example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
 
+			//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 			arrayFuncs = [
 
 				/*
@@ -446,7 +448,7 @@
 				//this.cube.position.z = t;
 				//				setAttributes( options.a, options.b );//For trace of the cube points only
 
-			} );//, 'White cube' );
+			} );
 			var position = new THREE.Vector3( -0.5, 0.5, -0.5 );
 			addCube( position, 'green', function ( t ) {
 
@@ -467,80 +469,80 @@
 			}, 'Green cube' );
 
 		},
-			{
+		{
 
-				elContainer: "canvasContainer1",//document.getElementById("canvasContainer1"),//id of the HTMLElement for canvas and HTMLElement with id="iframe-goes-in-here" for gui.
-				orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
+			elContainer: "canvasContainer1",//document.getElementById("canvasContainer1"),//id of the HTMLElement for canvas and HTMLElement with id="iframe-goes-in-here" for gui.
+			orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
 //				orbitControlsGui: true,//displays the orbit controls gui.
-				axesHelper: true,
+			axesHelper: true,
 /*
-				axesHelper: {
+			axesHelper: {
 
-				},
+			},
 */
-				axesHelperGui: true,
-				stereoEffect: true,
+			axesHelperGui: true,
+			stereoEffect: true,
 /*				
-				stereoEffect: {
+			stereoEffect: {
 
-					StereoEffect: StereoEffect,
-					spatialMultiplexsIndexs: spatialMultiplexsIndexs,
+				StereoEffect: StereoEffect,
+				spatialMultiplexsIndexs: spatialMultiplexsIndexs,
 
-				},//use stereoEffect. https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
+			},//use stereoEffect. https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
 */				
-				menuPlay: true,
-				dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
-				player: playerOptions,//3D objects animation.
-				a: 1.1,
-				b: 0.3,
-				//point: { size: 0.1 },
-				canvas: {
+			menuPlay: true,
+			dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
+			player: playerOptions,//3D objects animation.
+			a: 1.1,
+			b: 0.3,
+			//point: { size: 0.1 },
+			canvas: {
 
-					width: window.innerWidth / 2,
-					height: window.innerHeight / 2,
+				width: window.innerWidth / 2,
+				height: window.innerHeight / 2,
 
-				},
-				scales: {
+			},
+			scales: {
 
-					display: true,
-					//precision: 4,
-					t: playerOptions,
-					x: {
+				display: true,
+				//precision: 4,
+				t: playerOptions,
+				x: {
 
-						//zoomMultiplier: 2,
-						//positionOffset: 1,
-						name: 'latitude(km.)',
-						//min: -10,
-						//max: 10,
-						//marks: 11,
-
-					},
-					/*
-					y: {
-
-						//name: 'Temperature(degrees Celsius)',
-						min: -4,
-						max: 2,
-
-					},
-					z: {
-
-						name: 'Radius(m.)',
-						min: -110,
-						max: -100,
-						marks: 11,
-
-					},
-					*/
-					w: {
-						name: 'energy',
-						min: -1,
-						max: 1,
-					},
+					//zoomMultiplier: 2,
+					//positionOffset: 1,
+					name: 'latitude(km.)',
+					//min: -10,
+					//max: 10,
+					//marks: 11,
 
 				},
+				/*
+				y: {
 
-			} );
+					//name: 'Temperature(degrees Celsius)',
+					min: -4,
+					max: 2,
+
+				},
+				z: {
+
+					name: 'Radius(m.)',
+					min: -110,
+					max: -100,
+					marks: 11,
+
+				},
+				*/
+				w: {
+					name: 'energy',
+					min: -1,
+					max: 1,
+				},
+
+			},
+
+		} );
 
 	</script>
 	<h2>Simple canvas.</h2>

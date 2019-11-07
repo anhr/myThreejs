@@ -49,65 +49,177 @@ Creates new canvas with my 3D objects.
 | [options.canvas] | <code>object</code> |  | canvas properties. |
 | [options.canvas.width] | <code>number</code> |  | width of the canvas. |
 | [options.canvas.height] | <code>number</code> |  | height of the canvas. |
-| [options.a] | <code>number</code> | 1 | Can be use as 'a' parameter of the Function. See [arrayFuncs](https://github.com/anhr/myThreejs#arrayfuncs-item) for details. |
+| [options.a] | <code>number</code> | 1 | Can be use as 'a' parameter of the Function. See [arrayFuncs](#arrayfuncs-item) for details. |
 | [options.b] | <code>number</code> | 0 | Can be use as 'b' parameter of the Function. See [arrayFuncs](#arrayfuncs-item) for details. |
- * @param {number} [options.point] point settings.
- * @param {number} [options.point.size] point size. Default is 0.05.
- * @param {object} [options.scales] axes scales. Default is {}
- * @param {object} [options.scales.w] w axis scale options of 4D objects. Default is {}
- * @param {string} [options.scales.w.name] axis name. Default is "W".
- * @param {number} [options.scales.w.min] Minimum range of the w axis. Default is 0.
- * @param {number} [options.scales.w.max] Maximum range of the w axis. Default is 100.
+| [options.point] | <code>object</code> |  | point settings. |
+| [options.point.size] | <code>number</code> | 0.05 | point size. |
+| [options.scales] | <code>object</code> |  | axes scales. |
+| [options.scales.display] | <code>boolean</code> | false | true - displays the label and scale of the axes. |
+| [options.scales.precision] | <code>number</code> | 4 | Formats a scale marks into a specified length. |
+| [options.scales.x] | <code>object</code> |  | x axis scale options of 4D objects. |
+| [options.scales.x.name] | <code>string</code> | "X" | axis name. |
+| [options.scales.x.zoomMultiplier] | <code>number</code> | 1.1 | zoom multiplier. |
+| [options.scales.x.positionOffset] | <code>number</code> | 0.1 | position offset. |
+| [options.scales.x.min] | <code>number</code> | -1 | Minimum range of the x axis. |
+| [options.scales.x.max] | <code>number</code> | 1 | Maximum range of the x axis. |
+| [options.scales.x.marks] | <code>number</code> | 5 | Number of x scale marks. |
+| [options.scales.y] | <code>object</code> |  | y axis scale options of 4D objects. |
+| [options.scales.y.name] | <code>string</code> | "Y" | axis name. |
+| [options.scales.y.zoomMultiplier] | <code>number</code> | 1.1 | zoom multiplier. |
+| [options.scales.y.positionOffset] | <code>number</code> | 0.1 | position offset. |
+| [options.scales.y.min] | <code>number</code> | -1 | Minimum range of the y axis. |
+| [options.scales.y.max] | <code>number</code> | 1 | Maximum range of the y axis. |
+| [options.scales.y.marks] | <code>number</code> | 5 | Number of y scale marks. |
+| [options.scales.z] | <code>object</code> |  | z axis scale options of 4D objects. |
+| [options.scales.z.zoomMultiplier] | <code>number</code> | 1.1 | zoom multiplier. |
+| [options.scales.z.positionOffset] | <code>number</code> | 0.1 | position offset. |
+| [options.scales.z.name] | <code>string</code> | "Z" | axis name. |
+| [options.scales.z.min] | <code>number</code> | -1 | Minimum range of the z axis. |
+| [options.scales.z.max] | <code>number</code> | 1 | Maximum range of the z axis. |
+| [options.scales.z.marks] | <code>number</code> | 5 | Number of z scale marks. |
+| [options.scales.w] | <code>object</code> |  | w axis scale options of 4D objects. |
+| [options.scales.w.zoomMultiplier] | <code>number</code> | 1.1 | zoom multiplier. |
+| [options.scales.w.positionOffset] | <code>number</code> | 0.1 | position offset. |
+| [options.scales.w.name] | <code>string</code> | "W" | axis name. |
+| [options.scales.w.min] | <code>number</code> | 0 | Minimum range of the w axis. |
+| [options.scales.w.max] | <code>number</code> | 100 | Maximum range of the w axis. |
+| [options.scales.t] | <code>object</code> |  | Animation time. |
+| [options.scales.t.zoomMultiplier] | <code>number</code> | 2 | zoom multiplier. |
+| [options.scales.t.positionOffset] | <code>number</code> | 1 | position offset. |
+| [options.scales.t.name] | <code>string</code> | "T" | Time name. |
+| [options.scales.t.min] | <code>number</code> | 0 | Animation start time. |
+| [options.scales.t.max] | <code>number</code> | 1 | Animation stop time. |
+| [options.scales.t.marks] | <code>number</code> | 2 | Number of scenes of 3D objects animation. |
 
 **Example.**  
 ```
 <script>
-group = new THREE.Group();
-group.add( new THREE.Points( ... ) );
-group.add( new THREE.Mesh( ... ) );
 
-var gui = new dat.GUI();
-var colorRed = new THREE.Color( 0xff0000 );
-gui.add( controllerPlay.create( group, {
+	myThreejs.create( function ( group, options ) {
 
-	onShowObject3D: function ( objects3DItem ) {
+		var playerOptions = {
 
-		objects3DItem.visible = true;
+			marks: 110,//Number of scenes of 3D objects animation.
+			name: 'Time (sec.)',
+			repeat: true,
+			zoomMultiplier: 1.1,
+			positionOffset: 0.1,
+			min: -10,
+			max: 10,
+
+		};
+
+		//Points
+		var a = options.a, b = options.b;
+		var tMin = playerOptions.min === undefined ? 0 : playerOptions.min;
+
+		var arrayFuncs, sizes;
+
+		//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
+		arrayFuncs = [
+			{
+
+				vector: new THREE.Vector4(
+					new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
+					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
+					new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
+					new Function( 't', 'return 1-2*t' )//w
+				),//Animated 3D point
+				trace: true,//Displays the trace of the point movement.
+
+			},
+			new THREE.Vector4( 0, 0, 0, new Function( 't', 'return 1-2*t' ) ),//color is f(t)
+		]
+		var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
+			new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } ) );
+		points.name = 'Points';
+		points.geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+		points.userData.arrayFuncs = arrayFuncs;//3D object animation.
+		points.userData.raycaster = {
+
+			onIntersection: function ( raycaster, intersection, scene, mouse ) {
+
+				options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
+
+			},
+			onIntersectionOut: function ( scene ) {
+
+				options.removeSpriteTextIntersection( scene );
+
+			},
+
+		}
+		points.userData.selectPlayScene = function ( t ) {
+
+			var angle = t * Math.PI * 2 * 1.2;
+			points.rotation.set( angle, 0, 0 );
+			myThreejs.limitAngles( points.rotation );
+
+		}
+		points.position.copy( new THREE.Vector3( 0.1, 0.2, 0.3 ) );
+		points.scale.copy( new THREE.Vector3( 1.1, 1.2, 1.3 ) );
+		group.add( points );
 
 	},
-	onHideObject3D: function ( objects3DItem ) {
+	{
 
-		objects3DItem.visible = false;//hide object3D
+		elContainer: "canvasContainer1",//document.getElementById("canvasContainer1"),//id of the HTMLElement for canvas and HTMLElement with id="iframe-goes-in-here" for gui.
+		orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
+		axesHelper: true,
+		axesHelperGui: true,
+		stereoEffect: true,
+		menuPlay: true,
+		dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
+		player: playerOptions,//3D objects animation.
+		a: 1.1,
+		b: 0.3,
+		point: { size: 0.1 },
+		canvas: {
 
-	},
-	onSelectedObject3D: function ( objects3DItem ) {
+			width: window.innerWidth / 2,
+			height: window.innerHeight / 2,
 
-		objects3DItem.material.color = colorRed;
-		objects3DItem.visible = true;
+		},
+		scales: {
 
-	},
-	onRestoreObject3D: function ( objects3DItem ) {
+			display: true,
+			precision: 4,
+			t: playerOptions,
+			x: {
 
-		objects3DItem.material.color = objects3DItem.userData.color;
-		objects3DItem.visible = true;
+				zoomMultiplier: 2,
+				positionOffset: 1,
+				name: 'latitude(km.)',
+				min: -10,
+				max: 10,
+				marks: 11,
 
-	},
-	onRenamePlayButton: function ( name, title ) {
+			},
+			y: {
 
-		var elMenuButtonPlay = document.getElementById( 'menuButtonPlay' );
-		elMenuButtonPlay.innerHTML = name;
-		elMenuButtonPlay.title = title;
+				name: 'Temperature(degrees Celsius)',
+				min: -4,
+				max: 2,
 
-	},
-	onRenameRepeatButton: function ( title, color ) {
+			},
+			z: {
 
-		var elMenuButtonRepeat = document.getElementById( 'menuButtonRepeat' );
-		elMenuButtonRepeat.style.color = color;;
-		elMenuButtonRepeat.title = title;
+				name: 'Radius(m.)',
+				min: -110,
+				max: -100,
+				marks: 11,
 
-	},
+			},
+			w: {
+				name: 'energy',
+				min: -1,
+				max: 1,
+			},
 
-} ) );
+		},
+
+	} );
+
 </script>
 ```
 
@@ -117,7 +229,7 @@ Displaying points.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| arrayFuncs | <code>array of THREE.Vector4 or THREE.Vector3 or THREE.Vector2 or object</code> |  | points.geometry.attributes.position array |
+| arrayFuncs | <code>Array of THREE.Vector4 or THREE.Vector3 or THREE.Vector2 or object</code> |  | points.geometry.attributes.position array |
 | [options] | <code>object</code> |  | followed options is available: |
 | [options.elContainer] | <code>HTMLElement or string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
 

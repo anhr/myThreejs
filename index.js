@@ -150,7 +150,6 @@ var arrayCreates = [];
  * @param {number} [options.canvas.width] width of the canvas
  * @param {number} [options.canvas.height] height of the canvas
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
- * @param {object} [options.t] time options
  * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
  * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
  * @param {number} [options.point] point settings.
@@ -197,7 +196,7 @@ var arrayCreates = [];
 		},
 
 	}
- * Example: https://raw.githack.com/anhr/controllerPlay/master/Examples/html/
+ * Example: https://raw.githack.com/anhr/myThreejs/master/Examples/html/
  */
 export function create( createXDobjects, options ) {
 
@@ -2580,7 +2579,7 @@ function getObjectPosition( object, index ) {
 
 /**
  * Displaying points
- * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2|object]} arrayFuncs points.geometry.attributes.position array
+ * @param {THREE.Vector4|THREE.Vector3|THREE.Vector2|object} arrayFuncs points.geometry.attributes.position array
  * THREE.Vector4: 4D point.
  * THREE.Vector3: 3D point. w = 1. Default is white color
  * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color

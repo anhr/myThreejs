@@ -36,9 +36,9 @@ Creates new canvas with my 3D objects.
 | createXDobjects | <code>callback</code> |  | creates my 3D objects. callback function ( group ) group: [group](https://threejs.org/docs/index.html#api/en/objects/Group) of my 3d or 4d objects. |
 | [options] | <code>object</code> |  | followed options is available: |
 | [options.elContainer] | <code>HTMLElement or string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
-| [options.[orbitControls](https://threejs.org/docs/index.html#examples/en/controls/OrbitControls)] | <code>object</code> |  | use orbit controls allow the camera to orbit around a target.|
+| [options.orbitControls] | <code>object</code> |  | use [orbitControls](https://threejs.org/docs/index.html#examples/en/controls/OrbitControls) allow the camera to orbit around a target.|
 | [options.orbitControls.gui] | <code>boolean</code> | false | true - displays the orbit controls gui. |
-| [options.axesHelper] | <code>boolean</code> |  | true - displays the AxesHelper. |
+| [options.axesHelper] | <code>boolean</code> | false | true - displays the AxesHelper. |
 | [options.axesHelperGui] | <code>boolean</code> | false | true - displays the AxesHelper gui. |
 | [options.stereoEffect] | <code>boolean</code> | false | true - use [stereoEffect](https://github.com/anhr/three.js/blob/dev/examples/jsm/effects/StereoEffect.js). |
 | [options.dat] | <code>boolean</code> | false | true - use [dat.gui](https://github.com/dataarts/dat.gui) JavaScript Controller Library. |
@@ -49,10 +49,8 @@ Creates new canvas with my 3D objects.
 | [options.canvas] | <code>object</code> |  | canvas properties. |
 | [options.canvas.width] | <code>number</code> |  | width of the canvas. |
 | [options.canvas.height] | <code>number</code> |  | height of the canvas. |
- * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
- * @param {object} [options.t] time options
- * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
- * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
+| [options.a] | <code>number</code> | 1 | Can be use as 'a' parameter of the Function. See arrayFuncs for details. |
+| [options.b] | <code>number</code> | 0 | Can be use as 'b' parameter of the Function. See arrayFuncs for details. |
  * @param {number} [options.point] point settings.
  * @param {number} [options.point.size] point size. Default is 0.05.
  * @param {object} [options.scales] axes scales. Default is {}
@@ -112,6 +110,56 @@ gui.add( controllerPlay.create( group, {
 } ) );
 </script>
 ```
+
+### myThreejs.Points( arrayFuncs, options, pointsOptions )
+
+Displaying points.
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| arrayFuncs | <code>THREE.Vector4 or THREE.Vector3 or THREE.Vector2 or object</code> |  | points.geometry.attributes.position array |
+| [options] | <code>object</code> |  | followed options is available: |
+| [options.elContainer] | <code>HTMLElement or string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
+
+ ### arrayFuncs item
+
+ * THREE.Vector4: 4D point.
+ * THREE.Vector3: 3D point. w = 1. Default is white color
+ * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
+ * Vector's x, y, z, w is position of the point.
+ * Can be as:
+ * float - position of the point.
+ * [float] - array of positions of the point.
+ * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
+ * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
+ * if arrayFuncs.length === 0 then push new THREE.Vector3().
+ * 
+ * object: {
+ *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
+ *   name: point name
+ * }
+ * @param {object} options see myThreejs.create options for details
+ * @param {object} [pointsOptions] followed points options is availablee:
+ * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.
+ * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
+ * @param {THREE.Vector3} [pointsOptions.position] position of the points. Default is new THREE.Vector3( 0, 0, 0 ).
+ * Vector's x, y, z is position of the points.
+ * Can be as:
+ * float - position of the points.
+ * [float] - array of positions of the points.
+ * Function - position of the points is function of the t. Example: new Function( 't', 'return 0.1 + t' )
+ * @param {THREE.Vector3} [pointsOptions.scale] scale of the points. Default is new THREE.Vector3( 1, 1, 1 ).
+ * Vector's x, y, z is scale of the points.
+ * Can be as:
+ * float - scale of the points.
+ * [float] - array of scales of the points.
+ * Function - scale of the points is function of the t. Example: new Function( 't', 'return 1.1 + t' )
+ * @param {THREE.Vector3} [pointsOptions.rotation] rotation of the points. Default is new THREE.Vector3( 0, 0, 0 ).
+ * Vector's x, y, z is rotation of the points.
+ * Can be as:
+ * float - rotation of the points.
+ * [float] - array of rotations of the points.
+ * Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' )
 
 ## Directory Contents
 

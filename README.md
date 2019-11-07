@@ -231,13 +231,14 @@ Displaying points.
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [arrayFuncs](#arrayfuncs-item) | <code>Array of THREE.Vector4 or THREE.Vector3 or THREE.Vector2 or object</code> |  | points.geometry.attributes.position array |
-| [options] | <code>object</code> |  | options see [myThreejs.create](#mythreejscreate-createxdobjects-options-) options for details |
- * @param {object} [pointsOptions] followed points options is availablee:
- * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.
- * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
- * @param {THREE.Vector3} [pointsOptions.position] position of the points. Default is new THREE.Vector3( 0, 0, 0 ).
- * Vector's x, y, z is position of the points.
- * Can be as:
+| [options] | <code>object</code> |  | options. See [myThreejs.create](#mythreejscreate-createxdobjects-options-) options for details |
+| [pointsOptions] | <code>object</code> |  | followed points options is availablee: |
+| [pointsOptions.tMin] | <code>number</code> | 0 | start time. Uses for playing of the points. |
+| [pointsOptions.name] | <code>string</code> | "" | name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. |
+| [pointsOptions.position] | <code>THREE.Vector3</code> | new THREE.Vector3( 0, 0, 0 ) | position of the points.
+
+* Vector's x, y, z can be as: |
+ 
  * float - position of the points.
  * [float] - array of positions of the points.
  * Function - position of the points is function of the t. Example: new Function( 't', 'return 0.1 + t' )

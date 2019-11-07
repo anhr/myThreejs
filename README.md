@@ -241,8 +241,6 @@ Displaying points.
 
 **Example.**  
 ```
-<script>
-
 	group.add( myThreejs.Points( [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 
 		{
@@ -280,8 +278,30 @@ Displaying points.
 		rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 
 	} ) );
+```
 
-</script>
+### myThreejs.setArrayFuncs( mesh )
+
+Converts the mesh.geometry.attributes.position to mesh.userData.arrayFuncs.
+Used to restore the default point position.
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| mesh | <code>THREE.Mesh</code> |  | [THREE.Mesh](https://threejs.org/docs/index.html#api/en/objects/Mesh) |
+
+### myThreejs.limitAngles( rotation )
+
+Limits angles of rotations of the mesh between 0 and 360 degrees.
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| rotation | <code>[THREE.Euler](https://threejs.org/docs/index.html#api/en/math/Euler)</code> |  | rotation angles for limitation |
+
+**Example.**  
+```
+	var angle = t * Math.PI * 2 * 1.2;
+	points.rotation.set( angle, 0, 0 );
+	myThreejs.limitAngles( points.rotation );
 ```
 
  ### arrayFuncs item

@@ -235,11 +235,7 @@ Displaying points.
 | [pointsOptions] | <code>object</code> |  | followed points options is availablee: |
 | [pointsOptions.tMin] | <code>number</code> | 0 | start time. Uses for playing of the points. |
 | [pointsOptions.name] | <code>string</code> | "" | name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. |
-| [pointsOptions.position] | <code>THREE.Vector3</code> | new THREE.Vector3( 0, 0, 0 ) | position of the points.<p>Vector's x, y, z can be as:</p> |
- 
- * float - position of the points.
- * [float] - array of positions of the points.
- * Function - position of the points is function of the t. Example: new Function( 't', 'return 0.1 + t' )
+| [pointsOptions.position] | <code>THREE.Vector3</code> | new THREE.Vector3( 0, 0, 0 ) | position of the points.<p>Vector's x, y, z can be as:</p><p>* float - position of the points.</p><p>* [float] - array of positions of the points.</p> * Function - position of the points is function of the t. Example: new Function( 't', 'return 0.1 + t' ) |
  * @param {THREE.Vector3} [pointsOptions.scale] scale of the points. Default is new THREE.Vector3( 1, 1, 1 ).
  * Vector's x, y, z is scale of the points.
  * Can be as:

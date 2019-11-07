@@ -236,18 +236,8 @@ Displaying points.
 | [pointsOptions.tMin] | <code>number</code> | 0 | start time. Uses for playing of the points. |
 | [pointsOptions.name] | <code>string</code> | "" | name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. |
 | [pointsOptions.position] | <code>THREE.Vector3</code> | new THREE.Vector3( 0, 0, 0 ) | position of the points.<p>Vector's x, y, z can be as:</p><p>* float - position of the points.</p><p>* [float] - array of positions of the points.</p> * Function - position of the points is function of the t. Example: new Function( 't', 'return 0.1 + t' ) |
- * @param {THREE.Vector3} [pointsOptions.scale] scale of the points. Default is new THREE.Vector3( 1, 1, 1 ).
- * Vector's x, y, z is scale of the points.
- * Can be as:
- * float - scale of the points.
- * [float] - array of scales of the points.
- * Function - scale of the points is function of the t. Example: new Function( 't', 'return 1.1 + t' )
- * @param {THREE.Vector3} [pointsOptions.rotation] rotation of the points. Default is new THREE.Vector3( 0, 0, 0 ).
- * Vector's x, y, z is rotation of the points.
- * Can be as:
- * float - rotation of the points.
- * [float] - array of rotations of the points.
- * Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' )
+| [pointsOptions.scale] | <code>THREE.Vector3</code> | new THREE.Vector3( 1, 1, 1 ) | scale of the points.<p>Vector's x, y, z can be as:</p><p>* float - scale of the points.</p><p>* [float] - array of scales of the points.</p><p> * Function - scale of the points is function of the t. Example: new Function( 't', 'return 1.1 + t' )</p> |
+| [pointsOptions.rotation] | <code>THREE.Vector3</code> | new THREE.Vector3( 0, 0, 0 ) | rotation of the points.<p>Vector's x, y, z can be as:</p><p>* float - rotation of the points.</p><p>* [float] - array of rotations of the points.</p><p>* Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ) |
 
  ### arrayFuncs item
 

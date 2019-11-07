@@ -128,7 +128,6 @@ var arrayCreates = [];
 
 /**
  * Creates new canvas with my 3D objects
- * @param {any} THREE
  * @param {createXDobjects} createXDobjects callback creates my 3D objects.
  * @param {object} [options] followed options is available:
  * @param {HTMLElement|string} [options.elContainer] If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui.

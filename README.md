@@ -27,7 +27,7 @@ import myThreejs from 'https://raw.githack.com/anhr/myThreejs/master/myThreejs.j
 
 Now you can use window.myThreejs in your javascript code.
 
-### myThreejs.create(  )
+### myThreejs.create( createXDobjects, options )
 
 Creates new canvas with my 3D objects.
 
@@ -36,11 +36,40 @@ Creates new canvas with my 3D objects.
 | group | <code>THREE.Group</code> |  | group of 3D objects for playing. See https://threejs.org/docs/index.html#api/en/objects/Group for details. |
 | [events] | <code>Object</code> | "" | controller events. Default no events is sent to your web page. |
 | [events.onShowObject3D] | <code>callback</code> |  | The show 3D object event. callback function ( objects3DItem, index ) objects3DItem: showed mesh, index: index of showed mesh.|
-| [events.onHideObject3D] | <code>callback</code> |  | The hide 3D object event. callback function ( objects3DItem ). objects3DItem is selected mesh. |
-| [events.onRestoreObject3D] | <code>callback</code> |  | Event of restore of 3D object to original state. callback function ( objects3DItem ). objects3DItem is selected mesh. |
-| [events.onSelectedObject3D] | <code>callback</code> |  | Event of selecting of 3D object. callback Function( objects3DItem, index ) objects3DItem: selected mesh, index: index of selected mesh. |
-| [events.onRenamePlayButton] | <code>callback</code> |  | Event of renaming of the Play button. callback function ( name, title ) name: name of the Play button, title: title, [play] true - start playing. |
-| [events.onRenameRepeatButton] | <code>callback</code> |  | Event of renaming of the Repeat button. callback function ( title, color ) title: title of the Repeat button, color: style.color of the Repeat button. |
+| createXDobjects | <code>callback</code> |  | creates my 3D objects |
+ * @param {createXDobjects} createXDobjects callback creates my 3D objects.
+ * @param {object} [options] followed options is available:
+ * @param {HTMLElement|string} [options.elContainer] If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui.
+ * If a string, then is id of the HTMLElement.
+ * Default is document.getElementById( "containerDSE" ) or a div element, child of body.
+ * @param {any} [options.orbitControls] use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
+ * @param {boolean} [options.orbitControlsGui] true - displays the orbit controls gui.
+ * Available only if options.orbitControls is defined. Default is false.
+ * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.
+ * @param {Object} [options.stereoEffect] use stereoEffect.
+ * @param {Object} [options.stereoEffect.StereoEffect] https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
+ * @param {Object} [options.stereoEffect.spatialMultiplexsIndexs] https://en.wikipedia.org/wiki/DVB_3D-TV
+ * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
+ * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui](https://github.com/anhr/dat.gui) for playing of 3D objects in my projects.
+ * See nodejs\menuPlay\index.js
+ * @param {object} [options.player] 3D objects animation.
+ * @param {number} [options.player.min] Animation start time. Default is 0.
+ * @param {number} [options.player.max] Animation end time. Default is 1.
+ * @param {object} [options.canvas] canvas properties
+ * @param {number} [options.canvas.width] width of the canvas
+ * @param {number} [options.canvas.height] height of the canvas
+ * @param {object} [options.axesHelper] axesHelper options. Default the axes is not visible
+ * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
+ * @param {object} [options.t] time options
+ * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
+ * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
+ * @param {number} [options.point] point settings.
+ * @param {number} [options.point.size] point size. Default is 0.05.
+ * @param {object} [options.scales] axes scales. Default is {}
+ * @param {object} [options.scales.w] w axis scale options of 4D objects. Default is {}
+ * @param {string} [options.scales.w.name] axis name. Default is "W".
+ * @param {number} [options.scales.w.min] Minimum range of the w axis. Default is 0.
+ * @param {number} [options.scales.w.max] Maximum range of the w axis. Default is 100.
 
 **Example.**  
 ```

@@ -33,15 +33,11 @@ Creates new canvas with my 3D objects.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| group | <code>THREE.Group</code> |  | group of 3D objects for playing. See https://threejs.org/docs/index.html#api/en/objects/Group for details. |
-| [events] | <code>Object</code> | "" | controller events. Default no events is sent to your web page. |
 | [events.onShowObject3D] | <code>callback</code> |  | The show 3D object event. callback function ( objects3DItem, index ) objects3DItem: showed mesh, index: index of showed mesh.|
 | createXDobjects | <code>callback</code> |  | creates my 3D objects |
- * @param {createXDobjects} createXDobjects callback creates my 3D objects.
- * @param {object} [options] followed options is available:
- * @param {HTMLElement|string} [options.elContainer] If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui.
- * If a string, then is id of the HTMLElement.
- * Default is document.getElementById( "containerDSE" ) or a div element, child of body.
+| [options] | <code>object</code> |  | followed options is available: |
+ * @param {HTMLElement|string} [options.elContainer] 
+| [options.elContainer] | <code>HTMLElement|string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
  * @param {any} [options.orbitControls] use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
  * @param {boolean} [options.orbitControlsGui] true - displays the orbit controls gui.
  * Available only if options.orbitControls is defined. Default is false.

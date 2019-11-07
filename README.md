@@ -27,6 +27,13 @@ import myThreejs from 'https://raw.githack.com/anhr/myThreejs/master/myThreejs.j
 
 Now you can use window.myThreejs in your javascript code.
 
+## Methods
+
+* [myThreejs.create( createXDobjects, options )](#mythreejscreate-createxdobjects-options-).
+* [myThreejs.Points( arrayFuncs, options, pointsOptions )](#mythreejspoints-arrayfuncs-options-pointsoptions-).
+* [myThreejs.setArrayFuncs( mesh )](#mythreejssetarrayfuncs-mesh-).
+* [myThreejs.limitAngles( rotation )](#mythreejslimitangles-rotation-).
+
 ### myThreejs.create( createXDobjects, options )
 
 Creates new canvas with my 3D objects.
@@ -282,7 +289,7 @@ Displaying points.
 
 ### myThreejs.setArrayFuncs( mesh )
 
-Converts the mesh.geometry.attributes.position to mesh.userData.arrayFuncs.
+Converts the mesh.geometry.attributes.position to mesh.userData.[arrayFuncs](#arrayfuncs-item).
 Used to restore the default point position.
 
 | Param | Type | Default | Description |

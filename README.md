@@ -37,7 +37,7 @@ Creates new canvas with my 3D objects.
 | createXDobjects | <code>callback</code> |  | creates my 3D objects |
 | [options] | <code>object</code> |  | followed options is available: |
 | [options.elContainer] | <code>HTMLElement or string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
- * @param {any} [options.orbitControls] use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
+| [options.[orbitControls](https://threejs.org/docs/index.html#examples/en/controls/OrbitControls)] | <code>object</code> |  | use orbit controls allow the camera to orbit around a target.|
  * @param {boolean} [options.orbitControlsGui] true - displays the orbit controls gui.
  * Available only if options.orbitControls is defined. Default is false.
  * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.

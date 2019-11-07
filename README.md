@@ -239,6 +239,51 @@ Displaying points.
 | [pointsOptions.scale] | <code>THREE.Vector3</code> | new THREE.Vector3( 1, 1, 1 ) | scale of the points.<p>Vector's x, y, z can be as:</p><p>* float - scale of the points.</p><p>* [float] - array of scales of the points.</p><p> * Function - scale of the points is function of the t. Example: new Function( 't', 'return 1.1 + t' )</p> |
 | [pointsOptions.rotation] | <code>THREE.Vector3</code> | new THREE.Vector3( 0, 0, 0 ) | rotation of the points.<p>Vector's x, y, z can be as:</p><p>* float - rotation of the points.</p><p>* [float] - array of rotations of the points.</p><p>* Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ) |
 
+**Example.**  
+```
+<script>
+
+	group.add( myThreejs.Points( [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
+
+		{
+
+			vector: new THREE.Vector4(
+				new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
+				new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
+				new Function( 't', 'a', 'b', 'return t' ),//z
+				new Function( 't', 'return 1-2*t' )//w
+			),
+			name: 'Animated 4D point',
+			trace: true,//Displays the trace of the point movement.
+
+		},
+		new THREE.Vector2( 0, 0 ),//2D point. White color
+		new THREE.Vector3( -0.5, 0.5, -1 ),//3D point. White color
+		{
+
+			vector: new THREE.Vector4( 0.5,//new Function( 't', 'a', 'b', 'return 0.5-t' ),
+				0.5,
+				0.5,
+				new THREE.Color( "rgb(255, 0, 0)" ) ),//3D point
+			name: 'Red point',
+			trace: true,//Displays the trace of the point movement.
+
+		}
+
+
+	], options, {
+
+		name: 'Wave',
+		tMin: 0,
+		position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
+		scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
+		rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+
+	} ) );
+
+</script>
+```
+
  ### arrayFuncs item
 
  * THREE.Vector4: 4D point.

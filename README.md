@@ -49,8 +49,8 @@ Creates new canvas with my 3D objects.
 | [options.canvas] | <code>object</code> |  | canvas properties. |
 | [options.canvas.width] | <code>number</code> |  | width of the canvas. |
 | [options.canvas.height] | <code>number</code> |  | height of the canvas. |
-| [options.a] | <code>number</code> | 1 | Can be use as 'a' parameter of the Function. See arrayFuncs for details. |
-| [options.b] | <code>number</code> | 0 | Can be use as 'b' parameter of the Function. See arrayFuncs for details. |
+| [options.a] | <code>number</code> | 1 | Can be use as 'a' parameter of the Function. See [arrayFuncs](https://github.com/anhr/myThreejs#arrayfuncs-item) for details. |
+| [options.b] | <code>number</code> | 0 | Can be use as 'b' parameter of the Function. See [arrayFuncs](#arrayfuncs-item) for details. |
  * @param {number} [options.point] point settings.
  * @param {number} [options.point.size] point size. Default is 0.05.
  * @param {object} [options.scales] axes scales. Default is {}
@@ -117,7 +117,7 @@ Displaying points.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| arrayFuncs | <code>THREE.Vector4 or THREE.Vector3 or THREE.Vector2 or object</code> |  | points.geometry.attributes.position array |
+| arrayFuncs | <code>array of THREE.Vector4 or THREE.Vector3 or THREE.Vector2 or object</code> |  | points.geometry.attributes.position array |
 | [options] | <code>object</code> |  | followed options is available: |
 | [options.elContainer] | <code>HTMLElement or string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
 

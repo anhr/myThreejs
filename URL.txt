@@ -36,8 +36,8 @@ Building menu
 Open "Node.js command prompt"
 
 d:
-//cd "D:\WebFeatures\GoogleSite\nodejs\myThreejs"
-cd "D:\My documents\MyProjects\webgl\three.js\GitHub\nodejs\myThreejs"
+//cd "D:\My documents\MyProjects\webgl\three.js\GitHub\nodejs\myThreejs"
+cd "D:\My documents\MyProjects\webgl\three.js\GitHub\myThreejs\master"
 npm install
 npm run build
 

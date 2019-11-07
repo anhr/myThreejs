@@ -20,6 +20,10 @@ or
 ```
 <script src="https://raw.githack.com/anhr/myThreejs/master/build/myThreejs.min.js"></script>
 ```
+or you can import myThreejs from myThreejs.js file in your JavaScript module. [Example.](https://raw.githack.com/anhr/myThreejs/master/Examples/html/)
+```
+import myThreejs from 'https://raw.githack.com/anhr/myThreejs/master/myThreejs.js';
+```
 
 Now you can use window.myThreejs in your javascript code.
 

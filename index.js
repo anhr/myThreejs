@@ -49,15 +49,18 @@ import {
 */
 import * as THREE from '../../three.js/dev/build/three.module.js';
 
-import cookie from '../../cookieNodeJS/master/cookie.js';
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
+import cookie from '../../cookieNodeJS/master/cookie.js';
 
 //import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
 import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 
-
+//import controllerPlay from 'https://raw.githack.com/anhr/controllerPlay/master/controllerPlay.js';
 import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
+
+//import menuPlay from 'https://raw.githack.com/anhr/menuPlay/master/menuPlay.js';
 import menuPlay from '../../menuPlay/master/menuPlay.js';
+
 import Player from './player.js';
 
 //import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';
@@ -2128,20 +2131,21 @@ export function create( createXDobjects, options ) {
 
 				if ( ( mesh instanceof THREE.Points === false ) || ( mesh.geometry.attributes.size === undefined ) )
 					return;
+
+				//scale
+				var parent = mesh.parent, scale = 1;
+				while ( parent !== null ) {
+
+					scale *= ( parent.scale.x + parent.scale.y + parent.scale.z ) / 3;
+					parent = parent.parent;
+
+				}
+
 				//points with ShaderMaterial
 				for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
 					var position = getObjectPosition( mesh, i ),
 						distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( camera.position );
-
-					//scale
-					var parent = mesh.parent, scale = 1;
-					while ( parent !== null ) {
-
-						scale *= ( parent.scale.x + parent.scale.y + parent.scale.z ) / 3;
-						parent = parent.parent;
-
-					}
 					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance /
 						scale );
 //					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 / scale );

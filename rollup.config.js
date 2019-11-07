@@ -23,12 +23,14 @@ const banner = fs.readFileSync(path.join(__dirname, 'licenseBanner.txt'));
 export default {
   input: 'index.js',
   output: [{
-    globals: {
-		'http://localhost/threejs/three.js/build/three.module.js': 'THREE',
-		'http://localhost/threejs/three.js/examples/jsm/objects/SpriteText.js': 'SpriteText_js',
+	  globals: {
+/*
+		'http://localhost/anhr/three.js/dev/build/three.module.js': 'THREE',
+		'http://localhost/anhr/three.js/dev/src/objects/SpriteText.js': 'SpriteText_js',
 		'https://raw.githack.com/anhr/commonNodeJS/master/lang.js': 'lang_js',
-		'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js': 'OrbitControlsGui',
+		'http://localhost/anhr/commonNodeJS/master/OrbitControlsGui.js': 'OrbitControlsGui',
 		'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js': 'OrbitControlsGui',
+*/
     },
     // TODO: Remove default exports, and this line, in v0.8.0.
     exports: 'named',
@@ -57,11 +59,13 @@ export default {
 	external: [
 //		'../../three.js/src/math/Vector3.js',
 //		'../../three.js/src/math/',
-		'http://localhost/threejs/three.js/build/three.module.js',
-		'http://localhost/threejs/three.js/examples/jsm/objects/SpriteText.js',
+/*
+		'http://localhost/anhr/three.js/dev/build/three.module.js',
+		'http://localhost/anhr/three.js/dev/src/objects/SpriteText.js',
 		'https://raw.githack.com/anhr/commonNodeJS/master/lang.js',
-		'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js',
+		'http://localhost/anhr/commonNodeJS/master/OrbitControlsGui.js',
 		'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js',
+*/
 	],
 
 };

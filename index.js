@@ -73,6 +73,7 @@ import clearThree from '../../commonNodeJS/master/clearThree.js';
 import ColorPicker from '../../colorpicker/master/colorpicker.js';
 import PositionController from '../../commonNodeJS/master/PositionController.js';
 import ScaleController from '../../commonNodeJS/master/ScaleController.js';
+import { StereoEffect, spatialMultiplexsIndexs } from '/anhr/three.js/dev/examples/jsm/effects/StereoEffect.js';
 
 var palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
 palette.toColor = function ( value, min, max ) {
@@ -137,9 +138,7 @@ var arrayCreates = [];
  * @param {boolean} [options.orbitControlsGui] true - displays the orbit controls gui.
  * Available only if options.orbitControls is defined. Default is false.
  * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.
- * @param {Object} [options.stereoEffect] use stereoEffect.
- * @param {Object} [options.stereoEffect.StereoEffect] https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
- * @param {Object} [options.stereoEffect.spatialMultiplexsIndexs] https://en.wikipedia.org/wiki/DVB_3D-TV
+ * @param {boolean} [options.stereoEffect] true - use stereoEffect https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js.
  * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
  * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui](https://github.com/anhr/dat.gui) for playing of 3D objects in my projects.
  * See nodejs\menuPlay\index.js
@@ -327,7 +326,11 @@ export function create( createXDobjects, options ) {
 		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
 			renderer, cursor, controls, stereoEffect, player,
 			playController, canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
-			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault,// fullScreen,
+			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault, // fullScreen,
+
+			//uses only if stereo effects does not exists
+			mouse = new THREE.Vector2(), intersects, 
+
 			//https://www.khronos.org/webgl/wiki/HandlingContextLost
 			requestId;//, gl, tex;
 		//https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/webglcontextlost_event
@@ -470,9 +473,9 @@ export function create( createXDobjects, options ) {
 			//if ( THREE.StereoEffect !== undefined )
 			if ( options.stereoEffect ){
 
-				stereoEffect = new options.stereoEffect.StereoEffect( renderer, {
+				stereoEffect = new StereoEffect( renderer, {
 
-					spatialMultiplex: options.stereoEffect.spatialMultiplexsIndexs.Mono, //.SbS,
+					spatialMultiplex: spatialMultiplexsIndexs.Mono, //.SbS,
 					far: camera.far,
 					camera: camera,
 					stereoAspect: 1,
@@ -480,7 +483,7 @@ export function create( createXDobjects, options ) {
 					elParent: canvas.parentElement,
 
 				} );
-				stereoEffect.options.spatialMultiplex = options.stereoEffect.spatialMultiplexsIndexs.Mono;
+				stereoEffect.options.spatialMultiplex = spatialMultiplexsIndexs.Mono;
 
 			}
 
@@ -1549,7 +1552,7 @@ export function create( createXDobjects, options ) {
 				fOptions = gui.addFolder( lang.settings );
 			if ( stereoEffect !== undefined ) {
 
-				var spatialMultiplexsIndexs = options.stereoEffect.spatialMultiplexsIndexs;
+//				var spatialMultiplexsIndexs = options.stereoEffect.spatialMultiplexsIndexs;
 				stereoEffect.gui( fOptions, {
 
 					getLanguageCode: getLanguageCode,
@@ -1587,7 +1590,7 @@ export function create( createXDobjects, options ) {
 					canvasMenu = new menuPlay.create( elContainer, {
 
 						stereoEffect: stereoEffect === undefined ? stereoEffect :
-							{ stereoEffect: stereoEffect, spatialMultiplexsIndexs: options.stereoEffect.spatialMultiplexsIndexs },
+							{ stereoEffect: stereoEffect, spatialMultiplexsIndexs: spatialMultiplexsIndexs },
 						player: player,
 						//					play: options.play,
 						//					playController: playController,
@@ -2112,7 +2115,7 @@ export function create( createXDobjects, options ) {
 				if ( intersects.length > 0 ) {
 
 					renderer.domElement.style.cursor = 'pointer';
-					onIntersection( intersects );
+					onIntersection( intersects, mouse );
 
 				} else {
 

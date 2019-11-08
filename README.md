@@ -98,7 +98,19 @@ Creates new canvas with my 3D objects.
 | [options.scales.t.max] | <code>number</code> | 1 | Animation stop time. |
 | [options.scales.t.marks] | <code>number</code> | 2 | Number of scenes of 3D objects animation. |
 
-**Example.**  
+**You can use the following functions in your code:**
+
+* options.addSpriteTextIntersection( intersection, scene, mouse )
+
+Displays a sprite text if you move mouse over an 3D object
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| intersection | <code>object</code> |  | See [intersectObject](https://threejs.org/docs/index.html#api/en/core/Raycaster.intersectObject) for details. |
+| scene | <code>THREE.Scene</code> |  | scene. |
+| mouse | <code>THREE.Vector2</code> |  | mouse position. |
+
+**Example.**
 ```
 <script>
 

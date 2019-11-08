@@ -235,7 +235,7 @@
 
 				onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-					options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
+					options.addSpriteTextIntersection( intersection, scene, mouse );
 
 				},
 				onIntersectionOut: function ( scene ) {
@@ -357,7 +357,7 @@
 
 				onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-					options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
+					options.addSpriteTextIntersection( intersection, scene, mouse );
 
 				},
 				onIntersectionOut: function ( scene ) {
@@ -407,7 +407,7 @@
 						if ( cube.userData.currentHex === undefined )
 							cube.userData.currentHex = cube.material.emissive.getHex();
 						cube.material.emissive.setHex( 0xff0000 );
-						options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
+						options.addSpriteTextIntersection( intersection, scene, mouse );
 
 					},
 					onIntersectionOut: function ( scene, INTERSECTED ) {

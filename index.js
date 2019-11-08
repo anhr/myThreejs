@@ -208,7 +208,7 @@ var arrayCreates = [];
 			//Mouse is over of your 3D object event
 			//TO DO something
 			//For example you can use
-			options.addSpriteTextIntersection( raycaster, intersection, scene );
+			options.addSpriteTextIntersection( intersection, scene );
 			//for displaying of the position of your 3D object
 			//ATTENTION!!! Use onIntersection and onIntersectionOut togethe!
 
@@ -2346,7 +2346,13 @@ export function create( createXDobjects, options ) {
 
 	}
 
-	options.addSpriteTextIntersection = function ( raycaster, intersection, scene, mouse ) {
+	/**
+	 * Displays a sprite text if you move mouse over an 3D object
+	 * @param {object} intersection. See https://threejs.org/docs/index.html#api/en/core/Raycaster.intersectObject for details.
+	 * @param {THREE.Scene} scene.
+	 * @param {THREE.Vector2} mouse mouse position.
+	 */
+	options.addSpriteTextIntersection = function ( intersection, scene, mouse ) {
 
 		var spriteTextIntersection = findSpriteTextIntersection( scene );
 		var textColor = 'rgb( 128, 128, 128 )',
@@ -2683,7 +2689,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 
 		onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-			options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
+			options.addSpriteTextIntersection( intersection, scene, mouse );
 
 		},
 		onIntersectionOut: function ( scene ) {

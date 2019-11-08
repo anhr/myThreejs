@@ -102,13 +102,34 @@ Creates new canvas with my 3D objects.
 
 * options.addSpriteTextIntersection( intersection, scene, mouse )
 
-Displays a sprite text if you move mouse over an 3D object
+Displays a [sprite text](https://github.com/anhr/three.js/blob/dev/src/objects/SpriteText.js) if you move mouse over an 3D object.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | intersection | <code>object</code> |  | See [intersectObject](https://threejs.org/docs/index.html#api/en/core/Raycaster.intersectObject) for details. |
 | scene | <code>THREE.Scene</code> |  | scene. |
 | mouse | <code>THREE.Vector2</code> |  | mouse position. |
+
+* options.removeSpriteTextIntersection( scene )
+
+Hides a [sprite text](https://github.com/anhr/three.js/blob/dev/src/objects/SpriteText.js) if you move mouse out an object.
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| scene | <code>THREE.Scene</code> |  | scene. |
+
+* options.getPoints( t, arrayFuncs, a, b )
+
+Get array of THREE.Vector4 points.
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| t | <code>number</code> |  | first parameter of the arrayFuncs item function. Start time of animation. |
+| arrayFuncs | <code>THREE.Vector4 or THREE.Vector3 or THREE.Vector2</code> |  | points.geometry.attributes.position array. See [arrayFuncs](#arrayfuncs-item) for details |
+| a | <code>number</code> | 1 | second parameter of the arrayFuncs item function. |
+| b | <code>number</code> | 0 | third parameter of the arrayFuncs item function. |
+
+returns array of THREE.Vector4 points.
 
 **Example.**
 ```

@@ -2237,7 +2237,7 @@ export function create( createXDobjects, options ) {
 
 	/**
 	 * Get array of THREE.Vector4 points.
-	 * @param {number} t first parameter of the arrayFuncs item function. Start time of the player.
+	 * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
 	 * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array
 	 * THREE.Vector4: 4D point.
 	 * THREE.Vector3: 3D point. w = 1. Default is white color
@@ -2425,6 +2425,10 @@ export function create( createXDobjects, options ) {
 
 	}
 
+	/**
+	 * Hides a sprite text if you move mouse out an object
+	 * @param {THREE.Scene} scene.
+	 */
 	options.removeSpriteTextIntersection = function ( scene ) {
 
 		var detected = false;

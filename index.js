@@ -2310,6 +2310,28 @@ export function create( createXDobjects, options ) {
 
 	}
 
+	/**
+	 * Get array of mesh colors.
+	 * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
+	 * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array
+	 * THREE.Vector4: 4D point.
+	 * THREE.Vector3: 3D point. w = 1. Default is white color
+	 * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
+	 * Vector's x, y, z, w is position of the point.
+	 * Can be as:
+	 * float - position of the point.
+	 * [float] - array of positions of the point.
+	 * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
+	 * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
+	 *
+	 * object: {
+	 *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
+	 *   [name]: point name. Default is undefined.
+	 *   [trace]: true - displays the trace of the point movement. Default is undefined.
+	 * }
+	 * @param {object} scale options.scales.w
+	 * @returns array of mesh colors.
+	 */
 	options.getСolors = function ( t, arrayFuncs, scale ) {
 
 		if ( t === undefined )
@@ -2335,11 +2357,6 @@ export function create( createXDobjects, options ) {
 				colors.push( color.r, color.g, color.b );
 
 			} else colors.push( 1, 1, 1 );//white
-
-/*
-			var color = palette.toColor( funcs instanceof THREE.Vector4 ? funcs.w : max, min, max );
-			colors.push( color.r, color.g, color.b );
-*/
 
 		} );
 		return colors;

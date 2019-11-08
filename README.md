@@ -124,12 +124,24 @@ Get array of THREE.Vector4 points.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| t | <code>number</code> |  | first parameter of the arrayFuncs item function. Start time of animation. |
+| t | <code>number</code> |  | first parameter of the [arrayFuncs](#arrayfuncs-item) item function. Start time of animation. |
 | arrayFuncs | <code>THREE.Vector4 or THREE.Vector3 or THREE.Vector2</code> |  | points.geometry.attributes.position array. See [arrayFuncs](#arrayfuncs-item) for details |
-| a | <code>number</code> | 1 | second parameter of the arrayFuncs item function. |
-| b | <code>number</code> | 0 | third parameter of the arrayFuncs item function. |
+| a | <code>number</code> | 1 | second parameter of the [arrayFuncs](#arrayfuncs-item) item function. |
+| b | <code>number</code> | 0 | third parameter of the [arrayFuncs](#arrayfuncs-item) item function. |
 
 returns array of THREE.Vector4 points.
+
+* options.getСolors( t, arrayFuncs, scale )
+
+Get array of mesh colors.
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| t | <code>number</code> |  | first parameter of the [arrayFuncs](#arrayfuncs-item) item function. Start time of animation. |
+| arrayFuncs | <code>THREE.Vector4 or THREE.Vector3 or THREE.Vector2</code> |  | points.geometry.attributes.position array. See [arrayFuncs](#arrayfuncs-item) for details |
+| scale | <code>object</code> |  | options.scales.w |
+
+returns array of mesh colors.
 
 **Example.**
 ```

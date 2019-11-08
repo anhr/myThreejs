@@ -144,7 +144,7 @@
 			//Points
 			var a = options.a, b = options.b;
 			var tMin = playerOptions.min === undefined ? 0 : playerOptions.min;
-
+			/*
 			group.add( myThreejs.Points( [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 
 				{
@@ -178,16 +178,18 @@
 
 			], options, {
 
-				name: 'Wave',
-				tMin: tMin,
-				position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
-				scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
-				//scale: new THREE.Vector3( 1, 2, 1 ),
-				//				rotation: new Euler( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
-				rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
-				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
+					name: 'Wave',
+					tMin: tMin,
+					position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
+					scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
+					//scale: new THREE.Vector3( 1, 2, 1 ),
+					//				rotation: new Euler( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+					rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+					//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
 
-			} ) );
+				} ) );
+			*/
+
 
 			var arrayFuncs, sizes;
 
@@ -301,10 +303,11 @@
 				new THREE.Vector3(  -0.25,  -0.25,  -0.25 ),
 				new THREE.Vector3(  0,  0,  0 ),
 				*/
+				//new THREE.Vector3( 0, 1, 0 )
 			]
 			for ( var i = -1; i <= 1; i += 0.2 )
 				arrayFuncs.push( new THREE.Vector3( 0, i, 0 ) );
-			arrayFuncs.push( new THREE.Vector4( 0.4, 0.4, 2, new THREE.Color( "rgb(225, 0, 0)" ) ) );
+			//arrayFuncs.push( new THREE.Vector4( 0.4, 0.4, 2, new THREE.Color( "rgb(225, 0, 0)" ) ) );
 
 
 			sizes = new Float32Array( arrayFuncs.length );
@@ -495,7 +498,7 @@
 			player: playerOptions,//3D objects animation.
 			a: 1.1,
 			b: 0.3,
-			//point: { size: 0.1 },
+			point: { size: 0.02 },//The apparent angular size of a point in radians. Applies to points with ShaderMaterial. The size of the dot seems constant and does not depend on the distance to the camera
 			canvas: {
 
 				width: window.innerWidth / 2,

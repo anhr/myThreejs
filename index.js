@@ -152,8 +152,11 @@ var arrayCreates = [];
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
  * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
  * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
- * @param {object} [options.point] point settings.
- * @param {number} [options.point.size] point size. Default is 0.05.
+ * 
+ * @param {object} [options.point] point settings. Applies to points with ShaderMaterial.
+ * See https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial for details.
+ * The size of the point seems constant and does not depend on the distance to the camera.
+ * @param {number} [options.point.size] The apparent angular size of a point in radians. Default is 0.05.
  * 
  * @param {object} [options.scales] axes scales. Default is {}
  * @param {boolean} [options.scales.display] true - displays the label and scale of the axes. Default is false.
@@ -2172,14 +2175,17 @@ export function create( createXDobjects, options ) {
 					parent = parent.parent;
 
 				}
+				var cameraPosition = new THREE.Vector3( camera.position.x / scale, camera.position.y / scale, camera.position.z / scale );
+				//console.warn( 'camera.position x = ' + camera.position.x + ' y = ' + camera.position.y + ' z = ' + camera.position.z );
 
 				//points with ShaderMaterial
 				for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
-					var position = getObjectPosition( mesh, i ),
-						distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( camera.position );
-					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance /
-						scale );
+					var position = getObjectLocalPosition( mesh, i ),//getObjectPosition( mesh, i ),
+						distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( cameraPosition );
+					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance * scale );
+//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size * scale ) * distance / scale );
+//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance / scale );
 //					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 / scale );
 
 //					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 );

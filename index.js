@@ -368,7 +368,7 @@ export function create( createXDobjects, options ) {
 		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
 			renderer, cursor, controls, stereoEffect, player,
 			playController, canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
-			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault, // fullScreen,
+			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault, cameraPosition,// fullScreen,
 
 			//uses only if stereo effects does not exists
 			mouse = new THREE.Vector2(), intersects, 
@@ -2133,7 +2133,6 @@ export function create( createXDobjects, options ) {
 			render();
 
 		}
-
 		function render() {
 
 			//console.log( 'elContainer.id = ' + elContainer.id )
@@ -2159,42 +2158,60 @@ export function create( createXDobjects, options ) {
 
 			}
 
-			//set size of points with ShaderMaterial
-			//https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
-			//Example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
-			group.children.forEach( function ( mesh ) {
+			if( cameraPosition === undefined )
+				cameraPosition = new THREE.Vector3();
+			if( !cameraPosition.equals(camera.position) ) {
 
-				if ( ( mesh instanceof THREE.Points === false ) || ( mesh.geometry.attributes.size === undefined ) )
-					return;
+				cameraPosition.copy( camera.position );
 
-				//scale
-				var parent = mesh.parent, scale = 1;
-				while ( parent !== null ) {
+				group.children.forEach( function ( mesh ) {
 
-					scale *= ( parent.scale.x + parent.scale.y + parent.scale.z ) / 3;
-					parent = parent.parent;
+					if ( ( mesh instanceof THREE.Points === false ) || ( mesh.geometry.attributes.size === undefined ) )
+						return;
 
-				}
-				var cameraPosition = new THREE.Vector3( camera.position.x / scale, camera.position.y / scale, camera.position.z / scale );
-				//console.warn( 'camera.position x = ' + camera.position.x + ' y = ' + camera.position.y + ' z = ' + camera.position.z );
+					//scale
+					var parent = mesh.parent, scale = 1;
+					while ( parent !== null ) {
 
-				//points with ShaderMaterial
-				for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
+						scale *= ( parent.scale.x + parent.scale.y + parent.scale.z ) / 3;
+						parent = parent.parent;
 
-					var position = getObjectLocalPosition( mesh, i ),//getObjectPosition( mesh, i ),
-						distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( cameraPosition );
-					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance * scale );
-//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size * scale ) * distance / scale );
-//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance / scale );
-//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 / scale );
+					}
+					var cameraPosition = new THREE.Vector3( camera.position.x / scale, camera.position.y / scale, camera.position.z / scale );
+					//console.warn( 'camera.position x = ' + camera.position.x + ' y = ' + camera.position.y + ' z = ' + camera.position.z );
 
-//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 );
-//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 * scene.scale.x );
-					mesh.geometry.attributes.size.needsUpdate = true;
+					//set size of points with ShaderMaterial
+					//https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
+					//Example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
 
-				}
+					//points with ShaderMaterial
+					for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
-			} );
+						var position = getObjectLocalPosition( mesh, i ),//getObjectPosition( mesh, i ),
+							distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( cameraPosition );
+						mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance * scale );
+	//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size * scale ) * distance / scale );
+	//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance / scale );
+	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 / scale );
+
+	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 );
+	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 * scene.scale.x );
+						mesh.geometry.attributes.size.needsUpdate = true;
+
+					}
+
+					//set size of the SpriteText
+					if ( axesHelper !== undefined )
+						axesHelper.arraySpriteText.forEach( function ( spriteItem ) {
+
+							spriteItem.userData.setSize( cameraPosition, Math.tan( options.point.size ) * scale );
+
+						} );
+
+
+				} );
+
+			}
 
 		}
 

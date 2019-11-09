@@ -42,6 +42,7 @@
 	https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
 	Example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
 	-->
+	<!--
 	<script type="x-shader/x-vertex" id="vertexshader">
 
 		attribute float size;
@@ -78,7 +79,7 @@
 		}
 
 	</script>
-
+	-->
 	<h2>Canvas.</h2>
 	<!--<div id="canvasContainer1"><img src="https://raw.githubusercontent.com/anhr/TreeElementNodeJS/master/img/wait.gif"></div>-->
 	<div id="canvasContainer1"><img src="/anhr/TreeElementNodeJS/master/img/wait.gif"></div>
@@ -145,8 +146,10 @@
 			var a = options.a, b = options.b;
 			var tMin = playerOptions.min === undefined ? 0 : playerOptions.min;
 
-			group.add( myThreejs.Points( [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
+			var arrayFuncs, sizes;
 
+			arrayFuncs = [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
+				/*
 				{
 
 					vector: new THREE.Vector4(
@@ -174,23 +177,34 @@
 					//trace: true,//Displays the trace of the point movement.
 
 				}
+				*/
+			];
+			for ( var i = -1; i <= 1; i += 0.2 ) {
 
+//				var fx = 'return t+(' + i + ')';
+				var fx = 'return t * 3';
+				arrayFuncs.push( {
 
-			], options, {
+					vector: new THREE.Vector4( new Function( 't', fx ), i, 0, new Function( 't', 'return 1-2*t' ) ),
+					trace: true,//Displays the trace of the point movement.
+
+				} );
+//				arrayFuncs.push( new THREE.Vector4( 0, i, 0, new THREE.Color( "rgb(" + parseInt( ( - 0.5 * i + 0.5 ) * 255 ) + ", 0, " + parseInt( ( i + 1 ) * 255 ) + ")" ) ) );
+
+			}
+			group.add( myThreejs.Points( arrayFuncs, options, {
 
 					name: 'Wave',
 					tMin: tMin,
-					position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
+					position: new THREE.Vector3( -1, 0, 0 ),
+					//position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
 					scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
-					//scale: new THREE.Vector3( 1, 2, 1 ),
-					//				rotation: new Euler( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+					//scale: new THREE.Vector3( 2, 2, 2 ),
 					rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 					//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
+					shaderMaterial: true,
 
 				} ) );
-
-
-			var arrayFuncs, sizes;
 
 			//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 			arrayFuncs = [
@@ -308,16 +322,8 @@
 			*/
 			//arrayFuncs.push( new THREE.Vector4( 0.4, 0.4, 2, new THREE.Color( "rgb(225, 0, 0)" ) ) );
 
-
 			sizes = new Float32Array( arrayFuncs.length );
-			/*размер точки вычисляю в render()
-			for ( var i = 0, l = arrayFuncs.length; i < l; i++ ) {
-
-				sizes[i] = 0.05;// * ( i * 3 + 1 );
-
-			}
-			*/
-
+/*
 			var geometry = new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 );
 			geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1 ) );
 			geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
@@ -327,7 +333,8 @@
 				return this.attributes.size.array[index] / ( ( scale.x + scale.y + scale.z ) / 3 );
 
 			}
-
+*/
+/*
 			//http://localhost/threejs/three.js/dev/examples/textures/sprites/disc.png
 			//var texture = new THREE.TextureLoader().load( "../../../../three.js/dev/examples/textures/sprites/snowflake7_alpha.png" );
 			//var texture = new THREE.TextureLoader().load( "../../../../three.js/dev/examples/textures/sprites/disc.png" );
@@ -342,17 +349,30 @@
 					color: { value: new THREE.Color( 0xffffff ) },
 					pointTexture: { value: texture }
 				},
-				vertexShader: document.getElementById( 'vertexshader' ).textContent,
-				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+//				vertexShader: document.getElementById( 'vertexshader' ).textContent,
+				vertexShader: "		attribute float size;		attribute vec3 ca;		varying vec3 vColor;		void main() {		vColor = ca;		vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );		gl_PointSize = size * ( 300.0 / -mvPosition.z );		gl_Position = projectionMatrix * mvPosition;		}",
+//				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+				fragmentShader: "		uniform vec3 color;		uniform sampler2D pointTexture;		varying vec3 vColor;		void main() {		vec4 color = vec4( color * vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord );		gl_FragColor = color;		}	",
 				transparent: true
 
 			} );
+*/
+/*
+			var material = myThreejs.getShaderMaterial();
 			var points2 = new THREE.Points( geometry, material );
-			/*
-						var points2 = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
-							new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } ) );
-						points2.geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
-			*/
+*/
+			var points2 = myThreejs.getShaderMaterialPoints( {
+
+				getPoints: options.getPoints,
+				tMin: tMin,
+				arrayFuncs: arrayFuncs,
+				a: a, b: b,
+				sizes: sizes,
+				getСolors: options.getСolors,
+				scales: options.scales,
+//				group: group,
+
+			} );
 			points2.name = 'ShaderMaterial';
 			points2.userData.arrayFuncs = arrayFuncs;//3D object animation.
 			points2.userData.raycaster = {
@@ -374,9 +394,10 @@
 				var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
 				points2.rotation.set( angle, 0, 0 );
 				myThreejs.limitAngles( points2.rotation );
-
+/*
 				points2.geometry.attributes.size.setX( 1, 0.1 * ( t + 1 ) );
 				points2.geometry.attributes.size.needsUpdate = true;
+*/
 
 			}
 			group.add( points2 );
@@ -434,7 +455,7 @@
 					cube.userData.cube = cube;
 
 				}
-				group.add( cube );
+				//group.add( cube );
 
 			}
 			addCube( new THREE.Vector3( -1, 0, 0 ), 0xffffff, function ( t ) {

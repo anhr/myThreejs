@@ -317,6 +317,7 @@ export function create( createXDobjects, options ) {
 				// draw range
 				geometry.setDrawRange( index, index );
 				line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors } ) );
+				line.visible = true;
 //				group.add( line );
 				scene.add( line );
 
@@ -1036,8 +1037,10 @@ export function create( createXDobjects, options ) {
 						}
 						fMesh.domElement.style.display = display;
 
-						mesh.userData.traceAll = mesh.userData.traceAll || false;
-						cTraceAll.setValue( mesh.userData.traceAll );
+//Если оставить эту линию то исчезает трассировка точки если пользователь выбрал эту точку
+//						mesh.userData.traceAll = mesh.userData.traceAll || false;
+						if( mesh.userData.traceAll !== undefined )
+							cTraceAll.setValue( mesh.userData.traceAll );
 
 					} );
 					dat.controllerNameAndTitle( cMeshs, lang.select );
@@ -1257,6 +1260,7 @@ export function create( createXDobjects, options ) {
 */
 						for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
 							visibleTraceLine( { object: mesh, index: i }, value );
+						cTrace.setValue( value );
 
 					} );
 					dat.controllerNameAndTitle( cTraceAll, lang.trace, lang.traceAllTitle );
@@ -2170,6 +2174,7 @@ export function create( createXDobjects, options ) {
 						return;
 
 					//scale
+/*
 					var parent = mesh.parent, scale = 1;
 					while ( parent !== null ) {
 
@@ -2178,7 +2183,10 @@ export function create( createXDobjects, options ) {
 
 					}
 					var cameraPosition = new THREE.Vector3( camera.position.x / scale, camera.position.y / scale, camera.position.z / scale );
-					//console.warn( 'camera.position x = ' + camera.position.x + ' y = ' + camera.position.y + ' z = ' + camera.position.z );
+*/
+					var scale = getGlobalScale( mesh );
+					var cameraPosition = new THREE.Vector3( camera.position.x / scale.x, camera.position.y / scale.y, camera.position.z / scale.z );
+					scale = ( scale.x + scale.y + scale.z ) / 3;
 
 					//set size of points with ShaderMaterial
 					//https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
@@ -2187,7 +2195,7 @@ export function create( createXDobjects, options ) {
 					//points with ShaderMaterial
 					for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
-						var position = getObjectLocalPosition( mesh, i ),//getObjectPosition( mesh, i ),
+						var position = getObjectPosition( mesh, i ),//getObjectLocalPosition( mesh, i ),
 							distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( cameraPosition );
 						mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance * scale );
 	//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size * scale ) * distance / scale );
@@ -2200,16 +2208,15 @@ export function create( createXDobjects, options ) {
 
 					}
 
-					//set size of the SpriteText
-					if ( axesHelper !== undefined )
-						axesHelper.arraySpriteText.forEach( function ( spriteItem ) {
-
-							spriteItem.userData.setSize( cameraPosition, Math.tan( options.point.size ) * scale );
-
-						} );
-
-
 				} );
+
+				//set size of the SpriteText
+				if ( axesHelper !== undefined )
+					axesHelper.arraySpriteText.forEach( function ( spriteItem ) {
+
+						spriteItem.userData.setSize( cameraPosition, Math.tan( options.point.size ) * scale );
+
+					} );
 
 			}
 
@@ -2721,13 +2728,33 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 //	pointsOptions.rotation = pointsOptions.rotation || new THREE.Euler();
 	pointsOptions.rotation = pointsOptions.rotation || new THREE.Vector3();
 
-	var points = new THREE.Points(
-		new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, options.a, options.b ), 4 ),
-		new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } )
-	);
+	var points;
+	if ( pointsOptions.shaderMaterial )
+		points = getShaderMaterialPoints( {
+
+			getPoints: options.getPoints,
+			tMin: pointsOptions.tMin,
+			arrayFuncs: arrayFuncs,
+			a: options.a, b: options.b,
+			sizes: new Float32Array( arrayFuncs.length ),
+			getСolors: options.getСolors,
+			scales: options.scales,
+			//group: group,
+
+		} );
+	else {
+
+		points = new THREE.Points(
+
+			new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, options.a, options.b ), 4 ),
+			new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } )
+
+		);
+		points.geometry.addAttribute( 'color',
+			new THREE.Float32BufferAttribute( options.getСolors( pointsOptions.tMin, arrayFuncs, options.scales.w ), 3 ) );
+
+	}
 	points.name = pointsOptions.name;//'Wave';
-	points.geometry.addAttribute( 'color',
-		new THREE.Float32BufferAttribute( options.getСolors( pointsOptions.tMin, arrayFuncs, options.scales.w ), 3 ) );
 	points.userData.arrayFuncs = arrayFuncs;
 	points.userData.raycaster = {
 
@@ -2832,5 +2859,95 @@ export function limitAngles( rotation ) {
 	limitAngle( 'x' );
 	limitAngle( 'y' );
 	limitAngle( 'z' );
+
+}
+
+/**
+ * @see https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
+ * @example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
+ * @returns ShaderMaterial
+ */
+/*
+export function getShaderMaterial() {
+
+	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+
+	return new THREE.ShaderMaterial( {
+
+		uniforms: {
+			color: { value: new THREE.Color( 0xffffff ) },
+			pointTexture: { value: texture }
+		},
+		//				vertexShader: document.getElementById( 'vertexshader' ).textContent,
+		vertexShader: "		attribute float size;		attribute vec3 ca;		varying vec3 vColor;		void main() {		vColor = ca;		vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );		gl_PointSize = size * ( 300.0 / -mvPosition.z );		gl_Position = projectionMatrix * mvPosition;		}",
+		//				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+		fragmentShader: "		uniform vec3 color;		uniform sampler2D pointTexture;		varying vec3 vColor;		void main() {		vec4 color = vec4( color * vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord );		gl_FragColor = color;		}	",
+		transparent: true
+
+	} );
+
+}
+*/
+function getGlobalScale( mesh ) {
+
+	var parent = mesh.parent, scale = new THREE.Vector3( 1, 1, 1 );
+	while ( parent !== null ) {
+
+		scale.multiply( parent.scale );
+		parent = parent.parent;
+
+	}
+	return scale;
+
+}
+/**
+ * 
+ * @param {object} params
+ * @param {object} params
+ * @returns THREE.Points with THREE.ShaderMaterial material
+ */
+export function getShaderMaterialPoints( params ) {
+
+	var geometry = new THREE.BufferGeometry().setFromPoints( params.getPoints( params.tMin, params.arrayFuncs, params.a, params.b ), 4 );
+//	params.sizes = new Float32Array( params.arrayFuncs.length );
+	geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( params.sizes, 1 ) );
+	geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( params.getСolors( params.tMin, params.arrayFuncs, params.scales.w ), 3 ) );
+	geometry.getPointSize = function ( index ) {
+
+//		var scale = params.group.parent.scale;
+/*
+		var parent = points.parent, scale = new THREE.Vector3( 1, 1, 1 );
+		while( parent !== null ) {
+
+			scale.multiply(parent.scale);
+			parent = parent.parent;
+
+		}
+*/
+		var scale = getGlobalScale( points );
+		return this.attributes.size.array[index] / ( ( scale.x + scale.y + scale.z ) / 3 );
+
+	}
+
+	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+
+	var points = new THREE.Points( geometry, new THREE.ShaderMaterial( {
+
+		uniforms: {
+			color: { value: new THREE.Color( 0xffffff ) },
+			pointTexture: { value: texture }
+		},
+		//				vertexShader: document.getElementById( 'vertexshader' ).textContent,
+		vertexShader: "		attribute float size;		attribute vec3 ca;		varying vec3 vColor;		void main() {		vColor = ca;		vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );		gl_PointSize = size * ( 300.0 / -mvPosition.z );		gl_Position = projectionMatrix * mvPosition;		}",
+		//				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+		fragmentShader: "		uniform vec3 color;		uniform sampler2D pointTexture;		varying vec3 vColor;		void main() {		vec4 color = vec4( color * vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord );		gl_FragColor = color;		}	",
+		transparent: true
+
+	} ) );
+	return points;
 
 }

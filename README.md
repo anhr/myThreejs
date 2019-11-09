@@ -98,9 +98,9 @@ Creates new canvas with my 3D objects.
 | [options.scales.t.max] | <code>number</code> | 1 | Animation stop time. |
 | [options.scales.t.marks] | <code>number</code> | 2 | Number of scenes of 3D objects animation. |
 
-## You can use the following functions in your code:**
+## You can use the following functions in your code:
 
-* options.addSpriteTextIntersection( intersection, scene, mouse )
+### options.addSpriteTextIntersection( intersection, scene, mouse )
 
 Displays a [sprite text](https://github.com/anhr/three.js/blob/dev/src/objects/SpriteText.js) if you move mouse over an 3D object.
 
@@ -118,7 +118,7 @@ Hides a [sprite text](https://github.com/anhr/three.js/blob/dev/src/objects/Spri
 | --- | --- | --- | --- |
 | scene | <code>THREE.Scene</code> |  | scene. |
 
-#* options.getPoints( t, arrayFuncs, a, b )
+### options.getPoints( t, arrayFuncs, a, b )
 
 Get array of THREE.Vector4 points.
 
@@ -131,7 +131,7 @@ Get array of THREE.Vector4 points.
 
 returns array of THREE.Vector4 points.
 
-* options.getСolors( t, arrayFuncs, scale )
+### options.getСolors( t, arrayFuncs, scale )
 
 Get array of mesh colors.
 

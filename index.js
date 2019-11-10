@@ -2902,30 +2902,50 @@ function getGlobalScale( mesh ) {
 	return scale;
 
 }
+
 /**
- * 
+ * @callback getPoints
+ * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
+ * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array.
+ * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
+ * @param {number} a second parameter of the arrayFuncs item function. Default is 1.
+ * @param {number} b third parameter of the arrayFuncs item function. Default is 0.
+ */
+
+/**
+ * @callback getСolors
+ * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
+ * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array.
+ * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
+ * @param {object} scale options.scales.w
+ * @returns array of mesh colors.
+ */
+
+/**
+ * get THREE.Points with THREE.ShaderMaterial material
  * @param {object} params
- * @param {object} params
+ * @param {getPoints} params.getPoints get array of THREE.Vector4 points.
+ * See https://github.com/anhr/myThreejs#optionsgetpoints-t-arrayfuncs-a-b- for details.
+ * @param {getСolors} params.getСolors Get array of mesh colors.
+ * See https://github.com/anhr/myThreejs#optionsget%D1%81olors-t-arrayfuncs-scale- for details.
+ * @param {number} params.tMin start time. Uses for playing of the points. Default is 0.
+ * @param {array} params.arrayFuncs points.geometry.attributes.position array.
+ * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
+ * @param {number} params.a second parameter of the arrayFuncs item function. Default is 1.
+ * @param {number} params.b third parameter of the arrayFuncs item function. Default is 0.
+ * @param {Float32Array} params.sizes array of the size attribute of the geometry. Array length is params.arrayFuncs.length.
+ * Example: new Float32Array( arrayFuncs.length ).
+ * @param {object} params.scales axes scales.
+ * See options.scales of myThreejs.create( createXDobjects, options ) https://github.com/anhr/myThreejs#mythreejscreate-createxdobjects-options-.
  * @returns THREE.Points with THREE.ShaderMaterial material
  */
 export function getShaderMaterialPoints( params ) {
 
 	var geometry = new THREE.BufferGeometry().setFromPoints( params.getPoints( params.tMin, params.arrayFuncs, params.a, params.b ), 4 );
-//	params.sizes = new Float32Array( params.arrayFuncs.length );
 	geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( params.sizes, 1 ) );
 	geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( params.getСolors( params.tMin, params.arrayFuncs, params.scales.w ), 3 ) );
 	geometry.getPointSize = function ( index ) {
 
-//		var scale = params.group.parent.scale;
-/*
-		var parent = points.parent, scale = new THREE.Vector3( 1, 1, 1 );
-		while( parent !== null ) {
-
-			scale.multiply(parent.scale);
-			parent = parent.parent;
-
-		}
-*/
 		var scale = getGlobalScale( points );
 		return this.attributes.size.array[index] / ( ( scale.x + scale.y + scale.z ) / 3 );
 

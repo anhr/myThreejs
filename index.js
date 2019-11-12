@@ -363,7 +363,8 @@ export function create( createXDobjects, options ) {
 
 		}
 		arrayContainers.push( elContainer );
-		elContainer.innerHTML = loadFile.sync( 'https://raw.githack.com/anhr/myThreejs/master/canvasContainer.html' );//'http://' + url + '/nodejs/myThreejs/canvasContainer.html'
+		//elContainer.innerHTML = loadFile.sync( 'https://raw.githack.com/anhr/myThreejs/master/canvasContainer.html' );//'http://' + url + '/nodejs/myThreejs/canvasContainer.html'
+		elContainer.innerHTML = loadFile.sync( '/anhr/myThreejs/master/canvasContainer.html' );
 		elContainer = elContainer.querySelector( '.container' );
 
 		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
@@ -772,7 +773,11 @@ export function create( createXDobjects, options ) {
 					setValue( controllerWorld.z, position.z );
 					
 					var displayControllerW, displayControllerColor, none = 'none', block = 'block';
-					if ( isNaN( position.w ) ) {
+					var func = intersectionSelected.object.userData.arrayFuncs[intersectionSelected.index],
+						color = Array.isArray(func.w) ? execFunc( func, 'w', group.userData.t, options.a, options.b ) : func.w;
+
+//					if ( isNaN( position.w ) )
+					if ( color instanceof THREE.Color ) {
 
 						displayControllerW = none;
 						displayControllerColor = block;
@@ -782,7 +787,6 @@ export function create( createXDobjects, options ) {
 							displayControllerColor = none;
 						else {
 
-							var func = intersectionSelected.object.userData.arrayFuncs[intersectionSelected.index];
 							//console.warn( options + group );
 							if ( func.w === undefined ) {
 
@@ -800,12 +804,16 @@ export function create( createXDobjects, options ) {
 								*/
 
 							}
+							controllerColor.setValue( '#' + color.getHexString() );
+							controllerColor.userData = { intersection: intersectionSelected, }
+/*							
 							if ( func.w !== undefined ) {
 
 								controllerColor.setValue( '#' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() );
 								controllerColor.userData = { intersection: intersectionSelected, }
 
 							} else displayControllerColor = none;
+*/							
 
 						}
 /*
@@ -842,7 +850,8 @@ export function create( createXDobjects, options ) {
 							displayControllerW = none;
 						else {
 
-							setValue( controllerW, position.w );
+//							setValue( controllerW, position.w );
+							setValue( controllerW, color );
 							displayControllerW = block;
 
 						}
@@ -1715,6 +1724,31 @@ export function create( createXDobjects, options ) {
 							for ( var i = 0; i < arrayFuncs.length; i++ ) {
 
 								var funcs = arrayFuncs[i], needsUpdate = false;
+								function setPosition( axisName, fnName ){
+
+									var value = execFunc( funcs, axisName, t, a, b );
+									if( value !== undefined ) {
+
+										attributes.position[fnName]( i, value );
+										needsUpdate = true;
+
+									}
+/*									
+									var fun = funcs[axisName];
+									if ( typeof fun === "function" ) {
+
+										attributes.position[fnName]( i, fun( t, a, b ) );
+										needsUpdate = true;
+
+									}
+*/									
+
+								}
+								setPosition( 'x', 'setX' );
+								setPosition( 'y', 'setY' );
+								setPosition( 'z', 'setZ' );
+//								setPosition( 'w', 'setW' );
+/*								
 								if ( typeof funcs.x === "function" ) {
 
 									attributes.position.setX( i, funcs.x( t, a, b ) );
@@ -1733,28 +1767,32 @@ export function create( createXDobjects, options ) {
 									needsUpdate = true;
 
 								}
+*/								
 								let color;
+								var min, max;
+								if ( options.scales.w !== undefined ) {
+
+									min = options.scales.w.min; max = options.scales.w.max;
+
+								} else {
+
+									max = value;
+									min = max - 1;
+
+								}
 								if ( typeof funcs.w === "function" ) {
 
 									attributes.position.setW( i, funcs.w( t, a, b ) );
 									needsUpdate = true;
 
-									var min, max, value = funcs.w( t, a, b );
-									if ( options.scales.w !== undefined ) {
-
-										min = options.scales.w.min; max = options.scales.w.max;
-
-									} else {
-
-										max = value;
-										min = max - 1;
-
-									}
+									var value = funcs.w( t, a, b );
 									color = palette.toColor( value, min, max );
 
-								} else if ( funcs.w instanceof THREE.Color ) {
+								} else if ( typeof funcs.w === "object" ){
 
-									color = funcs.w;
+									if ( funcs.w instanceof THREE.Color )
+										color = funcs.w;
+									else color = palette.toColor( execFunc( funcs, 'w', t, a, b ), min, max );
 
 								} else color = new THREE.Color( 1, 1, 1 );//white
 //								if ( attributes.color !== undefined )
@@ -2265,6 +2303,114 @@ export function create( createXDobjects, options ) {
 
 	}
 
+	function execFunc( funcs, axisName, t, a, b ) {
+
+		//return typeof funcs[axisName] === "function" ? funcs[axisName]( t, a, b ) : funcs[axisName];
+		var func = funcs[axisName], typeofFuncs = typeof func;
+		switch ( typeofFuncs ) {
+
+			case "undefined":
+				return undefined;
+			case "function":
+				return func( t, a, b );
+			case "number":
+				return func;
+			case "object":
+				if ( Array.isArray( func ) ) {
+
+					if( func.length === 0 ) {
+
+						console.error( 'myThreejs.create.execFunc: funcs["' + axisName + '"] array is empty' );
+						return;
+
+					}
+					var a = func,
+						l = func.length - 1,
+						max = options.scales.t.max,
+						min = options.scales.t.min,
+						tStep = ( max - min ) / l,
+						tStart = min, tStop = max,
+						iStart = 0, iStop = l;
+					for( var i = 0; i < func.length; i++ ) {
+
+						if( tStep * i < t ) {
+
+							iStart = i;
+							iStop = i + 1;
+							tStart = tStep * iStart;
+							tStop = tStep * iStop;
+
+						}
+/*							
+						if( tStep * ( i + 1 ) <= t )
+							iStop = i;
+*/							
+
+					}
+					function execW( i ){
+						
+						if ( typeof a[i] === "function" )
+							return a[i]( t, a, b );
+						if ( a[i] instanceof THREE.Color )
+							return a[i];
+/*
+						if ( typeof a[iStart] === "function" )
+							return a[iStart]( t, a, b );
+						if ( a[iStart] instanceof THREE.Color )
+							return a[iStart];
+*/							
+
+					}
+					if ( typeof a[iStart] !== "number" ) {
+
+						if( axisName === 'w') {
+
+							return execW( iStart );
+/*							
+							if ( typeof a[iStart] === "function" )
+								return a[iStart]( t, a, b );
+							if ( a[iStart] instanceof THREE.Color )
+								return a[iStart];
+*/								
+
+						}
+						console.error( 'myThreejs.create.execFunc: funcs["' + axisName + '"] array item ' + iStart + ' typeof = ' + ( typeof a[iStart] ) + ' is not number' );
+						return;
+
+					}
+					if ( typeof a[iStop] !== "number" ) {
+
+						if( axisName === 'w')
+							return execW( iStop );
+/*							
+						if ( typeof a[iStop] === "function" )
+							return a[iStop]( t, a, b );
+						if ( a[iStop] instanceof THREE.Color )
+							return a[iStop];
+*/							
+						console.error( 'myThreejs.create.execFunc: funcs["' + axisName + '"] array item ' + iStop + ' typeof = ' + ( typeof a[iStop] ) + ' is not number' );
+						return;
+
+					}
+					var x = ( a[iStop] - a[iStart] ) / ( tStop - tStart ),
+						y = a[iStart] - x * tStart;
+/*						
+					var x = ( a[l] - a[0] ) / ( max - min ),
+						y = a[0] - x * min;
+*/						
+					return x * t + y;
+
+				}
+				if( axisName !== 'w' )
+					console.error( 'myThreejs.create.execFunc: funcs["' + axisName + '"] object is not array' );
+				return;
+			default:
+				console.error( 'myThreejs.create.execFunc: Invalud typeof funcs["' + axisName + '"]: ' + typeofFuncs );
+		}
+		return;
+
+	}
+
 	/**
 	 * Get array of THREE.Vector4 points.
 	 * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
@@ -2299,8 +2445,40 @@ export function create( createXDobjects, options ) {
 			var funcs = arrayFuncs[i];
 			function getAxis(axisName) {
 
-				if ( ( funcs instanceof THREE.Vector2 ) || ( funcs instanceof THREE.Vector3 ) || ( funcs instanceof THREE.Vector4 ) )
-					return typeof funcs[axisName] === "function" ? funcs[axisName]( t, a, b ) : funcs[axisName];
+				if ( ( funcs instanceof THREE.Vector2 ) || ( funcs instanceof THREE.Vector3 ) || ( funcs instanceof THREE.Vector4 ) ) {
+
+					return execFunc( funcs, axisName, t, a, b );
+					/*
+					var typeofFuncs = typeof funcs[axisName];
+					switch ( typeofFuncs ) {
+
+						case "undefined":
+							return undefined;
+						case "function":
+							return funcs[axisName]( t, a, b );
+						case "number":
+							return funcs[axisName];
+						case "object":
+							if ( Array.isArray( funcs[axisName] ) ) {
+
+								var a = funcs[axisName],
+									l = funcs[axisName].length - 1,
+									max = options.scales.t.max,
+									min = options.scales.t.min,
+									x = ( a[l] - a[0] ) / ( max - min ),
+									y = a[0] - x * min;
+								return x * t + y;
+
+							}
+							console.error( 'options.getPoints.getAxis: funcs["' + axisName + '"] object is not array');
+							return;
+						default :
+							console.error( 'options.getPoints.getAxis: Invalud typeof funcs["' + axisName + '"]: ' +  typeofFuncs);
+							return;
+					}
+					*/
+
+				}
 				if ( funcs.vector === undefined ) {
 
 					console.error( 'options.getPoints: funcs.vector = ' + funcs.vector );
@@ -2322,7 +2500,9 @@ export function create( createXDobjects, options ) {
 				}
 				arrayFuncs[i] = funcs.vector;
 				funcs = funcs.vector;
-				return typeof funcs[axisName] === "function" ? funcs[axisName]( t, a, b ) : funcs[axisName];
+//				return typeof funcs[axisName] === "function" ? funcs[axisName]( t, a, b ) : funcs[axisName];
+				return execFunc( funcs, axisName, t, a, b );
+
 
 			}
 			var point = new THREE.Vector4( getAxis( 'x' ), getAxis( 'y' ), getAxis( 'z' ), getAxis( 'w' ), );
@@ -2392,7 +2572,15 @@ export function create( createXDobjects, options ) {
 		return colors;
 
 	}
+/*	
+	function isColorWAxis( intersection ){
 
+		var func = intersection.object.userData.arrayFuncs[intersection.index],
+			color = Array.isArray(func.w) ? execFunc( func, 'w', group.userData.t, 1, 0 ) : func.w;
+		return color instanceof THREE.Color;
+
+	}
+*/	
 	/**
 	 * Displays a sprite text if you move mouse over an 3D object
 	 * @param {object} intersection. See https://threejs.org/docs/index.html#api/en/core/Raycaster.intersectObject for details.
@@ -2430,8 +2618,10 @@ export function create( createXDobjects, options ) {
 
 		if ( spriteTextIntersection === undefined ) {
 
-			var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) );
-			var pointName = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs[intersection.index].name;
+			var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
+				funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
+				pointName = !isArrayFuncs ? undefined : funcs[intersection.index].name,
+				color = Array.isArray(func.w) ? execFunc( funcs[intersection.index], 'w', group.userData.t, options.a, options.b ) : func.w;
 			spriteTextIntersection = new THREE.SpriteText(
 				( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
 				( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
@@ -2441,9 +2631,11 @@ export function create( createXDobjects, options ) {
 				(
 					!isArrayFuncs ?
 						'' :
-						intersection.object.userData.arrayFuncs[intersection.index] instanceof THREE.Vector4 ?
-							isNaN( position.w ) ?
-								'\n' + lang.color + ': ' + new THREE.Color( func.w.r, func.w.g, func.w.b ).getHexString() :
+						funcs[intersection.index] instanceof THREE.Vector4 ?
+//							isNaN( position.w ) ?
+//							isColorWAxis( intersection ) ?
+							color instanceof THREE.Color ?
+								'\n' + lang.color + ': ' + new THREE.Color( color.r, color.g, color.b ).getHexString() :
 								'\n' + options.scales.w.name + ': ' + position.w :
 							''
 

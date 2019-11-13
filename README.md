@@ -59,7 +59,7 @@ Creates new canvas with my 3D objects.
 | [options.a] | <code>number</code> | 1 | Can be use as 'a' parameter of the Function. See [arrayFuncs](#arrayfuncs-item) for details. |
 | [options.b] | <code>number</code> | 0 | Can be use as 'b' parameter of the Function. See [arrayFuncs](#arrayfuncs-item) for details. |
 | [options.point] | <code>object</code> |  | point settings. Applies to points with [ShaderMaterial](https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial). The size of the point seems constant and does not depend on the distance to the camera. |
-| [options.point.size] | <code>number</code> | 0.05 | The apparent angular size of a point in radians. |
+| [options.point.size] | <code>number</code> | 0.02 | The apparent angular size of a point in radians. |
 | [options.scales] | <code>object</code> |  | axes scales. |
 | [options.scales.display] | <code>boolean</code> | false | true - displays the label and scale of the axes. |
 | [options.scales.precision] | <code>number</code> | 4 | Formats a scale marks into a specified length. |

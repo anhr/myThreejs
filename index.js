@@ -156,7 +156,7 @@ var arrayCreates = [];
  * @param {object} [options.point] point settings. Applies to points with ShaderMaterial.
  * See https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial for details.
  * The size of the point seems constant and does not depend on the distance to the camera.
- * @param {number} [options.point.size] The apparent angular size of a point in radians. Default is 0.05.
+ * @param {number} [options.point.size] The apparent angular size of a point in radians. Default is 0.02.
  * 
  * @param {object} [options.scales] axes scales. Default is {}
  * @param {boolean} [options.scales.display] true - displays the label and scale of the axes. Default is false.
@@ -260,7 +260,7 @@ export function create( createXDobjects, options ) {
 	options.scale = 1;
 
 	options.point = options.point || {};
-	options.point.size = options.point.size || 0.05;
+	options.point.size = options.point.size || 0.02;
 
 	options.scales = options.scales || {};
 	function getAxis( axix, name, min, max ) {
@@ -371,6 +371,9 @@ export function create( createXDobjects, options ) {
 			renderer, cursor, controls, stereoEffect, player,
 			playController, canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
 			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault, cameraPosition,// fullScreen,
+
+			//point size
+			pointSize, defaultSize,
 
 			//uses only if stereo effects does not exists
 			mouse = new THREE.Vector2(), intersects, 
@@ -1895,7 +1898,8 @@ export function create( createXDobjects, options ) {
 
 				//point
 
-				var defaultSize = options.point.size, pointName = 'Point_' + getCanvasName();
+				defaultSize = options.point.size;
+				var pointName = 'Point_' + getCanvasName();
 				cookie.getObject( pointName, options.point, options.point );
 
 				var fPoint = fOptions.addFolder( lang.pointSettings ),
@@ -2202,9 +2206,12 @@ export function create( createXDobjects, options ) {
 
 			if( cameraPosition === undefined )
 				cameraPosition = new THREE.Vector3();
-			if( !cameraPosition.equals(camera.position) ) {
+			if( pointSize === undefined )
+				pointSize = options.point.size;
+			if( !cameraPosition.equals(camera.position) || ( pointSize != options.point.size ) ) {
 
 				cameraPosition.copy( camera.position );
+				pointSize = options.point.size;
 
 				group.children.forEach( function ( mesh ) {
 
@@ -2252,7 +2259,8 @@ export function create( createXDobjects, options ) {
 				if ( axesHelper !== undefined )
 					axesHelper.arraySpriteText.forEach( function ( spriteItem ) {
 
-						spriteItem.userData.setSize( cameraPosition, Math.tan( options.point.size ) * scale );
+//						spriteItem.userData.setSize( cameraPosition, Math.tan( options.point.size ) * scale );
+						spriteItem.userData.setSize( cameraPosition, Math.tan( defaultSize ) * scale );
 
 					} );
 

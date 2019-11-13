@@ -2629,7 +2629,7 @@ export function create( createXDobjects, options ) {
 			var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
 				funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
 				pointName = !isArrayFuncs ? undefined : funcs[intersection.index].name,
-				color = Array.isArray(func.w) ? execFunc( funcs[intersection.index], 'w', group.userData.t, options.a, options.b ) : func.w;
+				color = !isArrayFuncs ? undefined : Array.isArray(func.w) ? execFunc( funcs[intersection.index], 'w', group.userData.t, options.a, options.b ) : func.w;
 			spriteTextIntersection = new THREE.SpriteText(
 				( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
 				( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +

@@ -109,16 +109,12 @@
 
 		} from '../../../../three.js/dev/build/three.module.js';
 */
-//		import { OrbitControls } from '../../../../three.js/dev/examples/jsm/controls/OrbitControls.js';
 		import { ConvexBufferGeometry } from '../../../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js';
-//		import { StereoEffect, spatialMultiplexsIndexs } from '../../../../three.js/dev/examples/jsm/effects/StereoEffect.js';
 
 		//import myThreejs from 'https://raw.githack.com/anhr/myThreejs/master/myThreejs.js';
 		import myThreejs from '../../../../myThreejs/master/myThreejs.js';
 
-		//		import ColorPicker from '../../../colorpicker/master/colorpicker.js';
 		import { WEBGL } from '../../../../three.js/dev/examples/jsm/WebGL.js';
-
 		if ( WEBGL.isWebGLAvailable() === false ) {
 
 			document.body.appendChild( WEBGL.getWebGLErrorMessage() );
@@ -131,11 +127,11 @@
 			marks: 110,//Number of scenes of 3D objects animation.
 			name: 'Time (sec.)',
 			/*
-						repeat: true,
-						zoomMultiplier: 1.1,
-						positionOffset: 0.1,
-						min: -10,
-						max: 10,
+			repeat: true,
+			zoomMultiplier: 1.1,
+			positionOffset: 0.1,
+			min: -10,
+			max: 10,
 			*/
 
 		};
@@ -384,8 +380,7 @@
 				return this.attributes.size.array[index];// / ( ( scale.x + scale.y + scale.z ) / 3 );
 
 			}
-*/
-/*
+
 			//http://localhost/threejs/three.js/dev/examples/textures/sprites/disc.png
 			//var texture = new THREE.TextureLoader().load( "../../../../three.js/dev/examples/textures/sprites/snowflake7_alpha.png" );
 			//var texture = new THREE.TextureLoader().load( "../../../../three.js/dev/examples/textures/sprites/disc.png" );
@@ -420,7 +415,6 @@
 				a: a, b: b,
 				sizes: sizes,
 				scales: options.scales,
-//				group: group,
 
 			} );
 			points2.name = 'ShaderMaterial';
@@ -491,12 +485,6 @@
 					},
 					onMouseDown: function ( raycaster, intersection, scene ) {
 
-						/*
-												var position = raycaster.stereo.getPosition( intersection );
-												alert( 'You are clicked the "' + intersection.object.type + '" type object.'
-													+ ( intersection.index === undefined ? '' : ' Index = ' + intersection.index + '.' )
-													+ ' Position( x: ' + position.x + ', y: ' + position.y + ', z: ' + position.z + ' )' );
-						*/
 
 					},
 
@@ -518,7 +506,6 @@
 				//this.cube.position.x = t;
 				//this.cube.position.y = t;
 				//this.cube.position.z = t;
-				//				setAttributes( options.a, options.b );//For trace of the cube points only
 
 			} );
 			var position = new THREE.Vector3( -0.5, 0.5, -0.5 );
@@ -536,8 +523,6 @@
 				this.cube.rotation.set( angle / 2, angle / 4, angle );
 				myThreejs.limitAngles( this.cube.rotation );
 
-				//				setAttributes( options.a, options.b );//For trace of the cube points only
-
 			}, 'Green cube' );
 
 		},
@@ -545,23 +530,9 @@
 
 			elContainer: "canvasContainer1",//document.getElementById("canvasContainer1"),//id of the HTMLElement for canvas and HTMLElement with id="iframe-goes-in-here" for gui.
 			orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
-//				orbitControlsGui: true,//displays the orbit controls gui.
 			axesHelper: true,
-/*
-			axesHelper: {
-
-			},
-*/
 			axesHelperGui: true,
 			stereoEffect: true,
-/*				
-			stereoEffect: {
-
-				StereoEffect: StereoEffect,
-				spatialMultiplexsIndexs: spatialMultiplexsIndexs,
-
-			},//use stereoEffect. https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
-*/				
 			menuPlay: true,
 			dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
 			player: playerOptions,//3D objects animation.

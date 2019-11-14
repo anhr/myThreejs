@@ -489,6 +489,7 @@ export function create( createXDobjects, options ) {
 
 			} );
 			renderer.setPixelRatio( window.devicePixelRatio );
+			options.renderer = renderer;//for getShaderMaterialPoints
 			cursor = renderer.domElement.style.cursor;
 
 			//resize
@@ -1714,6 +1715,11 @@ export function create( createXDobjects, options ) {
 
 					if ( mesh.userData.selectPlayScene !== undefined ) {
 
+						//Эти строки нужны что бы появлялся текст возле точки, если на нее наведена мышка
+						//при условии, что до этого точка была передвинута с помошью проигрывателя.
+						delete mesh.geometry.boundingSphere;
+						mesh.geometry.boundingSphere = null;
+
 						mesh.userData.selectPlayScene( t );
 						function setAttributes( a, b ) {
 
@@ -1970,8 +1976,11 @@ export function create( createXDobjects, options ) {
 
 						raycaster = new THREE.Raycaster();
 //item.material.size is NaN if item.material is ShaderMaterial
+						//Влияет только на точки без ShaderMaterial
 //						raycaster.params.Points.threshold = item.material.size / 3;//0.03;
-						raycaster.params.Points.threshold = options.point.size / 3;//0.03;
+//						raycaster.params.Points.threshold = options.point.size / 3;//0.03;
+//						raycaster.params.Points.threshold = options.point.size * 10;
+						raycaster.params.Points.threshold = 0.01;
 						if ( raycaster.setStereoEffect !== undefined )
 							raycaster.setStereoEffect( {
 
@@ -2897,6 +2906,7 @@ function getObjectPosition( object, index ) {
  * @param {object} [pointsOptions] followed points options is availablee:
  * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.
  * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
+ * @param {string} [pointsOptions.shaderMaterial] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
  * @param {THREE.Vector3} [pointsOptions.position] position of the points. Default is new THREE.Vector3( 0, 0, 0 ).
  * Vector's x, y, z is position of the points.
  * Can be as:
@@ -2933,11 +2943,12 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 		points = getShaderMaterialPoints( {
 
 			getPoints: options.getPoints,
+			getСolors: options.getСolors,
+			renderer: options.renderer,
 			tMin: pointsOptions.tMin,
 			arrayFuncs: arrayFuncs,
 			a: options.a, b: options.b,
 			sizes: new Float32Array( arrayFuncs.length ),
-			getСolors: options.getСolors,
 			scales: options.scales,
 			//group: group,
 
@@ -3128,6 +3139,8 @@ function getGlobalScale( mesh ) {
  * See https://github.com/anhr/myThreejs#optionsgetpoints-t-arrayfuncs-a-b- for details.
  * @param {getСolors} params.getСolors Get array of mesh colors.
  * See https://github.com/anhr/myThreejs#optionsget%D1%81olors-t-arrayfuncs-scale- for details.
+ * @param {THREE.WebGLRenderer} params.renderer WebGLRenderer.
+ * See https://threejs.org/docs/index.html#api/en/constants/Renderer for details.
  * @param {number} params.tMin start time. Uses for playing of the points. Default is 0.
  * @param {array} params.arrayFuncs points.geometry.attributes.position array.
  * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
@@ -3146,8 +3159,12 @@ export function getShaderMaterialPoints( params ) {
 	geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( params.getСolors( params.tMin, params.arrayFuncs, params.scales.w ), 3 ) );
 	geometry.getPointSize = function ( index ) {
 
+		//размер области точки, в которой должна находиться мышка зависит от высоты холста canvas
+		var size = new THREE.Vector2();
+		params.renderer.getSize( size );
+		
 		var scale = getGlobalScale( points );
-		return this.attributes.size.array[index] / ( ( scale.x + scale.y + scale.z ) / 3 );
+		return this.attributes.size.array[index] * (-size.y*0.005+2.99) / ( ( scale.x + scale.y + scale.z ) / 3 );
 
 	}
 

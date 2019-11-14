@@ -150,6 +150,7 @@
 
 			arrayFuncs = [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 				/*
+				new THREE.Vector3( -0.5, 0.5, -1 ),//3D point. White color
 				{
 
 					vector: new THREE.Vector4(
@@ -166,7 +167,6 @@
 
 				},
 				new THREE.Vector2( 0, 0 ),//2D point. White color
-				new THREE.Vector3( -0.5, 0.5, -1 ),//3D point. White color
 				{
 
 					vector: new THREE.Vector4( 0.5,//new Function( 't', 'a', 'b', 'return 0.5-t' ),//0.5
@@ -178,7 +178,54 @@
 
 				}
 				*/
+				{
+
+					//vector: new THREE.Vector3( [-1, 1, 0], [1, -1, 0.5, 0], [-1, 0] ),
+					//vector: new THREE.Vector4( [-1, 1, 0], [1, -1, 0.5, 0], [-1, 0], new THREE.Color( "rgb(225, 0, 0)" ) ),
+					vector: new THREE.Vector4(
+
+						[1, 1, 0],//x
+						[1, -1, 0.5, 0],//y
+						//[new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ), -1, 0.5, 0],//y
+						[1, 0],//z
+						/******************************************
+						 * ВНИМАНИЕ!!! Эта строка почемуто работает некоррктно
+						 * Вместо красного цвета появляется цвет e1
+						 * Ошибка происходит в строке this.r = Math.min( 255, parseInt( color[ 1 ], 10 ) ) / 255;
+						 * в функции THREE.Color.setStyle
+						 * Непонятно почему this.r = 0.8823529411764706 вместо 1
+						new THREE.Color( "rgb(225, 0, 0)" ),//w
+						*/
+						//new THREE.Color( 1, 0, 0 ),//w
+						[
+							//color palette between form -1 to 1
+							3,//white
+							-1,
+							0,
+
+							new THREE.Color( 1, 0, 0 ),
+							new Function( 't', 'return 1-2*t' ),
+							new THREE.Color( 0, 1, 0 ),
+							new THREE.Color( 0, 0, 1 ),
+							0//last value is not using
+						]//w 
+						//new Function( 't', 'return 1-2*t' ),//w
+						/*
+						[
+							new THREE.Color( "rgb(225, 0, 0)" ),
+							//new THREE.Color( "rgb(0, 225, 0)" ),
+							new Function( 't', 'return 1-2*t' ),
+							new THREE.Color( "rgb(0, 0, 225)" ),
+							0
+						]//w
+						*/
+
+					),
+					trace: true,//Displays the trace of the point movement.
+
+				},
 			];
+			/*
 			for ( var i = -1; i <= 1; i += 0.2 ) {
 
 //				var fx = 'return t+(' + i + ')';
@@ -192,6 +239,7 @@
 //				arrayFuncs.push( new THREE.Vector4( 0, i, 0, new THREE.Color( "rgb(" + parseInt( ( - 0.5 * i + 0.5 ) * 255 ) + ", 0, " + parseInt( ( i + 1 ) * 255 ) + ")" ) ) );
 
 			}
+			*/
 			group.add( myThreejs.Points( arrayFuncs, options, {
 
 					name: 'Wave',
@@ -228,7 +276,7 @@
 
 				//				new THREE.Vector4( -1.5, 0.5, 1, 25 ),//4D point. white color
 				//new THREE.Vector4( 0, 0, 0, new Function( 't', 'return 1-2*t' ) ),//color is f(t)
-				new THREE.Vector4( 0.25, 0, 0, new THREE.Color( "rgb(255, 127, 0)" ) ),//yellow point
+				//new THREE.Vector4( 0.25, 0, 0, new THREE.Color( "rgb(255, 127, 0)" ) ),//yellow point
 				//new THREE.Vector4( 0.25, 0, 0, new THREE.Color( "rgb(255, 0, 0)" ) ),//red point
 			]
 			var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
@@ -269,7 +317,7 @@
 			//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 			arrayFuncs = [
 
-				//new THREE.Vector2( [-1, 1, 0], 0 ),
+				new THREE.Vector2( [-1, 1, 0], 0 ),
 				//new THREE.Vector4( 0.25, 0, 0, new THREE.Color( "rgb(255, 0, 0)" ) ),
 				/*
 				new THREE.Vector2( [0, 1], new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ) ),
@@ -280,52 +328,6 @@
 
 				},
 				*/
-				{
-
-					//vector: new THREE.Vector3( [-1, 1, 0], [1, -1, 0.5, 0], [-1, 0] ),
-					//vector: new THREE.Vector4( [-1, 1, 0], [1, -1, 0.5, 0], [-1, 0], new THREE.Color( "rgb(225, 0, 0)" ) ),
-					vector: new THREE.Vector4(
-
-						[-1, 1, 0],//x
-						[1, -1, 0.5, 0],//y
-						//[new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ), -1, 0.5, 0],//y
-						[-1, 0],//z
-						/******************************************
-						 * ВНИМАНИЕ!!! Эта строка почемуто работает некоррктно
-						 * Вместо красного цвета появляется цвет e1
-						 * Ошибка происходит в строке this.r = Math.min( 255, parseInt( color[ 1 ], 10 ) ) / 255;
-						 * в функции THREE.Color.setStyle
-						 * Непонятно почему this.r = 0.8823529411764706 вместо 1
-						new THREE.Color( "rgb(225, 0, 0)" ),//w
-						*/
-						//new THREE.Color( 1, 0, 0 ),//w
-						[
-							//color palette between form -1 to 1
-							3,//white
-							-1,
-							0,
-
-							new THREE.Color( 1, 0, 0 ),
-							new Function( 't', 'return 1-2*t' ),
-							new THREE.Color( 0, 1, 0 ),
-							new THREE.Color( 0, 0, 1 ),
-							0//last value is not using
-						]//w 
-						//new Function( 't', 'return 1-2*t' ),//w
-						/*
-						[
-							new THREE.Color( "rgb(225, 0, 0)" ),
-							//new THREE.Color( "rgb(0, 225, 0)" ),
-							new Function( 't', 'return 1-2*t' ),
-							new THREE.Color( "rgb(0, 0, 225)" ),
-							0
-						]//w
-						*/
-
-					),
-					trace: true,//Displays the trace of the point movement.
-
-				},
 				/*
 				{
 
@@ -379,7 +381,7 @@
 			geometry.getPointSize = function ( index ) {
 
 				var scale = group.parent.scale;
-				return this.attributes.size.array[index] / ( ( scale.x + scale.y + scale.z ) / 3 );
+				return this.attributes.size.array[index];// / ( ( scale.x + scale.y + scale.z ) / 3 );
 
 			}
 */
@@ -411,11 +413,12 @@
 			var points2 = myThreejs.getShaderMaterialPoints( {
 
 				getPoints: options.getPoints,
+				getСolors: options.getСolors,
+				renderer: options.renderer,
 				tMin: tMin,
 				arrayFuncs: arrayFuncs,
 				a: a, b: b,
 				sizes: sizes,
-				getСolors: options.getСolors,
 				scales: options.scales,
 //				group: group,
 

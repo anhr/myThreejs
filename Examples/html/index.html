@@ -21,8 +21,6 @@
 	<script src="/anhr/three.js/dev/examples/js/libs/dat.gui.js"></script>
 	<script src="/anhr/commonNodeJS/master/dat.js"></script>
 
-	<!--<script src="http://localhost/threejs/three.js/src/objects/SpriteText.js"></script>-->
-
 	<!--for debugging
 	https://github.com/vorg/webgl-debug
 	https://searchcode.com/codesearch/view/85060658/
@@ -81,7 +79,6 @@
 	</script>
 	-->
 	<h2>Canvas.</h2>
-	<!--<div id="canvasContainer1"><img src="https://raw.githubusercontent.com/anhr/TreeElementNodeJS/master/img/wait.gif"></div>-->
 	<div id="canvasContainer1"><img src="/anhr/TreeElementNodeJS/master/img/wait.gif"></div>
 	<script nomodule>alert( 'Fatal error: Your browser do not support modular JavaScript code.' );</script>
 	<script type="module">
@@ -112,7 +109,7 @@
 		import { ConvexBufferGeometry } from '../../../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js';
 
 		//import myThreejs from 'https://raw.githack.com/anhr/myThreejs/master/myThreejs.js';
-		import myThreejs from '../../../../myThreejs/master/myThreejs.js';
+		import myThreejs from '/anhr/myThreejs/master/myThreejs.js';
 
 		import { WEBGL } from '../../../../three.js/dev/examples/jsm/WebGL.js';
 		if ( WEBGL.isWebGLAvailable() === false ) {
@@ -591,7 +588,6 @@
 	<h2>Simple canvas.</h2>
 	<!--<div id="canvasContainer2"></div>-->
 	<script>
-		return;
 		myThreejs.create( function ( group, options ) {
 
 			//Points

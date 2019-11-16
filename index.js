@@ -275,8 +275,13 @@ export function create( createXDobjects, options ) {
 	options.scales.x = getAxis( options.scales.x, 'X' );
 	options.scales.y = getAxis( options.scales.y, 'Y' );
 	options.scales.z = getAxis( options.scales.z, 'Z' );
+	if ( options.scales.w === undefined )
+		options.scales.w = { name: 'W', min: -1, max: 1 };
+	options.scales.w = getAxis( options.scales.w, 'W', options.scales.w.min, options.scales.w.max );
+/*	
 	if ( options.scales.w !== undefined )
 		options.scales.w = getAxis( options.scales.w, 'W', 0, 100 );
+*/		
 
 	function setColorAttribute( attributes, i, color ) {
 
@@ -358,6 +363,8 @@ export function create( createXDobjects, options ) {
 			typeof options.elContainer === "string" ? document.getElementById( options.elContainer ) : options.elContainer;
 		if ( elContainer === null ) {
 
+			if( typeof options.elContainer === "string" )
+				console.warn( 'The ' + options.elContainer + ' element was not detected.' );
 			elContainer = document.createElement( 'div' );
 			document.querySelector( 'body' ).appendChild( elContainer );
 
@@ -854,9 +861,8 @@ export function create( createXDobjects, options ) {
 							displayControllerW = none;
 						else {
 
-//							setValue( controllerW, position.w );
 							setValue( controllerW, color );
-							displayControllerW = block;
+							displayControllerW = color === undefined ? none : block;
 
 						}
 						displayControllerColor = none;
@@ -1052,7 +1058,7 @@ export function create( createXDobjects, options ) {
 
 //Если оставить эту линию то исчезает трассировка точки если пользователь выбрал эту точку
 //						mesh.userData.traceAll = mesh.userData.traceAll || false;
-						if( mesh.userData.traceAll !== undefined )
+						if( ( mesh !== undefined ) && ( mesh.userData.traceAll !== undefined ) )
 							cTraceAll.setValue( mesh.userData.traceAll );
 
 					} );
@@ -1756,27 +1762,6 @@ export function create( createXDobjects, options ) {
 								setPosition( 'x', 'setX' );
 								setPosition( 'y', 'setY' );
 								setPosition( 'z', 'setZ' );
-//								setPosition( 'w', 'setW' );
-/*								
-								if ( typeof funcs.x === "function" ) {
-
-									attributes.position.setX( i, funcs.x( t, a, b ) );
-									needsUpdate = true;
-
-								}
-								if ( typeof funcs.y === "function" ) {
-
-									attributes.position.setY( i, funcs.y( t, a, b ) );
-									needsUpdate = true;
-
-								}
-								if ( typeof funcs.z === "function" ) {
-
-									attributes.position.setZ( i, funcs.z( t, a, b ) );
-									needsUpdate = true;
-
-								}
-*/								
 								let color;
 								var min, max;
 								if ( options.scales.w !== undefined ) {
@@ -1803,8 +1788,9 @@ export function create( createXDobjects, options ) {
 										color = funcs.w;
 									else color = palette.toColor( execFunc( funcs, 'w', t, a, b ), min, max );
 
-								} else color = new THREE.Color( 1, 1, 1 );//white
-//								if ( attributes.color !== undefined )
+								} else if ( typeof funcs.w === "number" )
+									color = palette.toColor( funcs.w, min, max );
+								else color = new THREE.Color( 1, 1, 1 );//white
 								setColorAttribute( attributes, i, color );
 								if ( needsUpdate )
 									attributes.position.needsUpdate = true;
@@ -2447,6 +2433,20 @@ export function create( createXDobjects, options ) {
 	 *   [name]: point name. Default is undefined.
 	 *   [trace]: true - displays the trace of the point movement. Default is undefined.
 	 * }
+	 * or
+	 * object: {
+	 *   x: x axis. Defauilt is 0.
+	 *   y: y axis. Defauilt is 0.
+	 *   z: z axis. Defauilt is 0.
+	 *   w: w axis. Defauilt is 0.
+	 * }
+	 *
+	 * array: [
+	 *   0: x axis. Defauilt is 0.
+	 *   1: y axis. Defauilt is 0.
+	 *   2: z axis. Defauilt is 0.
+	 *   3: w axis. Defauilt is 0.
+	 * ]
 	 * @param {number} a second parameter of the arrayFuncs item function. Default is 1.
 	 * @param {number} b third parameter of the arrayFuncs item function. Default is 0.
 	 * @returns array of THREE.Vector4 points.
@@ -2455,6 +2455,37 @@ export function create( createXDobjects, options ) {
 
 		if ( t === undefined )
 			console.error( 'getPoints: t = ' + t );
+		for ( var i = 0; i < arrayFuncs.length; i++ ) {
+
+			var item = arrayFuncs[i];
+			if ( Array.isArray( item ) )
+				arrayFuncs[i] = new THREE.Vector4(
+
+					item[0] === undefined ? 0 : item[0],
+					item[1] === undefined ? 0 : item[1],
+					item[2] === undefined ? 0 : item[2],
+					item[3] === undefined ? 0 : item[3]
+
+				);
+			else if (
+
+				( typeof item === "object" )
+				&& ( item.vector === undefined )
+				&& ( item instanceof THREE.Vector2 === false )
+				&& ( item instanceof THREE.Vector3 === false )
+				&& ( item instanceof THREE.Vector4 === false )
+
+			)
+				arrayFuncs[i] = new THREE.Vector4(
+
+					item.x === undefined ? 0 : item.x,
+					item.y === undefined ? 0 : item.y,
+					item.z === undefined ? 0 : item.z,
+					item.w === undefined ? 0 : item.w
+
+				);
+
+		};
 		var points = [];
 //		arrayFuncs.forEach( function ( funcs )
 		for ( var i = 0; i < arrayFuncs.length; i++ ){
@@ -2649,10 +2680,9 @@ export function create( createXDobjects, options ) {
 					!isArrayFuncs ?
 						'' :
 						funcs[intersection.index] instanceof THREE.Vector4 ?
-//							isNaN( position.w ) ?
-//							isColorWAxis( intersection ) ?
 							color instanceof THREE.Color ?
 								'\n' + lang.color + ': ' + new THREE.Color( color.r, color.g, color.b ).getHexString() :
+//								options.scales.w === undefined ? '' : '\n' + options.scales.w.name + ': ' + position.w :
 								'\n' + options.scales.w.name + ': ' + position.w :
 							''
 
@@ -2885,7 +2915,7 @@ function getObjectPosition( object, index ) {
 
 /**
  * Displaying points
- * @param {THREE.Vector4|THREE.Vector3|THREE.Vector2|object} arrayFuncs points.geometry.attributes.position array
+ * @param {THREE.Vector4|THREE.Vector3|THREE.Vector2|object|array} arrayFuncs points.geometry.attributes.position array
  * THREE.Vector4: 4D point.
  * THREE.Vector3: 3D point. w = 1. Default is white color
  * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
@@ -2902,6 +2932,20 @@ function getObjectPosition( object, index ) {
  *   name: point name
  *   trace: true - Displays the trace of the point movement. Default is false
  * }
+ * or
+ * object: {
+ *   x: x axis. Defauilt is 0.
+ *   y: y axis. Defauilt is 0.
+ *   z: z axis. Defauilt is 0.
+ *   w: w axis. Defauilt is 0.
+ * }
+ * 
+ * array: [
+ *   0: x axis. Defauilt is 0.
+ *   1: y axis. Defauilt is 0.
+ *   2: z axis. Defauilt is 0.
+ *   3: w axis. Defauilt is 0.
+ * ]
  * @param {object} options see myThreejs.create options for details
  * @param {object} [pointsOptions] followed points options is availablee:
  * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.

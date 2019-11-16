@@ -374,6 +374,20 @@ Limits angles of rotations of the mesh between 0 and 360 degrees.
  *   name: point name
  *   trace: true - Displays the trace of the point movement.
  * }
+ * or
+ * object: {
+ *   x: x axis. Defauilt is 0.
+ *   y: y axis. Defauilt is 0.
+ *   z: z axis. Defauilt is 0.
+ *   w: w axis. Defauilt is 0.
+ * }
+ * 
+ * array: [
+ *   0: x axis. Defauilt is 0.
+ *   1: y axis. Defauilt is 0.
+ *   2: z axis. Defauilt is 0.
+ *   3: w axis. Defauilt is 0.
+ * ]
 
 ## Directory Contents
 

@@ -359,9 +359,11 @@ Limits angles of rotations of the mesh between 0 and 360 degrees.
  ### arrayFuncs item
 
  * THREE.Vector4: 4D point.
- * THREE.Vector3: 3D point. w = 1. Default is white color
- * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
+ * THREE.Vector3: 3D point. w = 1. Default is white color.
+ * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color.
+
   Vector's x, y, z, w is position of the point.
+
   Can be as:
   float - position of the point.
   [float] - array of positions of the point.

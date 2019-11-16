@@ -361,13 +361,13 @@ Limits angles of rotations of the mesh between 0 and 360 degrees.
  * THREE.Vector4: 4D point.
  * THREE.Vector3: 3D point. w = 1. Default is white color
  * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
- * Vector's x, y, z, w is position of the point.
- * Can be as:
- * float - position of the point.
- * [float] - array of positions of the point.
- * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
- * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
- * if arrayFuncs.length === 0 then push new THREE.Vector3().
+  Vector's x, y, z, w is position of the point.
+  Can be as:
+  float - position of the point.
+  [float] - array of positions of the point.
+  Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
+  Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
+  if arrayFuncs.length === 0 then push new THREE.Vector3().
  * 
  * object: {
  *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position

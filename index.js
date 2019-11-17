@@ -1852,6 +1852,8 @@ export function create( createXDobjects, options ) {
 
 			} );
 
+			defaultSize = options.point.size;
+			
 			if ( gui !== undefined ) {
 
 				//THREE.AxesHelper gui
@@ -1890,7 +1892,6 @@ export function create( createXDobjects, options ) {
 
 				//point
 
-				defaultSize = options.point.size;
 				var pointName = 'Point_' + getCanvasName();
 				cookie.getObject( pointName, options.point, options.point );
 
@@ -2251,7 +2252,10 @@ export function create( createXDobjects, options ) {
 				} );
 
 				//set size of the SpriteText
-				if ( axesHelper !== undefined )
+				if (
+						( axesHelper !== undefined )
+						&& ( defaultSize !== undefined )
+					)
 					axesHelper.arraySpriteText.forEach( function ( spriteItem ) {
 
 //						spriteItem.userData.setSize( cameraPosition, Math.tan( options.point.size ) * scale );

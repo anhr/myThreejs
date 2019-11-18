@@ -701,7 +701,18 @@ export function create( createXDobjects, options ) {
 					controllerX, controllerY, controllerZ, controllerW, cTrace, cTraceAll, controllerColor,
 					controllerWorld = new THREE.Vector3();
 
-				//function visibleTraceLine( point, value, index )
+				function dislayEl( controller, displayController ) {
+
+					if ( controller === undefined )
+						return;
+					if( typeof displayController == "boolean" )
+						displayController = displayController ? 'block' : 'none';
+					var el = controller.domElement;
+					while ( el.tagName.toUpperCase() !== "LI" ) el = el.parentElement;
+					el.style.display = displayController;
+
+				}
+
 				function visibleTraceLine( intersection, value ) {
 
 					if ( intersection.object.userData.arrayFuncs === undefined )
@@ -866,15 +877,6 @@ export function create( createXDobjects, options ) {
 
 						}
 						displayControllerColor = none;
-
-					}
-					function dislayEl( controller, displayController ) {
-
-						if ( controller === undefined )
-							return;
-						var el = controller.domElement;
-						while ( el.tagName.toUpperCase() !== "LI" ) el = el.parentElement;
-						el.style.display = displayController;
 
 					}
 					dislayEl( controllerW, displayControllerW )
@@ -1272,17 +1274,13 @@ export function create( createXDobjects, options ) {
 					cTraceAll = fPonts.add( { trace: false }, 'trace' ).onChange( function ( value ) {
 
 						mesh.userData.traceAll = value;
-/*
-						if ( mesh.userData.arrayFuncs !== undefined )//You can not trace points if you do not defined the mesh.userData.arrayFuncs
-							for ( var i = 0; i < mesh.userData.arrayFuncs.length; i++ )
-								visibleTraceLine( { object: mesh, index: i }, value );
-*/
 						for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
 							visibleTraceLine( { object: mesh, index: i }, value );
 						cTrace.setValue( value );
 
 					} );
 					dat.controllerNameAndTitle( cTraceAll, lang.trace, lang.traceAllTitle );
+					dislayEl( cTraceAll, options.player === undefined ? false : true );
 
 					//Restore default settings of all 3d objects button.
 					dat.controllerNameAndTitle( f3DObjects.add( {
@@ -1448,6 +1446,7 @@ export function create( createXDobjects, options ) {
 
 					} );
 					dat.controllerNameAndTitle( cTrace, lang.trace, lang.traceTitle );
+					dislayEl( cTrace, options.player === undefined ? false : true );
 
 					//Point's world position axes controllers
 

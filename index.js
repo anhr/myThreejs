@@ -1695,9 +1695,11 @@ export function create( createXDobjects, options ) {
 					options.scales.t.marks = options.scales.t.marks || 2;
 
 				}
+				var cookieName = getCanvasName();
 				axesHelper = new THREE.AxesHelper( 1 * scale, {
 
 					cookie: cookie,
+					cookieName: cookieName === '' ? '' : '_' + cookieName,
 					scene: scene,
 					negativeAxes: true,
 					colors: colorsHelper / 0xff, //gray axes

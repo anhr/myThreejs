@@ -31,8 +31,8 @@ import PositionController from '../../commonNodeJS/master/PositionController.js'
 /**
  * 3D objects animation.
  * @param {object} options followed options is available
- * @param {number} [options.marks] Number of scenes of 3D objects animation. Default is 2
  * @param {number} [options.settings] time settings.
+ * @param {number} [options.settings.marks] Number of scenes of 3D objects animation. Default is 2
  * @param {boolean} [options.settings.repeat] true - Infinitely repeating 3D objects animation. Default is false.
  * @param {number} [options.settings.zoomMultiplier] zoom multiplier of the time. Default is 1.1.
  * @param {number} [options.settings.offset] offset of the time. Default is 0.1.
@@ -40,7 +40,7 @@ import PositionController from '../../commonNodeJS/master/PositionController.js'
  * @param {number} [options.settings.max] Animation end time. Default is 1.
  * @param {onChangeScaleT} [options.onChangeScaleT] event. User has updated the time settings.
  * @param {object} [options.cookie] Your custom cookie function for saving and loading of the Player settings. Default cookie is not saving settings.
- * @param {onSelectScene} onSelectScene event
+ * @param {onSelectScene} onSelectScene event of the changing of scene during animation
  */
 function Player( options, onSelectScene ) {
 
@@ -198,7 +198,7 @@ function Player( options, onSelectScene ) {
 
 	}
 	/**
-	 * Use has clicked the Play ► / Pause ❚❚ button
+	 * User has clicked the Play ► / Pause ❚❚ button
 	 */
 	this.play3DObject = function() {
 
@@ -230,7 +230,7 @@ function Player( options, onSelectScene ) {
 	}
 
 	/**
-	 * Use has clicked the repeat ⥀ button
+	 * User has clicked the repeat ⥀ button
 	 */
 	this.repeat = function () {
 
@@ -240,6 +240,7 @@ function Player( options, onSelectScene ) {
 	}
 
 	this.getOptions = function () { return options; }
+	this.getSettings = function () { return options.settings; }
 	this.getSelectSceneIndex = function () { return selectSceneIndex; }
 
 

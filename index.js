@@ -55,9 +55,6 @@ import cookie from '../../cookieNodeJS/master/cookie.js';
 //import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
 import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 
-//import controllerPlay from 'https://raw.githack.com/anhr/controllerPlay/master/controllerPlay.js';
-import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
-
 //import menuPlay from 'https://raw.githack.com/anhr/menuPlay/master/menuPlay.js';
 import menuPlay from '../../menuPlay/master/menuPlay.js';
 
@@ -72,6 +69,7 @@ import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
 import clearThree from '../../commonNodeJS/master/clearThree.js';
 import ColorPicker from '../../colorpicker/master/colorpicker.js';
 import PositionController from '../../commonNodeJS/master/PositionController.js';
+import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
 import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 import { StereoEffect, spatialMultiplexsIndexs } from '/anhr/three.js/dev/examples/jsm/effects/StereoEffect.js';
 import { OrbitControls } from '/anhr/three.js/dev/examples/jsm/controls/OrbitControls.js';
@@ -355,6 +353,14 @@ export function create( createXDobjects, options ) {
 
 	}
 
+	function getCanvasName() {
+		return typeof options.elContainer === "object" ?
+			options.elContainer.id :
+			typeof options.elContainer === "string" ?
+				options.elContainer :
+				'';
+	}
+
 	var camera, group, scene;
 
 	function onloadScripts() {
@@ -376,7 +382,8 @@ export function create( createXDobjects, options ) {
 
 		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
 			renderer, cursor, controls, stereoEffect, player,
-			playController, canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
+//			playController,
+			canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
 			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault, cameraPosition,// fullScreen,
 
 			//point size
@@ -1574,7 +1581,14 @@ export function create( createXDobjects, options ) {
 //				guiSelectPoint.addControllers();
 
 			}
+/*
+			options.onChangeScaleT = function ( scale ) {
 
+				if ( canvasMenu !== undefined )
+					canvasMenu.onChangeScale( scale );
+
+			}
+*/
 			//если я оставлю здесь этот вызов, то начальное время tMin будет еще не известно и не удасться установить все 3D объекты в начальное положение
 //			createXDobjects( group );
 
@@ -1582,8 +1596,23 @@ export function create( createXDobjects, options ) {
 
 			if ( options.player !== undefined ) {
 
+/*
 				options.player.cookie = cookie;
-				player = new Player( options.player, function ( index ) {
+				options.player.cookieName = '_' + getCanvasName();
+*/				
+				player = new Player( {
+
+					settings: options.player,
+					cookie: cookie,
+					cookieName: '_' + getCanvasName(),
+					onChangeScaleT: function ( scale ) {
+
+						if ( canvasMenu !== undefined )
+							canvasMenu.onChangeScale( scale );
+
+					},
+
+				}, function ( index ) {
 
 					var t = ( ( options.player.max - options.player.min ) / ( options.player.marks - 1 ) ) * index + options.player.min;
 //					group.userData.index = index;
@@ -1594,14 +1623,45 @@ export function create( createXDobjects, options ) {
 				} );
 				if ( gui !== undefined ) {
 
-					playController = controllerPlay.create( player );
+//					player.gui( gui, options.scales.t, getLanguageCode );
+					var playController = controllerPlay.create( player );
 					gui.add( playController );
+/*
+					import('../../controllerPlay/master/controllerPlay.js')
+						  .then(module => {
+
+							var controllerPlay = module.default;
+							var playController = controllerPlay.create( player );
+							gui.add( playController );
+
+						  })
+						  .catch(err => {
+
+							console.error( err.message );
+
+						  });
+*/
+/*
+					function addControllerPlay() {
+
+						let { default: controllerPlay } = await import( '../../controllerPlay/master/controllerPlay.js' );
+						var playController = controllerPlay.create( player );
+						gui.add( playController );
+
+					}
+					addControllerPlay();
+*/					
 
 				}
 
 			}
-			if ( gui !== undefined )
+			if ( gui !== undefined ) {
+
 				fOptions = gui.addFolder( lang.settings );
+				if( player !== undefined )
+					player.gui( fOptions, getLanguageCode );
+
+			}
 			if ( stereoEffect !== undefined ) {
 
 //				var spatialMultiplexsIndexs = options.stereoEffect.spatialMultiplexsIndexs;
@@ -1676,17 +1736,11 @@ export function create( createXDobjects, options ) {
 
 			}
 
-			options.onChangeScaleT = function ( scale ) {
-
-				if ( canvasMenu !== undefined )
-					canvasMenu.onChangeScale( scale );
-
-			}
-
 			// helper
 
 			if ( options.axesHelper ) {
 
+/*
 				if ( options.scales.t !== undefined ) {
 
 					options.scales.t.min = options.scales.t.min || 0;
@@ -1694,6 +1748,7 @@ export function create( createXDobjects, options ) {
 					options.scales.t.marks = options.scales.t.marks || 2;
 
 				}
+*/				
 				var cookieName = getCanvasName();
 				axesHelper = new THREE.AxesHelper( 1 * scale, {
 
@@ -1703,7 +1758,7 @@ export function create( createXDobjects, options ) {
 					negativeAxes: true,
 					colors: colorsHelper / 0xff, //gray axes
 					colorsHelper: colorsHelper,
-					onChangeScaleT: options.onChangeScaleT,
+//					onChangeScaleT: options.onChangeScaleT,
 					scales: options.scales,
 
 				} );
@@ -2077,14 +2132,6 @@ export function create( createXDobjects, options ) {
 
 			window.addEventListener( 'resize', onResize, false );
 
-			function getCanvasName() {
-				return typeof options.elContainer === "object" ?
-					options.elContainer.id :
-					typeof options.elContainer === "string" ?
-						options.elContainer :
-						'';
-			}
-
 		}
 		function onResize() {
 
@@ -2334,19 +2381,23 @@ export function create( createXDobjects, options ) {
 					}
 					var a = func,
 						l = func.length - 1,
+/*						
 						max = options.scales.t.max,
 						min = options.scales.t.min,
+*/						
+						max = options.player.max,
+						min = options.player.min,
 						tStep = ( max - min ) / l,
 						tStart = min, tStop = max,
 						iStart = 0, iStop = l;
 					for( var i = 0; i < func.length; i++ ) {
 
-						if( tStep * i < t ) {
+						if( tStep * i + min < t ) {
 
 							iStart = i;
 							iStop = i + 1;
-							tStart = tStep * iStart;
-							tStop = tStep * iStop;
+							tStart = tStep * iStart + min;
+							tStop = tStep * iStop + min;
 
 						}
 /*							
@@ -2675,6 +2726,7 @@ export function create( createXDobjects, options ) {
 				funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
 				pointName = !isArrayFuncs ? undefined : funcs[intersection.index].name,
 				color = !isArrayFuncs ? undefined : Array.isArray(func.w) ? execFunc( funcs[intersection.index], 'w', group.userData.t, options.a, options.b ) : func.w;
+			var cookieName = getCanvasName();
 			spriteTextIntersection = new THREE.SpriteText(
 				( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
 				( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
@@ -2706,6 +2758,7 @@ export function create( createXDobjects, options ) {
 					},
 					position: pos,//position,//positionProject,
 					center: new THREE.Vector2( 0.5, 0 ),
+					cookieName: cookieName === '' ? '' : '_' + cookieName,
 
 				} );
 			spriteTextIntersection.name = spriteTextIntersectionName;

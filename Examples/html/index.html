@@ -242,11 +242,11 @@
 					tMin: tMin,
 					position: new THREE.Vector3( -1, 0, 0 ),
 					//position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
-					scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
+					//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
 					//scale: new THREE.Vector3( 2, 2, 2 ),
-					rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+					//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 					//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
-					//shaderMaterial: true,
+					shaderMaterial: true,
 
 				} ) );
 
@@ -549,7 +549,7 @@
 
 				display: true,
 				//precision: 4,
-				t: playerOptions,
+//				t: playerOptions,
 				x: {
 
 					//zoomMultiplier: 2,
@@ -638,21 +638,21 @@
 			addCube( new THREE.Vector3( -0.5, 0.5, -0.5 ), 'green' );
 
 		},
-		{
+			{
 
-			dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
-			/*
-			axesHelper: true,
-			scales: { display: true, },
-			menuPlay: true,
-			orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
-			elContainer: "canvasContainer2",//document.getElementById("canvasContainer1"),//id of the HTMLElement for canvas and HTMLElement with id="iframe-goes-in-here" for gui.
-			axesHelperGui: true,
-			stereoEffect: true,
-//			player: playerOptions,//3D objects animation.
-			*/
+				dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
+				axesHelper: true,
+				scales: { display: true, },
+				menuPlay: true,
+				axesHelperGui: true,
+				/*
+				player: {},//3D objects animation.
+				orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
+				elContainer: "canvasContainer2",//document.getElementById("canvasContainer1"),//id of the HTMLElement for canvas and HTMLElement with id="iframe-goes-in-here" for gui.
+				stereoEffect: true,
+				*/
 
-		}
+			}
 		);
 
 	</script>

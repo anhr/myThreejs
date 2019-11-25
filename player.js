@@ -382,7 +382,8 @@ function Player( options, onSelectScene ) {
 				console.error( err.message );
 			  });			
 */			  
-			scaleControllers.scaleController = scaleControllers.folder.add( new ScaleController( onclick, axes ) ).onChange( function ( value ) {
+			scaleControllers.scaleController = scaleControllers.folder.add( new ScaleController( onclick, 
+				{ settings: options.settings, getLanguageCode: getLanguageCode, } ) ).onChange( function ( value ) {
 
 				axes.zoomMultiplier = value;
 //				options.cookie.setObject( cookieName, options.scales );

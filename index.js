@@ -162,7 +162,7 @@ var arrayCreates = [];
  *
  * @param {object} [options.scales.x] X axis options.
  * @param {number} [options.scales.x.zoomMultiplier] zoom multiplier. Default is 1.1
- * @param {number} [options.scales.x.positionOffset] position offset. Default is 0.1
+ * @param {number} [options.scales.x.offset] position offset. Default is 0.1
  * @param {string} [options.scales.x.name] axis name. Default is "X".
  * @param {number} [options.scales.x.min] Minimum range of the x axis. Default is -1.
  * @param {number} [options.scales.x.max] Maximum range of the x axis. Default is 1.
@@ -170,7 +170,7 @@ var arrayCreates = [];
  *
  * @param {object} [options.scales.y] Y axis options.
  * @param {number} [options.scales.y.zoomMultiplier] zoom multiplier. Default is 1.1
- * @param {number} [options.scales.y.positionOffset] position offset. Default is 0.1
+ * @param {number} [options.scales.y.offset] position offset. Default is 0.1
  * @param {string} [options.scales.y.name] axis name. Default is "Y".
  * @param {number} [options.scales.y.min] Minimum range of the y axis. Default is -1.
  * @param {number} [options.scales.y.max] Maximum range of the y axis. Default is 1.
@@ -178,7 +178,7 @@ var arrayCreates = [];
  *
  * @param {object} [options.scales.z] Z axis options.
  * @param {number} [options.scales.z.zoomMultiplier] zoom multiplier. Default is 1.1
- * @param {number} [options.scales.z.positionOffset] position offset. Default is 0.1
+ * @param {number} [options.scales.z.offset] position offset. Default is 0.1
  * @param {string} [options.scales.z.name] axis name. Default is "Z".
  * @param {number} [options.scales.z.min] Minimum range of the z axis. Default is -1.
  * @param {number} [options.scales.z.max] Maximum range of the z axis. Default is 1.
@@ -186,14 +186,14 @@ var arrayCreates = [];
  *
  * @param {object} [options.scales.w] w axis options.
  * @param {number} [options.scales.w.zoomMultiplier] zoom multiplier. Default is 1.1
- * @param {number} [options.scales.w.positionOffset] position offset. Default is 0.1
+ * @param {number} [options.scales.w.offset] position offset. Default is 0.1
  * @param {string} [options.scales.w.name] axis name. Default is "W".
  * @param {number} [options.scales.w.min] Minimum range of the w axis. Default is -1.
  * @param {number} [options.scales.w.max] Maximum range of the w axis. Default is 1.
  *
  * @param {object} [options.scales.t] Animation time. Default is {}
  * @param {number} [options.scales.t.zoomMultiplier] zoom multiplier. Default is 2
- * @param {number} [options.scales.t.positionOffset] position offset. Default is 1
+ * @param {number} [options.scales.t.offset] position offset. Default is 1
  * @param {string} [options.scales.t.name] Time name. Default is "T".
  * @param {number} [options.scales.t.min] Animation start time. Default is 0.
  * @param {number} [options.scales.t.max] Animation stop time. Default is 1.
@@ -1099,7 +1099,7 @@ export function create( createXDobjects, options ) {
 					},
 						{
 
-							zoomMultiplier: 1.1,
+							settings: { zoomMultiplier: 1.1, },
 							getLanguageCode: getLanguageCode,
 
 						} ) );

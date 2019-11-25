@@ -66,33 +66,33 @@ Creates new canvas with my 3D objects.
 | [options.scales.x] | <code>object</code> |  | x axis scale options of 4D objects. |
 | [options.scales.x.name] | <code>string</code> | "X" | axis name. |
 | [options.scales.x.zoomMultiplier] | <code>number</code> | 1.1 | zoom multiplier. |
-| [options.scales.x.positionOffset] | <code>number</code> | 0.1 | position offset. |
+| [options.scales.x.offset] | <code>number</code> | 0.1 | position offset. |
 | [options.scales.x.min] | <code>number</code> | -1 | Minimum range of the x axis. |
 | [options.scales.x.max] | <code>number</code> | 1 | Maximum range of the x axis. |
 | [options.scales.x.marks] | <code>number</code> | 5 | Number of x scale marks. |
 | [options.scales.y] | <code>object</code> |  | y axis scale options of 4D objects. |
 | [options.scales.y.name] | <code>string</code> | "Y" | axis name. |
 | [options.scales.y.zoomMultiplier] | <code>number</code> | 1.1 | zoom multiplier. |
-| [options.scales.y.positionOffset] | <code>number</code> | 0.1 | position offset. |
+| [options.scales.y.offset] | <code>number</code> | 0.1 | position offset. |
 | [options.scales.y.min] | <code>number</code> | -1 | Minimum range of the y axis. |
 | [options.scales.y.max] | <code>number</code> | 1 | Maximum range of the y axis. |
 | [options.scales.y.marks] | <code>number</code> | 5 | Number of y scale marks. |
 | [options.scales.z] | <code>object</code> |  | z axis scale options of 4D objects. |
 | [options.scales.z.zoomMultiplier] | <code>number</code> | 1.1 | zoom multiplier. |
-| [options.scales.z.positionOffset] | <code>number</code> | 0.1 | position offset. |
+| [options.scales.z.offset] | <code>number</code> | 0.1 | position offset. |
 | [options.scales.z.name] | <code>string</code> | "Z" | axis name. |
 | [options.scales.z.min] | <code>number</code> | -1 | Minimum range of the z axis. |
 | [options.scales.z.max] | <code>number</code> | 1 | Maximum range of the z axis. |
 | [options.scales.z.marks] | <code>number</code> | 5 | Number of z scale marks. |
 | [options.scales.w] | <code>object</code> |  | w axis scale options of 4D objects. |
 | [options.scales.w.zoomMultiplier] | <code>number</code> | 1.1 | zoom multiplier. |
-| [options.scales.w.positionOffset] | <code>number</code> | 0.1 | position offset. |
+| [options.scales.w.offset] | <code>number</code> | 0.1 | position offset. |
 | [options.scales.w.name] | <code>string</code> | "W" | axis name. |
 | [options.scales.w.min] | <code>number</code> | 0 | Minimum range of the w axis. |
 | [options.scales.w.max] | <code>number</code> | 100 | Maximum range of the w axis. |
 | [options.scales.t] | <code>object</code> |  | Animation time. |
 | [options.scales.t.zoomMultiplier] | <code>number</code> | 2 | zoom multiplier. |
-| [options.scales.t.positionOffset] | <code>number</code> | 1 | position offset. |
+| [options.scales.t.offset] | <code>number</code> | 1 | position offset. |
 | [options.scales.t.name] | <code>string</code> | "T" | Time name. |
 | [options.scales.t.min] | <code>number</code> | 0 | Animation start time. |
 | [options.scales.t.max] | <code>number</code> | 1 | Animation stop time. |
@@ -155,7 +155,7 @@ returns array of mesh colors.
 			name: 'Time (sec.)',
 			repeat: true,
 			zoomMultiplier: 1.1,
-			positionOffset: 0.1,
+			offset: 0.1,
 			min: -10,
 			max: 10,
 
@@ -241,7 +241,7 @@ returns array of mesh colors.
 			x: {
 
 				zoomMultiplier: 2,
-				positionOffset: 1,
+				offset: 1,
 				name: 'latitude(km.)',
 				min: -10,
 				max: 10,

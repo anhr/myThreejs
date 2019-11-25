@@ -350,6 +350,13 @@ export function create( createXDobjects, options ) {
 		}
 		this.visible = function ( visible ) { line.visible = visible; }
 		this.isVisible = function () { return line.visible; }
+		this.remove = function () {
+
+			line.geometry.dispose();
+			line.material.dispose();
+			scene.remove( line );
+
+		}
 
 	}
 
@@ -1609,6 +1616,20 @@ export function create( createXDobjects, options ) {
 
 						if ( canvasMenu !== undefined )
 							canvasMenu.onChangeScale( scale );
+						group.children.forEach( function ( mesh ) {
+
+							if( mesh.userData.arrayFuncs === undefined )
+								return;
+							mesh.userData.arrayFuncs.forEach( function ( vector ) {
+
+								if( vector.line === undefined )
+									return;
+								vector.line.remove();
+								vector.line = new traceLine();
+
+							} );
+
+						} );
 
 					},
 

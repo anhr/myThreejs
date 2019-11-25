@@ -79,6 +79,8 @@ function Player( options, onSelectScene ) {
 			index = 0;
 		else if ( index < 0 )
 			index = settings.marks - 1;
+		if( selectSceneIndex > settings.marks )
+			selectSceneIndex = settings.marks;
 		while ( selectSceneIndex !== index ) {
 			if ( selectSceneIndex < index )
 				selectSceneIndex++;
@@ -246,7 +248,6 @@ function Player( options, onSelectScene ) {
 
 	function setSettings() {
 
-//		options.cookie.setObject( cookieName, settings );
 		cookie.setObject( cookieName, options.settings );
 		options.onChangeScaleT( options.settings );
 
@@ -429,7 +430,7 @@ function Player( options, onSelectScene ) {
 			dat.controllerNameAndTitle( scaleControllers.max, lang.max );
 
 			//marks
-			if ( axes.marks !== undefined ) {//w axis do not have marks
+			if ( axes.marks !== undefined ) {
 
 				scaleControllers.marks = dat.controllerZeroStep( scaleControllers.folder, axes, 'marks', function ( value ) {
 

@@ -542,6 +542,7 @@ export function create( createXDobjects, options ) {
 			//if ( THREE.StereoEffect !== undefined )
 			if ( options.stereoEffect ){
 
+				var cookieName = getCanvasName();
 				stereoEffect = new StereoEffect( renderer, {
 
 					spatialMultiplex: spatialMultiplexsIndexs.Mono, //.SbS,
@@ -549,6 +550,7 @@ export function create( createXDobjects, options ) {
 					camera: camera,
 					stereoAspect: 1,
 					cookie: cookie,
+					cookieName: cookieName === '' ? '' : '_' + cookieName,
 					elParent: canvas.parentElement,
 
 				} );

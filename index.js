@@ -58,6 +58,8 @@ import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 //import menuPlay from 'https://raw.githack.com/anhr/menuPlay/master/menuPlay.js';
 import menuPlay from '../../menuPlay/master/menuPlay.js';
 
+import frustumPoints from './frustumPoints.js';
+
 import Player from './player.js';
 
 //import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';
@@ -137,10 +139,12 @@ var arrayCreates = [];
  * @param {boolean} [options.orbitControls.gui] true - displays the orbit controls gui. Default is false.
  * @param {boolean} [options.axesHelper] true - displays the AxesHelper. Default the axes is not visible.
  * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.
- * @param {boolean} [options.stereoEffect] true - use stereoEffect https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js.
- * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
+ * @param {boolean} [options.stereoEffect] true - use stereoEffect https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js. Default is false.
+ * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui Default is false.
  * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui](https://github.com/anhr/dat.gui) for playing of 3D objects in my projects.
- * See nodejs\menuPlay\index.js
+ * See nodejs\menuPlay\index.js Default is false.
+ * @param {boolean} [options.frustumPoints] true - display an array of points, statically fixed in front of the camera. Default is false.
+ * See frustumPoints.js.
  * @param {object} [options.player] 3D objects animation.
  * @param {number} [options.player.min] Animation start time. Default is 0.
  * @param {number} [options.player.max] Animation end time. Default is 1.
@@ -352,6 +356,8 @@ export function create( createXDobjects, options ) {
 		this.isVisible = function () { return line.visible; }
 		this.remove = function () {
 
+			if( line === undefined )
+				return;
 			line.geometry.dispose();
 			line.material.dispose();
 			scene.remove( line );
@@ -1789,6 +1795,23 @@ export function create( createXDobjects, options ) {
 
 				if ( controls !== undefined )
 					controls.update();//if scale != 1 and position != 0 of the screen, то после открытия canvas положение картинки смещено. Положение восстанавливается только если подвигать мышью
+			}
+			if ( options.frustumPoints ) {
+
+				group.add( frustumPoints.create( camera, options ) );
+/*
+				import( './frustumPoints.js' )
+					.then( frustumPoints => {
+
+
+					} )
+					.catch( err => {
+
+						console.error( err.message );
+
+					} );
+*/					
+
 			}
 
 			createXDobjects( group, options );

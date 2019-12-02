@@ -236,19 +236,21 @@
 
 			}
 			*/
+			/*
 			group.add( myThreejs.Points( arrayFuncs, options, {
 
 					name: 'myThreejs.Points',
 					tMin: tMin,
-					position: new THREE.Vector3( -1, 0, 0 ),
-					//position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
+					//position: new THREE.Vector3( -1, 0, 0 ),
+					position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
 					//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
 					//scale: new THREE.Vector3( 2, 2, 2 ),
-					//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+					rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 					//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
 					shaderMaterial: true,
 
 				} ) );
+			*/
 
 			//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 			arrayFuncs = [
@@ -495,7 +497,7 @@
 					cube.userData.cube = cube;
 
 				}
-				group.add( cube );
+				//group.add( cube );
 
 			}
 			addCube( new THREE.Vector3( -1, 0, 0 ), 0xffffff, function ( t ) {
@@ -534,6 +536,7 @@
 			axesHelperGui: true,
 			stereoEffect: true,
 			menuPlay: true,
+			frustumPoints: true,//display an array of points, statically fixed in front of the camera.
 			dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
 			player: playerOptions,//3D objects animation.
 			a: 1.1,

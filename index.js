@@ -58,7 +58,7 @@ import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 //import menuPlay from 'https://raw.githack.com/anhr/menuPlay/master/menuPlay.js';
 import menuPlay from '../../menuPlay/master/menuPlay.js';
 
-import frustumPoints from './frustumPoints.js';
+import FrustumPoints from './frustumPoints.js';
 
 import Player from './player.js';
 
@@ -393,8 +393,11 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( '/anhr/myThreejs/master/canvasContainer.html' );
 		elContainer = elContainer.querySelector( '.container' );
 
-		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
-			renderer, cursor, controls, stereoEffect, player,
+//		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
+//		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.5, 2 ),
+		var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
+			renderer, cursor, controls, stereoEffect, player, frustumPoints,
+
 //			playController,
 			canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
 			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault, cameraPosition,// fullScreen,
@@ -1796,23 +1799,9 @@ export function create( createXDobjects, options ) {
 				if ( controls !== undefined )
 					controls.update();//if scale != 1 and position != 0 of the screen, то после открытия canvas положение картинки смещено. Положение восстанавливается только если подвигать мышью
 			}
-			if ( options.frustumPoints ) {
 
-				group.add( frustumPoints.create( camera, options ) );
-/*
-				import( './frustumPoints.js' )
-					.then( frustumPoints => {
-
-
-					} )
-					.catch( err => {
-
-						console.error( err.message );
-
-					} );
-*/					
-
-			}
+			if ( options.frustumPoints ) 
+				frustumPoints = new FrustumPoints.create( camera, controls, guiSelectPoint, renderer, group, options );
 
 			createXDobjects( group, options );
 
@@ -2266,6 +2255,9 @@ export function create( createXDobjects, options ) {
 			if ( player !== undefined )
 				player.animate();
 
+			if( frustumPoints !== undefined )
+				frustumPoints.animate();
+
 			render();
 
 		}
@@ -2331,14 +2323,15 @@ export function create( createXDobjects, options ) {
 					for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
 						var position = getObjectPosition( mesh, i ),//getObjectLocalPosition( mesh, i ),
-							distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( cameraPosition );
-						mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance * scale );
-	//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size * scale ) * distance / scale );
-	//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance / scale );
-	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 / scale );
-
-	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 );
-	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 * scene.scale.x );
+							position3d = new THREE.Vector3( position.x, position.y, position.z ),
+							distance = position3d.distanceTo( cameraPosition ),
+							y = 1;
+						/*
+							angle = cameraPosition.angleTo( position3d ),
+							cameraFov = ( Math.PI / 180 ) * 0.5 * camera.fov,
+							y = 1 - 0.4 * ( angle / cameraFov );
+						*/
+						mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance * scale * y );
 						mesh.geometry.attributes.size.needsUpdate = true;
 
 					}
@@ -2572,20 +2565,47 @@ export function create( createXDobjects, options ) {
 			else if (
 
 				( typeof item === "object" )
-				&& ( item.vector === undefined )
+//				&& ( item.vector === undefined )
 				&& ( item instanceof THREE.Vector2 === false )
 				&& ( item instanceof THREE.Vector3 === false )
 				&& ( item instanceof THREE.Vector4 === false )
 
-			)
-				arrayFuncs[i] = new THREE.Vector4(
+			) {
+				
+				if( ( item.vector === undefined ) )
+					arrayFuncs[i] = new THREE.Vector4(
 
-					item.x === undefined ? 0 : item.x,
-					item.y === undefined ? 0 : item.y,
-					item.z === undefined ? 0 : item.z,
-					item.w === undefined ? 0 : item.w
+						item.x === undefined ? 0 : item.x,
+						item.y === undefined ? 0 : item.y,
+						item.z === undefined ? 0 : item.z,
+						item.w === undefined ? 0 : item.w
 
-				);
+					);
+				else if (
+
+					   ( item.vector instanceof THREE.Vector2 === true )
+					|| ( item.vector instanceof THREE.Vector3 === true )
+					|| ( item.vector instanceof THREE.Vector4 === true )
+
+				)
+					arrayFuncs[i].vector = new THREE.Vector4(
+
+						item.vector.x === undefined ? 0 : item.vector.x,
+						item.vector.y === undefined ? 0 : item.vector.y,
+						item.vector.z === undefined ? 0 : item.vector.z,
+						item.vector.w === undefined ? 0 : item.vector.w
+
+					);
+				else arrayFuncs[i].vector = new THREE.Vector4(
+
+						item.vector[0] === undefined ? 0 : item.vector[0],
+						item.vector[1] === undefined ? 0 : item.vector[1],
+						item.vector[2] === undefined ? 0 : item.vector[2],
+						item.vector[3] === undefined ? 0 : item.vector[3]
+
+					);
+
+			}
 
 		};
 		var points = [];
@@ -3221,34 +3241,6 @@ export function limitAngles( rotation ) {
 
 }
 
-/**
- * @see https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
- * @example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
- * @returns ShaderMaterial
- */
-/*
-export function getShaderMaterial() {
-
-	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-
-	return new THREE.ShaderMaterial( {
-
-		uniforms: {
-			color: { value: new THREE.Color( 0xffffff ) },
-			pointTexture: { value: texture }
-		},
-		//				vertexShader: document.getElementById( 'vertexshader' ).textContent,
-		vertexShader: "		attribute float size;		attribute vec3 ca;		varying vec3 vColor;		void main() {		vColor = ca;		vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );		gl_PointSize = size * ( 300.0 / -mvPosition.z );		gl_Position = projectionMatrix * mvPosition;		}",
-		//				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-		fragmentShader: "		uniform vec3 color;		uniform sampler2D pointTexture;		varying vec3 vColor;		void main() {		vec4 color = vec4( color * vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord );		gl_FragColor = color;		}	",
-		transparent: true
-
-	} );
-
-}
-*/
 function getGlobalScale( mesh ) {
 
 	var parent = mesh.parent, scale = new THREE.Vector3( 1, 1, 1 );

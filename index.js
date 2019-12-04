@@ -58,7 +58,7 @@ import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 //import menuPlay from 'https://raw.githack.com/anhr/menuPlay/master/menuPlay.js';
 import menuPlay from '../../menuPlay/master/menuPlay.js';
 
-import frustumPoints from './frustumPoints.js';
+import FrustumPoints from './frustumPoints.js';
 
 import Player from './player.js';
 
@@ -393,8 +393,11 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( '/anhr/myThreejs/master/canvasContainer.html' );
 		elContainer = elContainer.querySelector( '.container' );
 
-		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
-			renderer, cursor, controls, stereoEffect, player,
+//		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
+//		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.5, 2 ),
+		var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
+			renderer, cursor, controls, stereoEffect, player, frustumPoints,
+
 //			playController,
 			canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
 			canvas = elContainer.querySelector( 'canvas' ), gui, rendererSizeDefault, cameraPosition,// fullScreen,
@@ -1796,23 +1799,9 @@ export function create( createXDobjects, options ) {
 				if ( controls !== undefined )
 					controls.update();//if scale != 1 and position != 0 of the screen, то после открытия canvas положение картинки смещено. Положение восстанавливается только если подвигать мышью
 			}
-			if ( options.frustumPoints ) {
 
-				group.add( frustumPoints.create( camera, options ) );
-/*
-				import( './frustumPoints.js' )
-					.then( frustumPoints => {
-
-
-					} )
-					.catch( err => {
-
-						console.error( err.message );
-
-					} );
-*/					
-
-			}
+			if ( options.frustumPoints ) 
+				frustumPoints = new FrustumPoints.create( camera, controls, guiSelectPoint, renderer, group, options );
 
 			createXDobjects( group, options );
 
@@ -1997,48 +1986,62 @@ export function create( createXDobjects, options ) {
 				var pointName = 'Point_' + getCanvasName();
 				cookie.getObject( pointName, options.point, options.point );
 
-				var fPoint = fOptions.addFolder( lang.pointSettings ),
-					fSize = fPoint.addFolder( lang.size );
-				dat.folderNameAndTitle( fSize, lang.size, lang.sizeTitle );
+				function FolderPoint( folder, point, defaultSize, setSize, PCOptions ) {
 
-				//point size
-				function setSize( value ) {
+					PCOptions = PCOptions || {};
+
+					PCOptions.min = PCOptions.min || 0.01;
+					PCOptions.max = PCOptions.max || 0.1;
+					PCOptions.settings = PCOptions.settings || {}; 
+					PCOptions.settings.offset = PCOptions.settings.offset || 0.01;
+					PCOptions.step = PCOptions.step || 0.001;
+
+					var fPoint = folder.addFolder( lang.pointSettings ),
+						fSize = fPoint.addFolder( lang.size );
+					dat.folderNameAndTitle( fSize, lang.size, lang.sizeTitle );
+
+					fSize.add( new PositionController( function ( shift ) {
+
+						setSize( point.size + shift );
+
+					}, PCOptions//{ offset: 0.01, min: 0.01, max: 0.1, step: 0.01 }
+					) );
+
+					//size
+					this.size = dat.controllerZeroStep( fSize, point, 'size', function ( value ) {
+
+						setSize( value );
+
+					} );
+					dat.controllerNameAndTitle( this.size, lang.size, lang.sizeTitle );
+
+					//point size default button
+					dat.controllerNameAndTitle( fSize.add( {
+
+						defaultF: function ( value ) {
+
+							setSize( defaultSize );
+
+						},
+
+					}, 'defaultF' ), lang.defaultButton, lang.defaultSizeTitle );
+
+				}
+				var folderPoint = new FolderPoint( fOptions, options.point, defaultSize, function( value ) {
 
 					if ( value === undefined )
 						value = options.point.size;
 					if ( value < 0 )
 						value = 0;
-//					options.point.size = value;
-					size.setValue( value );
+					//					options.point.size = value;
+					folderPoint.size.setValue( value );
 					cookie.setObject( pointName, options.point );
 
-				}
+				} )
 
-				fSize.add( new PositionController( function ( shift ) {
-
-					setSize( options.point.size + shift );
-
-				}, { offset: 0.01, min: 0.01, max: 0.1, step: 0.01 } ) );
-
-				//size
-				//	target = fX.add( orbitControls.target, 'x' );
-				var size = dat.controllerZeroStep( fSize, options.point, 'size', function ( value ) {
-
-					setSize( value );
-
-				} );
-				dat.controllerNameAndTitle( size, lang.size, lang.sizeTitle );
-
-				//point size default button
-				dat.controllerNameAndTitle( fSize.add( {
-
-					defaultF: function ( value ) {
-
-						setSize( defaultSize );
-
-					},
-
-				}, 'defaultF' ), lang.defaultButton, lang.defaultSizeTitle );
+				//Frustum points
+				if ( frustumPoints )
+					frustumPoints.gui( fOptions, getLanguageCode, FolderPoint, 'FrustumPoints_' + getCanvasName() );
 
 				//default button
 				dat.controllerNameAndTitle( gui.add( {
@@ -2265,7 +2268,10 @@ export function create( createXDobjects, options ) {
 
 			if ( player !== undefined )
 				player.animate();
-
+/*
+			if( frustumPoints !== undefined )
+				frustumPoints.animate();
+*/
 			render();
 
 		}
@@ -2295,10 +2301,19 @@ export function create( createXDobjects, options ) {
 			}
 
 			if( cameraPosition === undefined )
-				cameraPosition = new THREE.Vector3();
-			if( pointSize === undefined )
+				cameraPosition = new THREE.Vector3(); 
+			if ( pointSize === undefined )
 				pointSize = options.point.size;
-			if( !cameraPosition.equals(camera.position) || ( pointSize != options.point.size ) ) {
+/*
+console.warn( frustumPoints );
+			if ( ( frustumPointSize === undefined ) && ( frustumPoints !== undefined ) )
+				pointSize = options.point.size;
+*/
+			if(
+				!cameraPosition.equals(camera.position) ||
+				( pointSize != options.point.size ) ||
+				( ( frustumPoints !== undefined ) && frustumPoints.animate() )
+			) {
 
 				cameraPosition.copy( camera.position );
 				pointSize = options.point.size;
@@ -2331,14 +2346,21 @@ export function create( createXDobjects, options ) {
 					for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
 						var position = getObjectPosition( mesh, i ),//getObjectLocalPosition( mesh, i ),
-							distance = new THREE.Vector3( position.x, position.y, position.z ).distanceTo( cameraPosition );
-						mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance * scale );
-	//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size * scale ) * distance / scale );
-	//					mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance / scale );
-	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 / scale );
+							position3d = new THREE.Vector3( position.x, position.y, position.z ),
+							distance = position3d.distanceTo( cameraPosition ),
+							y = 1;
+						/*дальние точки очень маленькие
+							angle = cameraPosition.angleTo( position3d ),
+							cameraFov = ( Math.PI / 180 ) * 0.5 * camera.fov,
+							y = 1 - 0.4 * ( angle / cameraFov );
+						*/
+						mesh.geometry.attributes.size.setX( i, Math.tan(
 
-	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 );
-	//					mesh.geometry.attributes.size.setX( i, distance * options.point.size * 0.5 * scene.scale.x );
+								mesh.userData.shaderMaterial.point !== undefined &&
+								mesh.userData.shaderMaterial.point.size !== undefined ?
+									mesh.userData.shaderMaterial.point.size : options.point.size
+									
+							) * distance * scale * y );
 						mesh.geometry.attributes.size.needsUpdate = true;
 
 					}
@@ -2572,20 +2594,47 @@ export function create( createXDobjects, options ) {
 			else if (
 
 				( typeof item === "object" )
-				&& ( item.vector === undefined )
+//				&& ( item.vector === undefined )
 				&& ( item instanceof THREE.Vector2 === false )
 				&& ( item instanceof THREE.Vector3 === false )
 				&& ( item instanceof THREE.Vector4 === false )
 
-			)
-				arrayFuncs[i] = new THREE.Vector4(
+			) {
+				
+				if( ( item.vector === undefined ) )
+					arrayFuncs[i] = new THREE.Vector4(
 
-					item.x === undefined ? 0 : item.x,
-					item.y === undefined ? 0 : item.y,
-					item.z === undefined ? 0 : item.z,
-					item.w === undefined ? 0 : item.w
+						item.x === undefined ? 0 : item.x,
+						item.y === undefined ? 0 : item.y,
+						item.z === undefined ? 0 : item.z,
+						item.w === undefined ? 0 : item.w
 
-				);
+					);
+				else if (
+
+					   ( item.vector instanceof THREE.Vector2 === true )
+					|| ( item.vector instanceof THREE.Vector3 === true )
+					|| ( item.vector instanceof THREE.Vector4 === true )
+
+				)
+					arrayFuncs[i].vector = new THREE.Vector4(
+
+						item.vector.x === undefined ? 0 : item.vector.x,
+						item.vector.y === undefined ? 0 : item.vector.y,
+						item.vector.z === undefined ? 0 : item.vector.z,
+						item.vector.w === undefined ? 0 : item.vector.w
+
+					);
+				else arrayFuncs[i].vector = new THREE.Vector4(
+
+						item.vector[0] === undefined ? 0 : item.vector[0],
+						item.vector[1] === undefined ? 0 : item.vector[1],
+						item.vector[2] === undefined ? 0 : item.vector[2],
+						item.vector[3] === undefined ? 0 : item.vector[3]
+
+					);
+
+			}
 
 		};
 		var points = [];
@@ -2961,6 +3010,7 @@ switch ( getLanguageCode() ) {
 
 		lang.trace = 'Трек';
 		lang.traceTitle = 'Показать трек перемещения точки.';
+		lang.traceAllTitle = 'Показать трек перемещения всех точек выбранного 3D объекта.';
 
 		break;
 
@@ -3098,6 +3148,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 			a: options.a, b: options.b,
 			sizes: new Float32Array( arrayFuncs.length ),
 			scales: options.scales,
+			shaderMaterial: pointsOptions.shaderMaterial,
 			//group: group,
 
 		} );
@@ -3221,34 +3272,6 @@ export function limitAngles( rotation ) {
 
 }
 
-/**
- * @see https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
- * @example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
- * @returns ShaderMaterial
- */
-/*
-export function getShaderMaterial() {
-
-	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-
-	return new THREE.ShaderMaterial( {
-
-		uniforms: {
-			color: { value: new THREE.Color( 0xffffff ) },
-			pointTexture: { value: texture }
-		},
-		//				vertexShader: document.getElementById( 'vertexshader' ).textContent,
-		vertexShader: "		attribute float size;		attribute vec3 ca;		varying vec3 vColor;		void main() {		vColor = ca;		vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );		gl_PointSize = size * ( 300.0 / -mvPosition.z );		gl_Position = projectionMatrix * mvPosition;		}",
-		//				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-		fragmentShader: "		uniform vec3 color;		uniform sampler2D pointTexture;		varying vec3 vColor;		void main() {		vec4 color = vec4( color * vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord );		gl_FragColor = color;		}	",
-		transparent: true
-
-	} );
-
-}
-*/
 function getGlobalScale( mesh ) {
 
 	var parent = mesh.parent, scale = new THREE.Vector3( 1, 1, 1 );
@@ -3333,6 +3356,7 @@ export function getShaderMaterialPoints( params ) {
 		transparent: true
 
 	} ) );
+	points.userData.shaderMaterial = params.shaderMaterial;
 	return points;
 
 }

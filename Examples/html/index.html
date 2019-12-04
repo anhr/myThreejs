@@ -35,49 +35,6 @@
 	</p>
 	<h1>myThreejs.</h1>
 
-	<!--
-	for points with ShaderMaterial
-	https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
-	Example https://threejs.org/examples/?q=points#webgl_custom_attributes_points2
-	-->
-	<!--
-	<script type="x-shader/x-vertex" id="vertexshader">
-
-		attribute float size;
-		attribute vec3 ca;
-
-		varying vec3 vColor;
-
-		void main() {
-
-		vColor = ca;
-
-		vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-
-		gl_PointSize = size * ( 300.0 / -mvPosition.z );
-
-		gl_Position = projectionMatrix * mvPosition;
-
-		}
-
-	</script>
-	<script type="x-shader/x-fragment" id="fragmentshader">
-
-		uniform vec3 color;
-		uniform sampler2D pointTexture;
-
-		varying vec3 vColor;
-
-		void main() {
-
-		vec4 color = vec4( color * vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord );
-
-		gl_FragColor = color;
-
-		}
-
-	</script>
-	-->
 	<h2>Canvas.</h2>
 	<div id="canvasContainer1"><img src="/anhr/TreeElementNodeJS/master/img/wait.gif"></div>
 	<script nomodule>alert( 'Fatal error: Your browser do not support modular JavaScript code.' );</script>
@@ -240,13 +197,13 @@
 
 					name: 'myThreejs.Points',
 					tMin: tMin,
-					position: new THREE.Vector3( -1, 0, 0 ),
-					//position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
+					//position: new THREE.Vector3( -1, 0, 0 ),
+					position: new THREE.Vector3( new Function( 't', 'return 0.1 + t' ), 0.2, 0 ),
 					//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
 					//scale: new THREE.Vector3( 2, 2, 2 ),
-					//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+					rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 					//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
-					shaderMaterial: true,
+					shaderMaterial: {},
 
 				} ) );
 
@@ -495,7 +452,7 @@
 					cube.userData.cube = cube;
 
 				}
-				group.add( cube );
+				//group.add( cube );
 
 			}
 			addCube( new THREE.Vector3( -1, 0, 0 ), 0xffffff, function ( t ) {
@@ -534,6 +491,7 @@
 			axesHelperGui: true,
 			stereoEffect: true,
 			menuPlay: true,
+			frustumPoints: true,//display an array of points, statically fixed in front of the camera.
 			dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
 			player: playerOptions,//3D objects animation.
 			a: 1.1,

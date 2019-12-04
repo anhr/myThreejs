@@ -2268,17 +2268,10 @@ export function create( createXDobjects, options ) {
 
 			if ( player !== undefined )
 				player.animate();
-<<<<<<< HEAD
 /*
 			if( frustumPoints !== undefined )
 				frustumPoints.animate();
 */
-=======
-
-			if( frustumPoints !== undefined )
-				frustumPoints.animate();
-
->>>>>>> origin/master
 			render();
 
 		}
@@ -2356,16 +2349,11 @@ console.warn( frustumPoints );
 							position3d = new THREE.Vector3( position.x, position.y, position.z ),
 							distance = position3d.distanceTo( cameraPosition ),
 							y = 1;
-<<<<<<< HEAD
 						/*дальние точки очень маленькие
-=======
-						/*
->>>>>>> origin/master
 							angle = cameraPosition.angleTo( position3d ),
 							cameraFov = ( Math.PI / 180 ) * 0.5 * camera.fov,
 							y = 1 - 0.4 * ( angle / cameraFov );
 						*/
-<<<<<<< HEAD
 						mesh.geometry.attributes.size.setX( i, Math.tan(
 
 								mesh.userData.shaderMaterial.point !== undefined &&
@@ -2373,9 +2361,6 @@ console.warn( frustumPoints );
 									mesh.userData.shaderMaterial.point.size : options.point.size
 									
 							) * distance * scale * y );
-=======
-						mesh.geometry.attributes.size.setX( i, Math.tan( options.point.size ) * distance * scale * y );
->>>>>>> origin/master
 						mesh.geometry.attributes.size.needsUpdate = true;
 
 					}

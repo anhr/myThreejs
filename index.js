@@ -393,10 +393,17 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( '/anhr/myThreejs/master/canvasContainer.html' );
 		elContainer = elContainer.querySelector( '.container' );
 
-//		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
+		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
 //		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.5, 2 ),
-		var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
+//		var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
 			renderer, cursor, controls, stereoEffect, player, frustumPoints,
+
+			mouseenter = false,//true - мышка находится над gui или canvasMenu
+								//В этом случае не надо обрабатывать событие elContainer 'mousedown'
+								//по которому выбирается точка на canvas.
+								//В противном случае если пользователь щелкнет на gui, то он может случайно выбрать точку на canvas.
+								//Тогда открывается папка Meshs и все органы управления сдвигаются вниз. Это неудобно.
+								//И вообще нехорошо когда выбирается точка когда пользователь не хочет это делать.
 
 //			playController,
 			canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
@@ -415,8 +422,12 @@ export function create( createXDobjects, options ) {
 
 		//raycaster
 
+/*
 		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 		document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+*/
+		elContainer.addEventListener( 'mousemove', onDocumentMouseMove, false );
+		elContainer.addEventListener( 'mousedown', onDocumentMouseDown, { capture: true } );
 
 		function isFullScreen() {
 
@@ -916,7 +927,7 @@ export function create( createXDobjects, options ) {
 
 				}
 				this.setPosition = function ( position, intersectionSelected ) {
-
+					
 					for ( var i = 0; i < cMeshs.__select.length; i++ ) {
 
 						var option = cMeshs.__select[i];
@@ -983,6 +994,8 @@ export function create( createXDobjects, options ) {
 				this.isSelectedMesh = function ( meshCur ) { return mesh === meshCur }
 				this.getSelectedPointIndex = function() {
 
+					if ( ( mesh !== undefined ) && mesh.userData.boFrustumPoints )
+						return;
 					if ( cPoints === undefined ) {
 
 						if ( selectedPointIndex === undefined )
@@ -1001,47 +1014,35 @@ export function create( createXDobjects, options ) {
 					console.error( 'myThreejs.create.onloadScripts.init.guiSelectPoint.getSelectedPointIndex: point is not selected' );
 
 				}
+				function isNotSetControllers() { return ( mesh === undefined ) || ( gui === undefined ) || mesh.userData.boFrustumPoints; }
 				function setScaleControllers() {
 
-					if ( ( mesh === undefined ) || ( gui === undefined ) )
+//					if ( ( mesh === undefined ) || ( gui === undefined ) )
+					if ( isNotSetControllers() )
 						return;
 					cScaleX.setValue( mesh.scale.x );
 					cScaleY.setValue( mesh.scale.y );
 					cScaleZ.setValue( mesh.scale.z );
-/*
-					var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
-					if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
-						axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
-*/
 
 				}
 				function setPositionControllers() {
 
-					if ( ( mesh === undefined ) || ( gui === undefined ) )
+//					if ( ( mesh === undefined ) || ( gui === undefined ) ||  )
+					if ( isNotSetControllers() )
 						return;
 					cPosition.x.setValue( mesh.position.x );
 					cPosition.y.setValue( mesh.position.y );
 					cPosition.z.setValue( mesh.position.z );
-/*
-					var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
-					//						if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== undefined ) )
-					if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
-						axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
-*/
 
 				}
 				function setRotationControllers() {
 
-					if ( ( mesh === undefined ) || ( gui === undefined ) )
+//					if ( ( mesh === undefined ) || ( gui === undefined ) || mesh.userData.boFrustumPoints )
+					if ( isNotSetControllers() )
 						return;
 					cRotations.x.setValue( mesh.rotation.x );
 					cRotations.y.setValue( mesh.rotation.y );
 					cRotations.z.setValue( mesh.rotation.z );
-/*
-					var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
-					if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
-						axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
-*/
 
 				}
 				this.add = function ( folder ) {
@@ -1050,7 +1051,6 @@ export function create( createXDobjects, options ) {
 
 					cMeshs = f3DObjects.add( { Meshs: lang.notSelected }, 'Meshs', { [lang.notSelected]: -1 } ).onChange( function ( value ) {
 
-//						cPoints.__select[0].selected = true;
 						cPoints.__onChange( -1 );
 						value = parseInt( value );
 						var display;
@@ -1080,6 +1080,7 @@ export function create( createXDobjects, options ) {
 							setScaleControllers();
 							setPositionControllers();
 							setRotationControllers();
+							
 						}
 						fMesh.domElement.style.display = display;
 
@@ -1108,11 +1109,6 @@ export function create( createXDobjects, options ) {
 
 						setScaleControllers();
 						exposePosition();
-/*
-						var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
-						if ( ( axesHelper !== undefined ) && ( selectedPointIndex !== -1 ) )
-							axesHelper.exposePosition( getObjectPosition( mesh, selectedPointIndex ) );
-*/
 
 					},
 						{
@@ -1413,24 +1409,8 @@ export function create( createXDobjects, options ) {
 									points.geometry.attributes.position.needsUpdate = true;
 
 									exposePosition();
-									/*
-																		//dotLines
-																		if ( axesHelper !== undefined )
-																			axesHelper.exposePosition( getPosition( intersection ) );
-									*/
 
 								} );
-							/*
-							controller = fPointWorld.add( {
-
-								value: scale.min,
-
-							}, 'value'),
-								scale.min,
-								scale.max,
-								( scale.max - scale.min ) / 100 ).
-								onChange( function ( value ) {
-								} );*/
 
 						}
 						dat.controllerNameAndTitle( controller, scale.name );
@@ -1565,12 +1545,18 @@ export function create( createXDobjects, options ) {
 						gui.removeFolder( gui.__folders[folders[i]] );
 //					gui.destroy();
 
-				} else gui = new dat.GUI( {
+				} else {
 
-					//autoPlace: false,//Убрать скроллинг когда окно gui не влазит в окно браузера
-//					closed: true,//Icorrect "Open Controls" button name
+					gui = new dat.GUI( {
 
-				} );
+						//autoPlace: false,//Убрать скроллинг когда окно gui не влазит в окно браузера
+	//					closed: true,//Icorrect "Open Controls" button name
+
+					} );
+					gui.domElement.addEventListener( 'mouseenter', function(event) { mouseenter = true; });
+					gui.domElement.addEventListener( 'mouseleave', function ( event ) { mouseenter = false; } );
+
+				}
 
 				//for debugging
 				if ( typeof WebGLDebugUtils !== "undefined" )
@@ -1648,7 +1634,7 @@ export function create( createXDobjects, options ) {
 
 					var t = ( ( options.player.max - options.player.min ) / ( options.player.marks - 1 ) ) * index + options.player.min;
 //					group.userData.index = index;
-					selectPlayScene( t, index );
+					selectPlayScene( t, index, true );
 					if ( canvasMenu !== undefined )
 						canvasMenu.setIndex( index, options.player.name + ': ' + t );
 
@@ -1746,7 +1732,11 @@ export function create( createXDobjects, options ) {
 						onFullScreen: function ( fullScreen, elContainer ) {
 
 							rendererSizeDefault.onFullScreenToggle( !fullScreen );
-							//						arrayContainers.display( elContainer.parentElement, fullScreen );
+
+						},
+						onOver: function ( _mouseenter ) {
+
+							mouseenter = _mouseenter;
 
 						},
 						THREE: THREE,
@@ -1801,123 +1791,142 @@ export function create( createXDobjects, options ) {
 			}
 
 			if ( options.frustumPoints ) 
-				frustumPoints = new FrustumPoints.create( camera, controls, guiSelectPoint, renderer, group, options );
+				frustumPoints = new FrustumPoints.create( camera, controls, guiSelectPoint, group,
+				'FrustumPoints_' + getCanvasName(), options, function( points ) {
+
+					if ( axesHelper === undefined )
+						return;
+
+					if ( !guiSelectPoint.isSelectedMesh( points ) )
+						return;
+						
+					var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
+					if ( selectedPointIndex === -1 )
+						return;
+
+					axesHelper.exposePosition( getObjectPosition( points, selectedPointIndex ) );
+
+				} );
 
 			createXDobjects( group, options );
 
-			function selectPlayScene( t, index ) {
+			function selectPlayScene( t, index, boPlayer ) {
 
 				group.userData.t = t;
 				group.children.forEach( function ( mesh ) {
 
-					if ( mesh.userData.selectPlayScene !== undefined ) {
+					if (
 
-						//Эти строки нужны что бы появлялся текст возле точки, если на нее наведена мышка
-						//при условии, что до этого точка была передвинута с помошью проигрывателя.
-						delete mesh.geometry.boundingSphere;
-						mesh.geometry.boundingSphere = null;
+						( mesh.userData.selectPlayScene === undefined ) ||
+						( boPlayer && mesh.userData.boFrustumPoints )
 
-						mesh.userData.selectPlayScene( t );
-						function setAttributes( a, b ) {
+					)
+						return;
 
-							var attributes = mesh.geometry.attributes,
-								arrayFuncs = mesh.userData.arrayFuncs;
-							if ( arrayFuncs === undefined )
-								return;
-							if ( t === undefined )
-								console.error( 'setPosition: t = ' + t );
+					//Эти строки нужны что бы появлялся текст возле точки, если на нее наведена мышка
+					//при условии, что до этого точка была передвинута с помошью проигрывателя.
+					delete mesh.geometry.boundingSphere;
+					mesh.geometry.boundingSphere = null;
 
-							for ( var i = 0; i < arrayFuncs.length; i++ ) {
+					mesh.userData.selectPlayScene( t );
+					function setAttributes( a, b ) {
 
-								var funcs = arrayFuncs[i], needsUpdate = false;
-								function setPosition( axisName, fnName ){
+						var attributes = mesh.geometry.attributes,
+							arrayFuncs = mesh.userData.arrayFuncs;
+						if ( arrayFuncs === undefined )
+							return;
+						if ( t === undefined )
+							console.error( 'setPosition: t = ' + t );
 
-									var value = execFunc( funcs, axisName, t, a, b );
-									if( value !== undefined ) {
+						for ( var i = 0; i < arrayFuncs.length; i++ ) {
 
-										attributes.position[fnName]( i, value );
-										needsUpdate = true;
+							var funcs = arrayFuncs[i], needsUpdate = false;
+							function setPosition( axisName, fnName ){
 
-									}
-/*									
-									var fun = funcs[axisName];
-									if ( typeof fun === "function" ) {
+								var value = execFunc( funcs, axisName, t, a, b );
+								if( value !== undefined ) {
 
-										attributes.position[fnName]( i, fun( t, a, b ) );
-										needsUpdate = true;
-
-									}
-*/									
-
-								}
-								setPosition( 'x', 'setX' );
-								setPosition( 'y', 'setY' );
-								setPosition( 'z', 'setZ' );
-								let color;
-								var min, max;
-								if ( options.scales.w !== undefined ) {
-
-									min = options.scales.w.min; max = options.scales.w.max;
-
-								} else {
-
-									max = value;
-									min = max - 1;
-
-								}
-								if ( typeof funcs.w === "function" ) {
-
-									attributes.position.setW( i, funcs.w( t, a, b ) );
+									attributes.position[fnName]( i, value );
 									needsUpdate = true;
 
-									var value = funcs.w( t, a, b );
-									color = palette.toColor( value, min, max );
+								}
+/*									
+								var fun = funcs[axisName];
+								if ( typeof fun === "function" ) {
 
-								} else if ( typeof funcs.w === "object" ){
+									attributes.position[fnName]( i, fun( t, a, b ) );
+									needsUpdate = true;
 
-									if ( funcs.w instanceof THREE.Color )
-										color = funcs.w;
-									else color = palette.toColor( execFunc( funcs, 'w', t, a, b ), min, max );
+								}
+*/									
 
-								} else if ( typeof funcs.w === "number" )
-									color = palette.toColor( funcs.w, min, max );
-								else color = new THREE.Color( 1, 1, 1 );//white
-								setColorAttribute( attributes, i, color );
-								if ( needsUpdate )
-									attributes.position.needsUpdate = true;
+							}
+							setPosition( 'x', 'setX' );
+							setPosition( 'y', 'setY' );
+							setPosition( 'z', 'setZ' );
+							let color;
+							var min, max;
+							if ( options.scales.w !== undefined ) {
 
-								if ( funcs.line !== undefined )
-									funcs.line.addPoint( getObjectPosition( mesh, i ), index, color );
+								min = options.scales.w.min; max = options.scales.w.max;
 
-							};
+							} else {
 
-						}
-						setAttributes( options.a, options.b );
-						var message = 'myThreejs.create.onloadScripts.init.selectPlayScene: invalid mesh.scale.';
-						if ( mesh.scale.x <= 0 ) console.error( message + 'x = ' + mesh.scale.x );
-						if ( mesh.scale.y <= 0 ) console.error( message + 'y = ' + mesh.scale.y );
-						if ( mesh.scale.z <= 0 ) console.error( message + 'z = ' + mesh.scale.z );
+								max = value;
+								min = max - 1;
 
-						guiSelectPoint.setMesh();
+							}
+							if ( typeof funcs.w === "function" ) {
 
-						var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
+								attributes.position.setW( i, funcs.w( t, a, b ) );
+								needsUpdate = true;
+
+								var value = funcs.w( t, a, b );
+								color = palette.toColor( value, min, max );
+
+							} else if ( typeof funcs.w === "object" ){
+
+								if ( funcs.w instanceof THREE.Color )
+									color = funcs.w;
+								else color = palette.toColor( execFunc( funcs, 'w', t, a, b ), min, max );
+
+							} else if ( typeof funcs.w === "number" )
+								color = palette.toColor( funcs.w, min, max );
+							else color = new THREE.Color( 1, 1, 1 );//white
+							setColorAttribute( attributes, i, color );
+							if ( needsUpdate )
+								attributes.position.needsUpdate = true;
+
+							if ( funcs.line !== undefined )
+								funcs.line.addPoint( getObjectPosition( mesh, i ), index, color );
+
+						};
+
+					}
+					setAttributes( options.a, options.b );
+					var message = 'myThreejs.create.onloadScripts.init.selectPlayScene: invalid mesh.scale.';
+					if ( mesh.scale.x <= 0 ) console.error( message + 'x = ' + mesh.scale.x );
+					if ( mesh.scale.y <= 0 ) console.error( message + 'y = ' + mesh.scale.y );
+					if ( mesh.scale.z <= 0 ) console.error( message + 'z = ' + mesh.scale.z );
+
+					guiSelectPoint.setMesh();
+
+					var selectedPointIndex = guiSelectPoint.getSelectedPointIndex();
 //							if ( selectedPointIndex !== undefined )
-						if ( ( selectedPointIndex !== -1 ) && guiSelectPoint.isSelectedMesh( mesh ) ) {
+					if ( ( selectedPointIndex !== -1 ) && guiSelectPoint.isSelectedMesh( mesh ) ) {
 
-							var position = getObjectPosition( mesh, selectedPointIndex );
+						var position = getObjectPosition( mesh, selectedPointIndex );
 
-							if ( axesHelper !== undefined )
-								axesHelper.exposePosition( position );
+						if ( axesHelper !== undefined )
+							axesHelper.exposePosition( position );
 
-							if ( gui !== undefined )
-								guiSelectPoint.setPosition( position, {
+						if ( gui !== undefined )
+							guiSelectPoint.setPosition( position, {
 
-									object: mesh,
-									index: selectedPointIndex,
+								object: mesh,
+								index: selectedPointIndex,
 
-								} );
-
-						}
+							} );
 
 					}
 
@@ -1944,6 +1953,9 @@ export function create( createXDobjects, options ) {
 			} );
 
 			defaultSize = options.point.size;
+
+			var pointName = 'Point_' + getCanvasName();
+			cookie.getObject( pointName, options.point, options.point );
 			
 			if ( gui !== undefined ) {
 
@@ -1982,9 +1994,6 @@ export function create( createXDobjects, options ) {
 				pointLight2.controls( group, fOptions, scales, lang.light + ' 2' );
 
 				//point
-
-				var pointName = 'Point_' + getCanvasName();
-				cookie.getObject( pointName, options.point, options.point );
 
 				function FolderPoint( folder, point, defaultSize, setSize, PCOptions ) {
 
@@ -2041,7 +2050,7 @@ export function create( createXDobjects, options ) {
 
 				//Frustum points
 				if ( frustumPoints )
-					frustumPoints.gui( fOptions, getLanguageCode, FolderPoint, 'FrustumPoints_' + getCanvasName() );
+					frustumPoints.gui( fOptions, getLanguageCode, FolderPoint );
 
 				//default button
 				dat.controllerNameAndTitle( gui.add( {
@@ -2243,6 +2252,9 @@ export function create( createXDobjects, options ) {
 		function onDocumentMouseDown( event ) {
 
 			if ( raycaster === undefined )
+				return;
+
+			if ( mouseenter )
 				return;
 
 			if ( raycaster.stereo !== undefined ) {

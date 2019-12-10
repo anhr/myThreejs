@@ -2008,6 +2008,7 @@ export function create( createXDobjects, options ) {
 					var fPoint = folder.addFolder( lang.pointSettings ),
 						fSize = fPoint.addFolder( lang.size );
 					dat.folderNameAndTitle( fSize, lang.size, lang.sizeTitle );
+					this.display = function( display ){ fPoint.domElement.style.display = display; }
 
 					fSize.add( new PositionController( function ( shift ) {
 
@@ -2082,6 +2083,7 @@ export function create( createXDobjects, options ) {
 //						raycaster.params.Points.threshold = options.point.size / 3;//0.03;
 //						raycaster.params.Points.threshold = options.point.size * 10;
 						raycaster.params.Points.threshold = 0.01;
+						if( frustumPoints !== undefined ) frustumPoints.setRaycaster( raycaster );
 						if ( raycaster.setStereoEffect !== undefined )
 							raycaster.setStereoEffect( {
 
@@ -2209,6 +2211,9 @@ export function create( createXDobjects, options ) {
 				renderer.setSize( size.x, size.y );
 			else
 				stereoEffect.setSize( size.x, size.y );
+
+			if ( frustumPoints !== undefined )
+				frustumPoints.update();
 
 		}
 		function onDocumentMouseMove( event ) {

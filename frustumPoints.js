@@ -56,8 +56,12 @@ import { spatialMultiplexsIndexs } from '../../three.js/dev/examples/jsm/effects
  * @param {number} [shaderMaterialDefault.yCount] The count of vertical points for each z level of the  frustum of the camera's field of view.. Default is 30
  *
  * @param {number} [shaderMaterialDefault.near] Shift of the frustum layer near to the camera in percents.
+ * 0 percents - no shift.
+ * 100 percents - ближний к камере слой усеченной пирамиды приблизился к дальнему от камеры слою усеченной пирамиды.
  * Default is 0
  * @param {number} [shaderMaterialDefault.far] Shift of the frustum layer far to the camera in percents.
+ * 0 percents - no shift.
+ * 100 percents - дальний от камеры слоем усеченной пирамиды приблизился к ближнему к камере слою усеченной пирамиды.
  * Default is 0
  * @param {number} [shaderMaterialDefault.base] Scale of the base of the frustum points in percents.
  * 0 base is null

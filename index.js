@@ -58,7 +58,7 @@ import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 //import menuPlay from 'https://raw.githack.com/anhr/menuPlay/master/menuPlay.js';
 import menuPlay from '../../menuPlay/master/menuPlay.js';
 
-import FrustumPoints from './frustumPoints.js';
+import { FrustumPoints, cFrustumPointsF } from './frustumPoints.js';
 
 import Player from './player.js';
 
@@ -80,6 +80,16 @@ import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitCon
 //https://github.com/mrdoob/stats.js/
 //import Stats from '../../three.js/dev/examples/jsm/libs/stats.module.js';
 
+var debug = {
+
+	opacity: 1 //непрозрачность frustumPoints
+
+};
+/*
+var debug = true,
+	url = 'localhost/threejs',//'192.168.1.2'//ATTENTION!!! localhost is not available for debugging of the mobile devices
+	min = '';//min.
+*/
 var palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
 palette.toColor = function ( value, min, max ) {
 
@@ -91,11 +101,6 @@ palette.toColor = function ( value, min, max ) {
 	return new THREE.Color( "rgb(" + c.r + ", " + c.g + ", " + c.b + ")" );
 
 }
-/*
-var debug = true,
-	url = 'localhost/threejs',//'192.168.1.2'//ATTENTION!!! localhost is not available for debugging of the mobile devices
-	min = '';//min.
-*/
 function arrayContainersF(){
 
 	var array = [];
@@ -158,7 +163,7 @@ var arrayCreates = [];
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
  * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
  * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
- * 
+ *
  * @param {object} [options.point] point settings. Applies to points with ShaderMaterial.
  * See https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial for details.
  * The size of the point seems constant and does not depend on the distance to the camera.
@@ -208,7 +213,7 @@ var arrayCreates = [];
  * @param {number} [options.scales.t.max] Animation stop time. Default is 1.
  * @param {number} [options.scales.t.marks] Number of scenes of 3D objects animation. Default is 2.
  * @param {boolean} [options.scales.t.repeat] true - Infinite repeat of animation.. Default is false.
-*
+ *
  * @todo If you want to use raycaster (working out what objects in the 3d space the mouse is over) https://threejs.org/docs/index.html#api/en/core/Raycaster,
  * please add following object into your 3D Object userdata:
  * your3dObject.userData.raycaster = {
@@ -249,6 +254,8 @@ var arrayCreates = [];
  * Example: https://raw.githack.com/anhr/myThreejs/master/Examples/html/
  */
 export function create( createXDobjects, options ) {
+
+	var myThreejs = this;
 
 	arrayCreates.push( {
 
@@ -323,7 +330,6 @@ export function create( createXDobjects, options ) {
 
 				line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors } ) );
 				line.visible = true;
-//				group.add( line );
 				scene.add( line );
 
 			}
@@ -394,16 +400,15 @@ export function create( createXDobjects, options ) {
 			renderer,
 
 			cursor,//default
-//			cursorCanvas = '',
 
 			controls, stereoEffect, player, frustumPoints,
 
 			mouseenter = false,//true - мышка находится над gui или canvasMenu
-								//В этом случае не надо обрабатывать событие elContainer 'mousedown'
-								//по которому выбирается точка на canvas.
-								//В противном случае если пользователь щелкнет на gui, то он может случайно выбрать точку на canvas.
-								//Тогда открывается папка Meshs и все органы управления сдвигаются вниз. Это неудобно.
-								//И вообще нехорошо когда выбирается точка когда пользователь не хочет это делать.
+			//В этом случае не надо обрабатывать событие elContainer 'mousedown'
+			//по которому выбирается точка на canvas.
+			//В противном случае если пользователь щелкнет на gui, то он может случайно выбрать точку на canvas.
+			//Тогда открывается папка Meshs и все органы управления сдвигаются вниз. Это неудобно.
+			//И вообще нехорошо когда выбирается точка когда пользователь не хочет это делать.
 
 			canvasMenu, raycaster, INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
 			gui, rendererSizeDefault, cameraPosition,// fullScreen,
@@ -414,10 +419,12 @@ export function create( createXDobjects, options ) {
 			stats,
 
 			//uses only if stereo effects does not exists
-			mouse = new THREE.Vector2(), intersects, 
+			mouse = new THREE.Vector2(), intersects,
 
 			//https://www.khronos.org/webgl/wiki/HandlingContextLost
-			requestId;//, gl, tex;
+			requestId,// gl, tex;
+
+			cFrustumPoints;
 		canvas = elContainer.querySelector( 'canvas' );
 		//https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/webglcontextlost_event
 		const gl = canvas.getContext( 'webgl' );
@@ -438,7 +445,6 @@ export function create( createXDobjects, options ) {
 
 				if ( intersection.object.userData.raycaster !== undefined ) {
 
-//					intersection.object.userData.raycaster.onIntersection( raycaster, intersection, scene, intersection.object );
 					intersection.object.userData.raycaster.onIntersection( raycaster, intersection, scene, mouse );
 					INTERSECTED.push( intersection.object );
 
@@ -704,13 +710,16 @@ export function create( createXDobjects, options ) {
 			scene.add( group );
 			function guiSelectPointF() {
 
-				var f3DObjects, fPoint, cRestoreDefaultLocalPosition, fPointWorld, fPonts, cMeshs, fMesh, mesh, intersection, _this = this,
+				var f3DObjects, fPoint, cRestoreDefaultLocalPosition, fPointWorld, fPoints, cMeshs, fMesh,// mesh,
+					intersection, _this = this,
 					cScaleX, cScaleY, cScaleZ, cPosition = new THREE.Vector3(), cRotations = new THREE.Vector3(),
 					cPoints, selectedPointIndex = -1,
-					controllerX, controllerY, controllerZ, controllerW, cTrace, cTraceAll, controllerColor,
+					controllerX, controllerY, controllerZ, controllerW, cTrace, cTraceAll, controllerColor, controllerOpacity,
 					controllerWorld = new THREE.Vector3(),
-					//					cursor = '',//'move'//когда точек много, то выбор точки по щелчку мыши происходит медленно. Во время выбора точки меняю курсор мыши.
+//					cursor = '',//'move'//когда точек много, то выбор точки по щелчку мыши происходит медленно. Во время выбора точки меняю курсор мыши.
 					boSetMesh = false;//Для предотвращения лишних вызовов exposePosition если выбрать точку и передвинуть камеру с помошью OrbitControls,
+				if ( options.frustumPoints )
+					cFrustumPoints = new cFrustumPointsF( _this );
 				//сейчас exposePosition вызывается только один раз из this.setMesh
 				function dislayEl( controller, displayController ) {
 
@@ -728,8 +737,9 @@ export function create( createXDobjects, options ) {
 
 					if ( intersection.object.userData.arrayFuncs === undefined )
 						return;
-					var index = intersection.index || 0, point = intersection.object.userData.arrayFuncs[index];
-					var line = point.line;
+					var index = intersection.index || 0,
+						point = intersection.object.userData.arrayFuncs[index],
+						line = point === undefined ? undefined : point.line;
 					if ( line !== undefined )
 						line.visible( value );
 					if ( !value )
@@ -749,7 +759,7 @@ export function create( createXDobjects, options ) {
 
 					point.line.addPoint(
 
-						getObjectPosition( mesh, index ),
+						getObjectPosition( getMesh(), index ),
 						player.getSelectSceneIndex(),
 						color
 
@@ -764,7 +774,7 @@ export function create( createXDobjects, options ) {
 					if ( selectedPointIndex === -1 )
 						return;
 
-					var position = getObjectPosition( mesh, selectedPointIndex );
+					var position = getObjectPosition( cMeshs.__select.options[cMeshs.__select.options.selectedIndex].mesh, selectedPointIndex );
 
 					if ( ( axesHelper !== undefined ) )
 
@@ -783,10 +793,15 @@ export function create( createXDobjects, options ) {
 				}
 				function setValue( controller, v ) {
 
+					var input = controller.domElement.querySelector( 'input' ),
+						readOnly = input.readOnly;
+					input.readOnly = false;
 					controller.object[controller.property] = v;
 					if ( controller.__onChange )
 						controller.__onChange.call( controller, v );
+					controller.initialValue = v;
 					controller.updateDisplay();
+					input.readOnly = readOnly;
 					return controller;
 
 				}
@@ -812,27 +827,63 @@ export function create( createXDobjects, options ) {
 					setValue( controllerWorld.y, position.y );
 					setValue( controllerWorld.z, position.z );
 
-					var displayControllerW, displayControllerColor, none = 'none', block = 'block';
+					var displayControllerW, displayControllerColor, displayControllerOpacity, none = 'none', block = 'block';
+if( typeof intersection.object.userData.arrayFuncs === "function" )
+	console.error( 'arrayFuncs === "function" under constraction' );
 					var func = intersectionSelected.object.userData.arrayFuncs[intersectionSelected.index],
-						color = Array.isArray( func.w ) ? execFunc( func, 'w', group.userData.t, options.a, options.b ) : func.w;
+						opasity,
+						color = func === undefined ?
+							undefined :
+							Array.isArray( func.w ) || ( typeof func.w === "function" ) ?
+								execFunc( func, 'w', group.userData.t, options.a, options.b ) :
+								func.w;
+
+					if ( color === undefined ) {
+
+						var vColor = new THREE.Vector4().fromArray(
+							intersectionSelected.object.geometry.attributes.ca.array,
+							intersectionSelected.index * intersectionSelected.object.geometry.attributes.ca.itemSize );
+						color = new THREE.Color( 'rgb(' + vColor.x + ', ' + vColor.y + ', ' + vColor.z + ')' );
+						opasity = vColor.w;
+
+					}
 
 					if ( color instanceof THREE.Color ) {
 
 						displayControllerW = none;
 						displayControllerColor = block;
+						displayControllerOpacity = block;
 
 						//color
-						if ( intersectionSelected.object.userData.arrayFuncs === undefined )
-							displayControllerColor = none;
-						else {
+						if ( intersectionSelected.object.userData.arrayFuncs === undefined ) {
 
+							displayControllerColor = none;
+							displayControllerOpacity = none;
+
+						} else {
+
+							/*Не помню зачем это написал
+							Если это оставить то не будет отображаться цвет выбранной точки frustumPoints
+							потому что сейчас у frustumPoints func.w = undefined 
 							if ( func.w === undefined ) {
 
 								displayControllerColor = none;
 
 							}
+							*/
 							controllerColor.setValue( '#' + color.getHexString() );
-							controllerColor.userData = { intersection: intersectionSelected, }
+							controllerColor.initialValue = controllerColor.getValue();
+							controllerColor.userData = { intersection: intersectionSelected, };
+							if ( opasity !== undefined ) {
+
+								setValue( controllerOpacity, opasity );
+/*								
+								controllerOpacity.setValue( opasity );
+								controllerOpacity.initialValue = controllerOpacity.getValue();
+*/								
+
+							} else displayControllerOpacity = none;
+							controllerOpacity.userData = { intersection: intersectionSelected, };
 
 						}
 
@@ -842,16 +893,32 @@ export function create( createXDobjects, options ) {
 							displayControllerW = none;
 						else {
 
-							setValue( controllerW, color );
-							displayControllerW = color === undefined ? none : block;
+							if ( color === undefined )
+								displayControllerW = none;
+							else {
+
+								setValue( controllerW, color );
+								displayControllerW = block;
+
+							}
 
 						}
 						displayControllerColor = none;
+						displayControllerOpacity = none;
 
 					}
-					dislayEl( controllerW, displayControllerW )
-					dislayEl( controllerColor, displayControllerColor )
+					dislayEl( controllerW, displayControllerW );
+					dislayEl( controllerColor, displayControllerColor );
+					dislayEl( controllerOpacity, displayControllerOpacity );
 
+					var boReadOnly = intersectionSelected.object.userData.boFrustumPoints === true ? true : false;
+					controllerX.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					controllerY.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					controllerZ.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					controllerW.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					controllerColor.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					controllerOpacity.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					
 				}
 				this.setMesh = function () {
 
@@ -924,6 +991,8 @@ export function create( createXDobjects, options ) {
 				}
 				this.addMesh = function ( mesh ) {
 
+					if ( !options.dat )
+						return;
 					if ( mesh.userData.boFrustumPoints ) {
 
 						for ( var i = 0; i < cMeshs.__select.options.length; i++ ) {
@@ -943,8 +1012,8 @@ export function create( createXDobjects, options ) {
 				}
 				this.select = function ( intersectionSelected ) {
 
-					//					cursor = 'progress';
-
+					if ( !options.dat )
+						return;
 					var position = getObjectLocalPosition( intersectionSelected.object, intersectionSelected.index );
 					if ( f3DObjects === undefined ) {
 
@@ -988,15 +1057,26 @@ export function create( createXDobjects, options ) {
 							return;//Сначала пользователь выбрал точку с помошщью мыши
 						//Потом сменил Meshs/Select
 
-						//fPonts.open();много времени на открытие когда много точек
-						cPoints.__select[intersectionSelected.index + 1].selected = true;
+						if ( !intersectionSelected.object.userData.boFrustumPoints ) {
+
+							//fPoints.open();много времени на открытие когда много точек
+							cPoints.__select[intersectionSelected.index + 1].selected = true;
+
+						} else {//FrustumPoints
+						
+							cFrustumPoints.pointIndexes( intersectionSelected.object.userData.pointIndexes( intersectionSelected.index ) );
+							
+						}
 						var block = 'block';
 						fPoint.domElement.style.display = block;
 						fPointWorld.domElement.style.display = block;
 						intersection = intersectionSelected;
 						setPosition( intersectionSelected );
 
-						var line = mesh.userData.arrayFuncs === undefined ? undefined : mesh.userData.arrayFuncs[intersectionSelected.index].line;//You can not trace points if you do not defined the mesh.userData.arrayFuncs
+						var mesh = getMesh();
+						var line = ( mesh.userData.arrayFuncs === undefined ) || (typeof intersection.object.userData.arrayFuncs === "function" ) ?
+							undefined :
+							mesh.userData.arrayFuncs[intersectionSelected.index].line;//You can not trace points if you do not defined the mesh.userData.arrayFuncs
 						cTrace.setValue( line === undefined ? false : line.isVisible() )
 
 						cRestoreDefaultLocalPosition.domElement.parentElement.parentElement.style.display =
@@ -1006,7 +1086,7 @@ export function create( createXDobjects, options ) {
 					this.selectPoint2();
 
 				}
-				this.isSelectedMesh = function ( meshCur ) { return mesh === meshCur }
+				this.isSelectedMesh = function ( meshCur ) { return getMesh() === meshCur }
 				this.getSelectedPointIndex = function () {
 
 					if ( cPoints === undefined ) {
@@ -1020,9 +1100,17 @@ export function create( createXDobjects, options ) {
 					return index - 1;
 
 				}
+				function getMesh() {
+
+					var selectedIndex = cMeshs.__select.options.selectedIndex;
+					if ( selectedIndex !== -1 )
+						return cMeshs.__select.options[cMeshs.__select.options.selectedIndex].mesh;
+					return undefined;
+
+				}
 				function isNotSetControllers() {
 
-					return ( mesh === undefined )
+					return ( getMesh() === undefined )
 						|| ( gui === undefined )
 						//					|| !mesh.userData.boFrustumPoints//не помню зачем это поставил
 						;
@@ -1031,6 +1119,7 @@ export function create( createXDobjects, options ) {
 
 					if ( isNotSetControllers() )
 						return;
+					var mesh = getMesh();
 					cScaleX.setValue( mesh.scale.x );
 					cScaleY.setValue( mesh.scale.y );
 					cScaleZ.setValue( mesh.scale.z );
@@ -1040,6 +1129,7 @@ export function create( createXDobjects, options ) {
 
 					if ( isNotSetControllers() )
 						return;
+					var mesh = getMesh();
 					cPosition.x.setValue( mesh.position.x );
 					cPosition.y.setValue( mesh.position.y );
 					cPosition.z.setValue( mesh.position.z );
@@ -1049,6 +1139,7 @@ export function create( createXDobjects, options ) {
 
 					if ( isNotSetControllers() )
 						return;
+					var mesh = getMesh();
 					cRotations.x.setValue( mesh.rotation.x );
 					cRotations.y.setValue( mesh.rotation.y );
 					cRotations.z.setValue( mesh.rotation.z );
@@ -1060,9 +1151,7 @@ export function create( createXDobjects, options ) {
 
 					cMeshs = f3DObjects.add( { Meshs: lang.notSelected }, 'Meshs', { [lang.notSelected]: -1 } ).onChange( function ( value ) {
 
-						cPoints.__onChange( -1 );
-						_this.removePoints();
-						mesh = cMeshs.__select.options[cMeshs.__select.options.selectedIndex].mesh;
+						var mesh = getMesh();//cMeshs.__select.options[cMeshs.__select.options.selectedIndex].mesh;
 						var display;
 						if ( mesh === undefined ) {
 
@@ -1072,90 +1161,110 @@ export function create( createXDobjects, options ) {
 						} else {
 
 							display = 'block';
+							var displayPoints = 'none', displayFrustumPoints = 'block';
+							if ( mesh.userData.controllers !== undefined ) {
 
-							//заполеение списка точек может занять много времени. Например когда пользователь выбрал frustumPoint.
-							//Что бы веб страница не замирала на это время я разбиваю долгий процесс на фазы
-							//которые могут меняться во время вызова guiSelectPoint.render(); из myThreejs render()
-							//Во время фазы renderPhaseEnum.start курсор мыши меняется на 'progress'
-							guiSelectPoint.renderPhaseEnum = { start: 0, progress: 1, ready: 3 };
-							guiSelectPoint.renderPhase = guiSelectPoint.renderPhaseEnum.start;
+								//FrustumPoints
+								mesh.userData.controllers();// cFrustumPoints );
 
-							var iPosition;
+							} else {
 
-							guiSelectPoint.render = function () {
+								cPoints.__onChange( -1 );
+								_this.removePoints();
 
-								switch ( guiSelectPoint.renderPhase ) {
+								displayPoints = 'block';
+								displayFrustumPoints = 'none';
 
-									case guiSelectPoint.renderPhaseEnum.start:
+								//заполеение списка точек может занять много времени. Например когда пользователь выбрал frustumPoint.
+								//Что бы веб страница не замирала на это время я разбиваю долгий процесс на фазы
+								//которые могут меняться во время вызова guiSelectPoint.render(); из myThreejs render()
+								//Во время фазы renderPhaseEnum.start курсор мыши меняется на 'progress'
+								guiSelectPoint.renderPhaseEnum = { start: 0, progress: 1, ready: 3 };
+								guiSelectPoint.renderPhase = guiSelectPoint.renderPhaseEnum.start;
 
-										cursor = renderer.domElement.style.cursor;
-										renderer.domElement.style.cursor = 'progress';
-										renderer.cursor = renderer.domElement.style.cursor;
-										guiSelectPoint.renderPhase = guiSelectPoint.renderPhaseEnum.progress;
-										iPosition = 0;
-										break;
+								var iPosition;
 
-									case guiSelectPoint.renderPhaseEnum.progress:
+								guiSelectPoint.render = function () {
 
-										var i = iPosition + 10000;
-										//console.warn( 'iPosition = ' + iPosition );
-										//Если после каждого входа на эту линию добавлять только один option
-										//то время запонения cPoints будет очень большим.
-										//Если добавлять все option сразу, то курсор не всегда будет меняться на 'progress'.
-										//В этом случае, что бы курсор поменялся на 'progress',
-										//надо будет быстро подвинуть курсор мыши сразу после щелчка на точке.
-										while ( iPosition < i ) {
+									switch ( guiSelectPoint.renderPhase ) {
 
-											if ( iPosition < mesh.geometry.attributes.position.count ) {
+										case guiSelectPoint.renderPhaseEnum.start:
 
-												var opt = document.createElement( 'option' ),
-													name = mesh.userData.arrayFuncs === undefined ? undefined : mesh.userData.arrayFuncs[iPosition].name;
-												opt.innerHTML = iPosition + ( name === undefined ? '' : ' ' + name );
-												opt.setAttribute( 'value', iPosition );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
-												cPoints.__select.appendChild( opt );
-												iPosition++;
+											cursor = renderer.domElement.style.cursor;
+											renderer.domElement.style.cursor = 'progress';
+											renderer.cursor = renderer.domElement.style.cursor;//эта строка нужна что бы новый курсор оставался при движении мыши
+											guiSelectPoint.renderPhase = guiSelectPoint.renderPhaseEnum.progress;
+											iPosition = 0;
+											break;
 
-											} else {
+										case guiSelectPoint.renderPhaseEnum.progress:
 
-												renderer.domElement.style.cursor = cursor;
-												renderer.cursor = undefined;
-												guiSelectPoint.renderPhase = guiSelectPoint.renderPhaseEnum.ready;
-												guiSelectPoint.render = undefined;
+											var i = iPosition + 10000;
+											//console.warn( 'iPosition = ' + iPosition );
+											//Если после каждого входа на эту линию добавлять только один option
+											//то время запонения cPoints будет очень большим.
+											//Если добавлять все option сразу, то курсор не всегда будет меняться на 'progress'.
+											//В этом случае, что бы курсор поменялся на 'progress',
+											//надо будет быстро подвинуть курсор мыши сразу после щелчка на точке.
+											while ( iPosition < i ) {
 
-												if ( guiSelectPoint.selectPoint2 !== undefined )
-													guiSelectPoint.selectPoint2( mesh );
-												break;
+												if ( iPosition < mesh.geometry.attributes.position.count ) {
+
+													var opt = document.createElement( 'option' ),
+														name = mesh.userData.arrayFuncs === undefined ?
+															undefined :
+															mesh.userData.pointName === undefined ? mesh.userData.arrayFuncs[iPosition].name : mesh.userData.pointName( iPosition );
+													opt.innerHTML = iPosition + ( name === undefined ? '' : ' ' + name );
+													opt.setAttribute( 'value', iPosition );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
+													cPoints.__select.appendChild( opt );
+													iPosition++;
+
+												} else {
+
+													renderer.domElement.style.cursor = cursor;
+													renderer.cursor = undefined;
+													guiSelectPoint.renderPhase = guiSelectPoint.renderPhaseEnum.ready;
+													guiSelectPoint.render = undefined;
+
+													if ( guiSelectPoint.selectPoint2 !== undefined )
+														guiSelectPoint.selectPoint2( mesh );
+													break;
+
+												}
 
 											}
+											/*											
+											console.warn( 'addPoints start. cursor: ' + renderer.domElement.style.cursor );
+																						for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
+										
+																							var opt = document.createElement( 'option' ),
+																								name = mesh.userData.arrayFuncs === undefined ? undefined : mesh.userData.arrayFuncs[i].name;
+																							opt.innerHTML = i + ( name === undefined ? '' : ' ' + name );
+																							opt.setAttribute( 'value', i );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
+																							cPoints.__select.appendChild( opt );
+										
+																						}
+										
+											console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
+																						renderer.domElement.style.cursor = cursor;
+																						renderer.cursor = undefined;
+																						guiSelectPoint.renderPhase = guiSelectPoint.renderPhaseEnum.ready;
+																						guiSelectPoint.render = undefined;
+										
+																						guiSelectPoint.selectPoint2( mesh );
+											*/
+											break;
 
-										}
-										/*											
-										console.warn( 'addPoints start. cursor: ' + renderer.domElement.style.cursor );
-																					for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
-										
-																						var opt = document.createElement( 'option' ),
-																							name = mesh.userData.arrayFuncs === undefined ? undefined : mesh.userData.arrayFuncs[i].name;
-																						opt.innerHTML = i + ( name === undefined ? '' : ' ' + name );
-																						opt.setAttribute( 'value', i );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
-																						cPoints.__select.appendChild( opt );
-										
-																					}
-										
-										console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
-																					renderer.domElement.style.cursor = cursor;
-																					renderer.cursor = undefined;
-																					guiSelectPoint.renderPhase = guiSelectPoint.renderPhaseEnum.ready;
-																					guiSelectPoint.render = undefined;
-										
-																					guiSelectPoint.selectPoint2( mesh );
-										*/
-										break;
+										default: console.error( 'Invalid renderPhase = ' + guiSelectPoint.renderPhase );
 
-									default: console.error( 'Invalid renderPhase = ' + guiSelectPoint.renderPhase );
+									}
 
 								}
 
 							}
+							cPoints.domElement.parentElement.parentElement.style.display = displayPoints;
+							cTraceAll.domElement.parentElement.parentElement.style.display = displayPoints;
+							cFrustumPoints.display( displayFrustumPoints );
 
 							setScaleControllers();
 							setPositionControllers();
@@ -1290,6 +1399,7 @@ export function create( createXDobjects, options ) {
 						cRotations[name] = fRotation.add( new THREE.Vector3(), name, 0, Math.PI * 2, 1 / 360 ).
 							onChange( function ( value ) {
 
+								var mesh = getMesh();
 								if ( !mesh.userData.boFrustumPoints ) {
 
 									mesh.rotation[name] = value;
@@ -1325,8 +1435,9 @@ export function create( createXDobjects, options ) {
 
 					//Points
 
-					fPonts = fMesh.addFolder( lang.points );
-					cPoints = fPonts.add( { Points: lang.notSelected }, 'Points', { [lang.notSelected]: -1 } ).onChange( function ( value ) {
+					fPoints = fMesh.addFolder( lang.points );
+
+					cPoints = fPoints.add( { Points: lang.notSelected }, 'Points', { [lang.notSelected]: -1 } ).onChange( function ( value ) {
 
 						value = parseInt( value );
 						var display, position;
@@ -1341,29 +1452,33 @@ export function create( createXDobjects, options ) {
 
 						}
 						if ( axesHelper !== undefined )
-							axesHelper.exposePosition( getObjectPosition( mesh, value ) );
+							axesHelper.exposePosition( getObjectPosition( getMesh(), value ) );
 						fPoint.domElement.style.display = display;
 						fPointWorld.domElement.style.display = display;
 
 					} );
 					cPoints.__select[0].selected = true;
 					dat.controllerNameAndTitle( cPoints, lang.select );
+					if ( cFrustumPoints !== undefined )
+						cFrustumPoints.create( fPoints, getLanguageCode() );
+					myThreejs.cFrustumPoints = cFrustumPoints;
 
 					//Points attribute position
-					fPoint = fPonts.addFolder( lang.point );
+					fPoint = fPoints.addFolder( lang.point );
 					dat.folderNameAndTitle( fPoint, lang.point, lang.pointTitle );
 					fPoint.domElement.style.display = 'none';
 					//					fPoint.open();
 
 					//Points world position
-					fPointWorld = fPonts.addFolder( lang.pointWorld );
+					fPointWorld = fPoints.addFolder( lang.pointWorld );
 					dat.folderNameAndTitle( fPointWorld, lang.pointWorld, lang.pointWorldTitle );
 					fPointWorld.domElement.style.display = 'none';
 					fPointWorld.open();
 
 					//displays the trace of the movement of all points of the mesh
-					cTraceAll = fPonts.add( { trace: false }, 'trace' ).onChange( function ( value ) {
+					cTraceAll = fPoints.add( { trace: false }, 'trace' ).onChange( function ( value ) {
 
+						var mesh = getMesh();
 						mesh.userData.traceAll = value;
 						for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
 							visibleTraceLine( { object: mesh, index: i }, value );
@@ -1418,6 +1533,30 @@ export function create( createXDobjects, options ) {
 						if ( mesh instanceof THREE.Group )
 							continue;
 						this.addMesh( mesh );
+
+					}
+
+					function isReadOnlyController( controller ) {
+
+						if ( controller.domElement.querySelector( 'input' ).readOnly ) {
+
+							if ( controller.getValue() !== controller.initialValue ) {
+
+								if ( controller.boSetValue === undefined ) {
+
+									controller.boSetValue = true;
+									setValue( controller, controller.initialValue );
+									controller.boSetValue = undefined;
+									controller.initialValue = controller.getValue();//Эта строка нужна в случае когда новое зачения невозможно установиь точно таким же, как initialValue
+													//Иначе перепонится стек
+
+								}
+
+							}
+							return true;
+
+						}
+						return false;
 
 					}
 
@@ -1479,6 +1618,8 @@ export function create( createXDobjects, options ) {
 								( scale.max - scale.min ) / 100 ).
 								onChange( function ( value ) {
 
+									if ( isReadOnlyController( controller ) )
+										return;
 									var points = intersection.object;
 									points.geometry.attributes.position.array
 									[axesId + intersection.index * points.geometry.attributes.position.itemSize] = value;
@@ -1505,16 +1646,34 @@ export function create( createXDobjects, options ) {
 					}, 'color' ).
 						onChange( function ( value ) {
 
+							if ( isReadOnlyController( controllerColor ) )
+								return;
 							if ( controllerColor.userData === undefined )
 								return;
 							var intersection = controllerColor.userData.intersection;
 							setColorAttribute( intersection.object.geometry.attributes, intersection.index, value );
 
 						} );
-
-					//read only
-
 					dat.controllerNameAndTitle( controllerColor, lang.color );
+					controllerOpacity = fPoint.add( {
+
+						opasity: 1,
+
+					}, 'opasity', 0, 1, 0.01 ).
+						onChange( function ( opasity ) {
+
+							if ( isReadOnlyController( controllerOpacity ) )
+								return;
+							var intersection = controllerColor.userData.intersection;
+							var points = intersection.object;
+							if ( points.geometry.attributes.ca === undefined )
+								return;//no opasity
+							points.geometry.attributes.ca.array
+							[3 + intersection.index * points.geometry.attributes.ca.itemSize] = opasity;
+							points.geometry.attributes.ca.needsUpdate = true;
+
+						} );
+					dat.controllerNameAndTitle( controllerOpacity, lang.opacity, lang.opacityTitle );
 
 					//displays the trace of the point movement
 					cTrace = fPoint.add( { trace: false }, 'trace' ).onChange( function ( value ) {
@@ -1564,6 +1723,11 @@ export function create( createXDobjects, options ) {
 								else if ( typeof positionDefault.w === "function" )
 									setValue( controllerW, positionDefault.w( group.userData.t ) );
 								else console.error( 'Restore default local position: Invalid W axis.' );
+
+							} else {
+
+								controllerColor.setValue( controllerColor.initialValue );
+								controllerOpacity.setValue( controllerOpacity.initialValue );
 
 							}
 
@@ -1811,13 +1975,16 @@ export function create( createXDobjects, options ) {
 					controls.update();//if scale != 1 and position != 0 of the screen, то после открытия canvas положение картинки смещено. Положение восстанавливается только если подвигать мышью
 			}
 
-			if ( options.frustumPoints )
+			createXDobjects( group, options );
+
+			if ( options.frustumPoints ) {
+
 				frustumPoints = new FrustumPoints.create( camera, controls, guiSelectPoint, group,
-					'FrustumPoints_' + getCanvasName(), stereoEffect.options.spatialMultiplex, options,
+					'FrustumPoints_' + getCanvasName(), stereoEffect.options.spatialMultiplex, renderer, options,
 					{//points and lines options.Default is { }
-						
+
 						point: {//points options.Default is {}
-							
+
 							size: 0.01,//Size of each frustum point.Default is 0;
 
 						},
@@ -1825,9 +1992,13 @@ export function create( createXDobjects, options ) {
 						//info: true, //true - display information about frustum point if user move mouse over or click this point.Default is false
 
 						//Stereo options. Available only if user has selected a stereo mode (spatialMultiplex !== spatialMultiplex.Mono)
+						stereo: {
 
-						//lines: false, // Display or hide lines between Frustum Points for more comfortable visualisation in the stereo mode.Default is true
-						//hide: 10, // Hide the nearby to the camera points in percentage to all points for more comfortable visualisation.Default is 0
+							//lines: false, // Display or hide lines between Frustum Points for more comfortable visualisation in the stereo mode.Default is true
+							//hide: 10, // Hide the nearby to the camera points in percentage to all points for more comfortable visualisation.Default is 0
+							//opacity: 1,//Float in the range of 0.0 - 1.0 indicating how transparent the lines is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque. Default is 0.3
+
+						},
 
 						//
 
@@ -1837,22 +2008,24 @@ export function create( createXDobjects, options ) {
 						//изменение размеров усеченной пирамиды FrustumPoints
 
 						near: 10,// Shift of the frustum layer near to the camera in percents.
-							//0 percents - no shift.
-							//100 percents - ближний к камере слой усеченной пирамиды приблизился к дальнему от камеры слою усеченной пирамиды.
-							//Default is 0
+						//0 percents - no shift.
+						//100 percents - ближний к камере слой усеченной пирамиды приблизился к дальнему от камеры слою усеченной пирамиды.
+						//Default is 0
 						far: 70,// Shift of the frustum layer far to the camera in percents.
-							// 0 percents - no shift.
-							// 100 percents - дальний от камеры слоем усеченной пирамиды приблизился к ближнему к камере слою усеченной пирамиды.
-							// Default is 0
+						// 0 percents - no shift.
+						// 100 percents - дальний от камеры слоем усеченной пирамиды приблизился к ближнему к камере слою усеченной пирамиды.
+						// Default is 0
 						base: 70,// Scale of the base of the frustum points in percents.
-							// 0 base is null
-							// 100 no scale
-							// Default is 100
+						// 0 base is null
+						// 100 no scale
+						// Default is 100
 						square: true,// true - Square base of the frustum points.Default is false
-					}
+					},
+					cFrustumPoints
 				);
+				cFrustumPoints.setFrustumPoints( frustumPoints );
 
-			createXDobjects( group, options );
+			}
 
 			function selectPlayScene( t, index, boPlayer ) {
 
@@ -1911,6 +2084,7 @@ export function create( createXDobjects, options ) {
 								min = max - 1;
 
 							}
+							var boSetColorAttribute = true;
 							if ( typeof funcs.w === "function" ) {
 
 								attributes.position.setW( i, funcs.w( t, a, b ) );
@@ -1927,8 +2101,15 @@ export function create( createXDobjects, options ) {
 
 							} else if ( typeof funcs.w === "number" )
 								color = palette.toColor( funcs.w, min, max );
-							else color = new THREE.Color( 1, 1, 1 );//white
-							setColorAttribute( attributes, i, color );
+							else {
+
+								boSetColorAttribute = false;
+//								var colorItem = new THREE.Vector3().fromArray( attributes.ca.array, i );
+//								color = new THREE.Color( 1, 1, 1 );//white
+
+							}
+							if ( boSetColorAttribute )
+								setColorAttribute( attributes, i, color );
 							if ( needsUpdate )
 								attributes.position.needsUpdate = true;
 
@@ -2055,7 +2236,7 @@ export function create( createXDobjects, options ) {
 
 					} );
 					dat.controllerNameAndTitle( this.size, lang.size, lang.sizeTitle );
-
+/*
 					//opacity
 					if ( point.opacity !== undefined ) {
 
@@ -2067,6 +2248,7 @@ export function create( createXDobjects, options ) {
 						dat.controllerNameAndTitle( this.opacity, lang.opacity, lang.opacityTitle );
 
 					}
+*/					
 
 					//point default button
 					dat.controllerNameAndTitle( fPoint.add( {
@@ -2599,14 +2781,29 @@ export function create( createXDobjects, options ) {
 						item.vector.w === undefined ? 0 : item.vector.w
 
 					);
-				else arrayFuncs[i].vector = new THREE.Vector4(
+				else {
+
+					if ( item.vector.length === 4 )
+						arrayFuncs[i].vector = new THREE.Vector4(
+
+							item.vector[0] === undefined ? 0 : item.vector[0],
+							item.vector[1] === undefined ? 0 : item.vector[1],
+							item.vector[2] === undefined ? 0 : item.vector[2],
+							item.vector[3] === undefined ? 0 : item.vector[3]
+
+						);
+					else if ( item.vector.length === 3 )
+
+						arrayFuncs[i].vector = new THREE.Vector3(
 
 						item.vector[0] === undefined ? 0 : item.vector[0],
 						item.vector[1] === undefined ? 0 : item.vector[1],
 						item.vector[2] === undefined ? 0 : item.vector[2],
-						item.vector[3] === undefined ? 0 : item.vector[3]
 
 					);
+					else console.error( 'options.getPoints(...) falied! item.vector.length = ' + item.vector.length );
+
+				}
 
 			}
 
@@ -2647,7 +2844,9 @@ export function create( createXDobjects, options ) {
 
 
 			}
-			var point = new THREE.Vector4( getAxis( 'x' ), getAxis( 'y' ), getAxis( 'z' ), getAxis( 'w' ), );
+			var point = funcs.vector instanceof THREE.Vector3 === true ?
+				new THREE.Vector3( getAxis( 'x' ), getAxis( 'y' ), getAxis( 'z' ) ) :
+				new THREE.Vector4( getAxis( 'x' ), getAxis( 'y' ), getAxis( 'z' ), getAxis( 'w' ), );
 
 			if ( funcs.w === undefined )
 				point.w = {};//Если тут поставить NaN то в points.geometry.attributes.position.array он преобразуется в 0.
@@ -2684,33 +2883,113 @@ export function create( createXDobjects, options ) {
 	 * @param {object} scale options.scales.w
 	 * @returns array of mesh colors.
 	 */
-	options.getСolors = function ( t, arrayFuncs, scale ) {
+	options.getСolors = function ( t, arrayFuncs, scale, positions, colors ) {
 
 		if ( t === undefined )
 			console.error( 'getСolors: t = ' + t );
 
-		var colors = [];
-		arrayFuncs.forEach( function ( funcs ) {
+		if ( ( positions !== undefined ) && Array.isArray(arrayFuncs) && ( arrayFuncs.length !== positions.count ) ) {
 
-			var min, max;
-			if ( scale !== undefined ) {
+			console.error( 'getСolors failed! arrayFuncs.length: ' + arrayFuncs.length + ' != positions.count: ' + positions.count );
+			return colors;
 
-				min = scale.min; max = scale.max;
+		}
+		colors = colors || [];
+		var length = Array.isArray(arrayFuncs) ? arrayFuncs.length : positions.count;
 
-			} else {
+		//Standard normal distribution
+		//https://en.wikipedia.org/wiki/Normal_distribution
+		function getStandardNormalDistribution( x ) {
 
-				max = funcs instanceof THREE.Vector4 ? funcs.w : 1;
-				min = max - 1;
+			var res = Math.exp( -0.5 * x * x ) / Math.sqrt( 2 * Math.PI );
+			//console.log( 'x = ' + x + ' y = ' + res );
+			return res;
 
-			}
+		}
+
+		var standardNormalDistributionZero;
+		if ( positions !== undefined )
+			standardNormalDistributionZero = getStandardNormalDistribution( 0 );
+		for( var i = 0; i < length; i++ ) {
+
+			var funcs = Array.isArray(arrayFuncs) ? arrayFuncs[i] : undefined,
+				vector;
 			if ( funcs instanceof THREE.Vector4 ) {
 
+				var min, max;
+				if ( scale !== undefined ) {
+
+					min = scale.min; max = scale.max;
+
+				} else {
+
+					max = funcs instanceof THREE.Vector4 ? funcs.w : 1;
+					min = max - 1;
+
+				}
 				var color = palette.toColor( funcs.w, min, max );
 				colors.push( color.r, color.g, color.b );
 
-			} else colors.push( 1, 1, 1 );//white
+			} else if ( colors instanceof THREE.Float32BufferAttribute )
+				vector = new THREE.Vector3( 1, 1, 1 );
+				//colors.setXYZ( i, 1, 1, 1 );//white
+			else colors.push( 1, 1, 1 );//white
+/*			
+			var color = new THREE.Vector3( 255, 255, 255 );//white
+			if ( positions !== undefined )
+				group.children.forEach( function ( mesh ) {
 
-		} );
+					if ( !mesh.userData.cloud )
+						return;
+					color.fromArray( mesh.geometry.attributes.color.array, 0 );
+
+				} );
+			colors.push( color.x, color.y, color.z );
+*/			
+
+			//opacity
+			if ( positions !== undefined ) {
+
+				var opacity = 0;
+				group.children.forEach( function ( mesh ) {
+
+					if ( !mesh.userData.cloud )
+						return;
+					for ( var iMesh = 0; iMesh < mesh.geometry.attributes.position.count; iMesh++ ) {
+
+//						var position = new THREE.Vector3().fromBufferAttribute( mesh.geometry.attributes.position, iMesh );
+						var position = getObjectPosition( mesh, iMesh );
+						opacity += getStandardNormalDistribution(
+							getWorldPosition(//myThreejs.getWorldPosition(
+								camera, new THREE.Vector3().fromBufferAttribute( positions, i )
+							).distanceTo( position ) * 5
+						) / standardNormalDistributionZero;
+
+					}
+
+				} );
+
+				if ( debug.opacity !== undefined )
+					opacity = debug.opacity;
+					
+				if ( colors instanceof THREE.Float32BufferAttribute ) {
+
+					colors.setXYZW( i, vector.x, vector.y, vector.z, opacity );
+					
+//					colors.setX( i + 3, opacity2 === undefined ? opacity : opacity2 );
+
+				}
+				else colors.push( opacity );
+/*				
+				colors.push( getStandardNormalDistribution( myThreejs.getWorldPosition(
+					camera, new THREE.Vector3().fromBufferAttribute( positions, i ) ).distanceTo( new THREE.Vector3() ) * 5 )
+					/ standardNormalDistributionZero );
+*/					
+
+			} else colors.push( 1 );
+//			colors.push( positions !== undefined ? positions.getW( i ) : 1 );//opacity
+
+		}
 		return colors;
 
 	}
@@ -2727,9 +3006,12 @@ export function create( createXDobjects, options ) {
 			return;
 		var spriteTextIntersection = findSpriteTextIntersection( scene );
 		var textColor = 'rgb( 128, 128, 128 )',
-			position = getPosition( intersection ),
+			position = getPosition( intersection );
+/*
 			func = intersection.object.userData.arrayFuncs === undefined ? undefined : intersection.object.userData.arrayFuncs[intersection.index];
-
+if( typeof intersection.object.userData.arrayFuncs === "function" )
+	console.error( 'under constaction. arrayFuncs === "function"' );
+*/
 		// Make the spriteText follow the mouse
 		//https://stackoverflow.com/questions/36033879/three-js-object-follows-mouse-position
 		var vector = new THREE.Vector3( mouse.x, mouse.y, 0 );
@@ -2750,8 +3032,26 @@ export function create( createXDobjects, options ) {
 
 			var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
 				funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
-				pointName = !isArrayFuncs ? undefined : funcs[intersection.index].name,
-				color = !isArrayFuncs ? undefined : Array.isArray(func.w) ? execFunc( funcs[intersection.index], 'w', group.userData.t, options.a, options.b ) : func.w;
+				func = ( funcs === undefined ) && ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
+				pointName = !isArrayFuncs ?
+					undefined :
+					intersection.object.userData.pointName === undefined ?
+						func.name :
+						intersection.object.userData.pointName( intersection.index ),
+				color = !isArrayFuncs || ( func === undefined ) ?
+					undefined :
+					Array.isArray(func.w) ?
+						execFunc( func, 'w', group.userData.t, options.a, options.b ) :
+						func.w;
+			if ( color === undefined ) {
+
+				var vector = new THREE.Vector3().fromArray(intersection.object.geometry.attributes.ca.array, intersection.index * intersection.object.geometry.attributes.ca.itemSize);
+				color = new THREE.Color( vector.x, vector.y, vector.z );
+
+				//не помню почему так написал эту строку
+//				color = new THREE.Color( "rgb(" + vector.x + ", " + vector.y + ", " + vector.z + ")" );
+				
+			}
 			var cookieName = getCanvasName();
 
 			/**
@@ -2778,17 +3078,31 @@ export function create( createXDobjects, options ) {
 				options.scales.x.name + ': ' + position.x +
 				'\n' + options.scales.y.name + ': ' + position.y +
 				'\n' + options.scales.z.name + ': ' + position.z +
-				(
+				(//w
 					!isArrayFuncs ?
 						'' :
-						funcs[intersection.index] instanceof THREE.Vector4 ?
+						funcs[intersection.index] instanceof THREE.Vector4 ||
+						funcs[intersection.index] instanceof THREE.Vector3 ||
+						typeof funcs === "function" ?
 							color instanceof THREE.Color ?
 								'\n' + lang.color + ': ' + new THREE.Color( color.r, color.g, color.b ).getHexString() :
 //								options.scales.w === undefined ? '' : '\n' + options.scales.w.name + ': ' + position.w :
 								'\n' + options.scales.w.name + ': ' + position.w :
 							''
 
-				), {
+				) +
+				(//opacity
+					( intersection.object.geometry.attributes.ca === undefined ) ||
+					( intersection.object.geometry.attributes.ca.itemSize < 4 ) ?
+						'' :
+						'\n' + lang.opacity + ': ' + new THREE.Vector4().fromArray(
+
+							intersection.object.geometry.attributes.ca.array,
+							intersection.index * intersection.object.geometry.attributes.ca.itemSize
+
+						).w
+				)
+				, {
 
 					textHeight: 0.2,
 					fontColor: textColor,
@@ -2941,6 +3255,7 @@ switch ( getLanguageCode() ) {
 		lang.position = 'Позиция';
 		lang.name = 'Имя';
 		lang.color = 'Цвет';
+//		lang.opacity = 'Непрозрачность',
 		lang.settings = 'Настройки';
 		lang.webglcontextlost = 'Пользовательский агент обнаружил, что буфер рисунка, связанный с объектом WebGLRenderingContext, потерян.';
 
@@ -2959,7 +3274,7 @@ switch ( getLanguageCode() ) {
 		lang.pointSettings = 'Точка';
 		lang.size = 'Размер';
 		lang.sizeTitle = 'Размер точки с материалом типа "ShaderMaterial"';
-		lang.opacity = 'Прозрачность';
+		lang.opacity = 'Непрозрачность';
 		lang.opacityTitle = 'Число в диапазоне 0,0 - 1,0, указывающий, насколько прозрачен материал. Значение 0.0 означает полностью прозрачный, 1.0 - полностью непрозрачный.';
 		lang.defaultPointTitle = 'Восстановить точку';
 
@@ -2979,23 +3294,28 @@ function getPosition( intersection ) {
 }
 function getObjectLocalPosition( object, index ) {
 
+/*
+if ( object.geometry.attributes.position === undefined )
+	console.error( 'attributesPosition = ' + object.geometry.attributes.position );
+*/	
 	var attributesPosition = object.geometry.attributes.position,
 		position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3();
 	position.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
 	return position;
 
 }
-function getObjectPosition( object, index ) {
 
-	if ( index === -1 )
-		return undefined;
-	var attributesPosition = object.geometry.attributes.position;
-	if ( index === undefined )
-		return object.position;
-	var position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3(),
-		position2 = getObjectLocalPosition( object, index ),
+/**
+ * gets position of the vector in world coordinates, taking into account the position, scale and rotation of the 3D object
+ * @param {THREE.Object3D} object
+ * @param {THREE.Vector3} pos local position
+ * @returns world position 
+ */
+export function getWorldPosition( object, pos ) {
+
+	var position = new THREE.Vector3(),
 		positionAngle = new THREE.Vector3();
-	position = position2.clone();
+	position = pos.clone();
 
 	position.multiply( object.scale );
 
@@ -3007,8 +3327,16 @@ function getObjectPosition( object, index ) {
 	position.z = positionAngle.z;
 
 	position.add( object.position );
-
 	return position;
+
+}
+function getObjectPosition( object, index ) {
+
+	if ( index === -1 )
+		return undefined;
+	if ( index === undefined )
+		return object.position;
+	return getWorldPosition( object, getObjectLocalPosition( object, index ) )
 
 }
 
@@ -3049,7 +3377,7 @@ function getObjectPosition( object, index ) {
  * @param {object} [pointsOptions] followed points options is availablee:
  * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.
  * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
- * @param {string} [pointsOptions.shaderMaterial] creates the THREE.Points with THREE.ShaderMaterial material.
+ * @param {object} [pointsOptions.shaderMaterial] creates the THREE.Points with THREE.ShaderMaterial material.
  * The size of the each point of the THREE.Points seems the same on canvas
  * because I reduce the size of the points closest to the camera and increase the size of the points farthest to the camera.
  * See var shaderMaterialDefault of the frustumPoints for details.
@@ -3071,10 +3399,11 @@ function getObjectPosition( object, index ) {
  * float - rotation of the points.
  * [float] - array of rotations of the points.
  * Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' )
+ * @param {object} [pointsOptions.cloud] position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.Default is undefined.
  */
 export function Points( arrayFuncs, options, pointsOptions ) {
 
-	if ( arrayFuncs.length === 0 )
+	if ( (typeof arrayFuncs !== 'function') && ( arrayFuncs.length === 0 ) )
 		arrayFuncs.push( new THREE.Vector3() );
 	pointsOptions = pointsOptions || {};
 	pointsOptions.tMin = pointsOptions.tMin || 0;
@@ -3096,6 +3425,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 			sizes: new Float32Array( arrayFuncs.length ),
 			scales: options.scales,
 			shaderMaterial: pointsOptions.shaderMaterial,
+			opacity: pointsOptions.opacity,
 
 		} );
 	else {
@@ -3112,6 +3442,17 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 	}
 	points.name = pointsOptions.name;//'Wave';
 	points.userData.arrayFuncs = arrayFuncs;
+	if ( pointsOptions.pointIndexes !== undefined )
+		points.userData.pointIndexes = function ( pointIndex ) { return pointsOptions.pointIndexes( pointIndex ); }
+	if ( pointsOptions.pointName !== undefined )
+		points.userData.pointName = function ( pointIndex ) { return pointsOptions.pointName( pointIndex ); }
+	if ( pointsOptions.controllers !== undefined ) {
+
+		points.userData.addControllers = pointsOptions.addControllers;
+		points.userData.controllers = function( /*cFrustumPoints*/ )
+			{ return pointsOptions.controllers( /*cFrustumPoints*/ ); }
+
+	}
 	points.userData.raycaster = {
 
 		onIntersection: function ( raycaster, intersection, scene, mouse ) {
@@ -3133,6 +3474,8 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 		setRotations( t );
 
 	}
+	if( pointsOptions.cloud !== undefined )
+		points.userData.cloud = pointsOptions.cloud;
 	function setPositions( t ) {
 
 		t = t || pointsOptions.tMin;
@@ -3269,15 +3612,27 @@ function getGlobalScale( mesh ) {
  */
 export function getShaderMaterialPoints( params ) {
 
-	var geometry = new THREE.BufferGeometry().setFromPoints( params.getPoints( params.tMin, params.arrayFuncs, params.a, params.b ), 4 );
-	geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( params.sizes, 1 ) );
-	geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( params.getСolors( params.tMin, params.arrayFuncs, params.scales.w ), 3 ) );
+	var geometry;
+	if ( typeof params.arrayFuncs === 'function' )
+		geometry = params.arrayFuncs();
+	else geometry = new THREE.BufferGeometry().setFromPoints( params.getPoints( params.tMin, params.arrayFuncs, params.a, params.b ),
+		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
+	geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( geometry.attributes.position.count, 1 ) );
+	geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute(
+		params.getСolors( params.tMin, params.arrayFuncs, params.scales.w, params.opacity ? geometry.attributes.position : undefined ), 4 ) );
+	
+	//Аппроксимация функции https://mycurvefit.com/
+	//Z Count	Y Count	length	allocated
+	//					1		348
+	//3			3		27		2004
+	//5			3		45		3156
+	//100		100		1000000	64000276
 	geometry.getPointSize = function ( index ) {
 
 		//размер области точки, в которой должна находиться мышка зависит от высоты холста canvas
 		var size = new THREE.Vector2();
 		params.renderer.getSize( size );
-		
+
 		var scale = getGlobalScale( points );
 		return this.attributes.size.array[index] * (-size.y*0.005+2.99) / ( ( scale.x + scale.y + scale.z ) / 3 );
 
@@ -3291,6 +3646,7 @@ export function getShaderMaterialPoints( params ) {
 
 		//See https://threejs.org/examples/webgl_custom_attributes_points2.html
 		//D: \My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\examples\webgl_custom_attributes_points2.html
+		//https://www.khronos.org/opengl/wiki/OpenGL_Shading_Language
 
 		uniforms: {
 
@@ -3306,9 +3662,9 @@ export function getShaderMaterialPoints( params ) {
 		vertexShader: [
 
 			"attribute float size;",
-			"attribute vec3 ca;",
+			"attribute vec4 ca;",
 
-			"varying vec3 vColor;",
+			"varying vec4 vColor;",
 
 			"void main() {",
 
@@ -3325,15 +3681,15 @@ export function getShaderMaterialPoints( params ) {
 		].join( "\n" ),
 		fragmentShader: [
 
-			"uniform vec3 color;",
+			"uniform vec4 color;",
 			"uniform sampler2D pointTexture;",
 			"uniform float opacity;",
 
-			"varying vec3 vColor;",
+			"varying vec4 vColor;",
 
 			"void main() {",
 
-			"	vec4 color = vec4( color * vColor, opacity ) * texture2D( pointTexture, gl_PointCoord );",
+			"	vec4 color = vec4( vColor ) * texture2D( pointTexture, gl_PointCoord );",
 
 			"	gl_FragColor = color;",
 
@@ -3341,7 +3697,7 @@ export function getShaderMaterialPoints( params ) {
 
 		].join( "\n" ),
 		transparent: true,
-		opacity: 0.1,
+//		opacity: 0.1,
 
 	} ) );
 	points.userData.shaderMaterial = params.shaderMaterial;

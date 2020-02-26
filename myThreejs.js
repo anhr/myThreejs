@@ -14,7 +14,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import { create, Points, setArrayFuncs, limitAngles, getShaderMaterialPoints } from './index.js';
+import { create, Points, setArrayFuncs, limitAngles, getShaderMaterialPoints, getWorldPosition } from './index.js';
 
 var myThreejs = {
 
@@ -23,6 +23,7 @@ var myThreejs = {
 	setArrayFuncs: setArrayFuncs,
 	limitAngles: limitAngles,
 	getShaderMaterialPoints: getShaderMaterialPoints,
+	getWorldPosition: getWorldPosition,
 
 }
 export default myThreejs;

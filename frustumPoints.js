@@ -211,7 +211,7 @@ function create( camera, controls, guiSelectPoint, group, cookieName, spatialMul
 
 					} else {
 
-						options.getСolors( 0, undefined, options.scales.w, points.geometry.attributes.position, points.geometry.attributes.ca );
+						options.getColors( 0, undefined, options.scales.w, points.geometry.attributes.position, points.geometry.attributes.ca );
 						points.geometry.attributes.ca.needsUpdate = true;
 						group.add( points );
 
@@ -829,15 +829,16 @@ function create( camera, controls, guiSelectPoint, group, cookieName, spatialMul
 			if ( shaderMaterial.display ) {
 
 				update();
-				displayControllers( true );
+//				displayControllers( true );
 
 			} else {
 
 				raycaster.stereo.removeParticle( points );
 				removePoints();
-				displayControllers( false );
+//				displayControllers( false );
 
 			}
+			displayControllers( shaderMaterial.display );
 			saveSettings();
 
 		} );

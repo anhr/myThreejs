@@ -194,7 +194,8 @@
 
 			}
 			*/
-			group.add( myThreejs.Points( arrayFuncs, options, {
+/*			
+			group.add( myThreejs.myPoints( arrayFuncs, options, {
 
 					name: 'myThreejs.Points',
 					tMin: tMin,
@@ -208,6 +209,31 @@
 					cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
 				} ) );
+*/				
+			myThreejs.myPoints( arrayFuncs, group, options, {
+
+				name: 'myThreejs.Points',
+				tMin: tMin,
+				//position: new THREE.Vector3( -1, 0, 0 ),
+				//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
+				//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
+				//scale: new THREE.Vector3( 2, 2, 2 ),
+				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
+				shaderMaterial: {},
+				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+
+			},
+/*			
+			function ( points ) {
+
+//				points.geometry.attributes.position.needsUpdate = true;
+				setTimeout( function () { group.add( points );}, 0 );
+					
+			}
+*/			
+
+			);
 
 			//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 			arrayFuncs = [
@@ -240,11 +266,11 @@
 			var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
 				new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } ) );
 			points.geometry.addAttribute( 'color',
-				new THREE.Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+				new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
 			points.name = 'Points1';
 
 			//непонятно зачем эта строка
-			//points.geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+			//points.geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
 			
 			points.userData.arrayFuncs = arrayFuncs;//3D object animation.
 			points.userData.raycaster = {
@@ -341,7 +367,7 @@
 /*
 			var geometry = new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 );
 			geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1 ) );
-			geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( options.getСolors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+			geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
 			geometry.getPointSize = function ( index ) {
 
 				var scale = group.parent.scale;
@@ -376,7 +402,7 @@
 			var points2 = new myThreejs.getShaderMaterialPoints( {
 
 				getPoints: options.getPoints,
-				getСolors: options.getСolors,
+				getColors: options.getColors,
 				renderer: options.renderer,
 				tMin: tMin,
 				arrayFuncs: arrayFuncs,
@@ -464,7 +490,7 @@
 					cube.userData.cube = cube;
 
 				}
-				//group.add( cube );
+				group.add( cube );
 
 			}
 			addCube( new THREE.Vector3( -1, 0, 0 ), 0xffffff, function ( t ) {

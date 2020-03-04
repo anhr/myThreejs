@@ -15,11 +15,13 @@
  */
 
 import { create, Points, setArrayFuncs, limitAngles, getShaderMaterialPoints, getWorldPosition } from './index.js';
+import { myPoints } from './myPoints/myPoints.js';
 
 var myThreejs = {
 
 	create: create,
-	Points: Points,
+    Points: Points,
+    myPoints: myPoints.create,
 	setArrayFuncs: setArrayFuncs,
 	limitAngles: limitAngles,
 	getShaderMaterialPoints: getShaderMaterialPoints,

@@ -1,5 +1,5 @@
 /**
- * myThreejs
+ * @module myThreejs
  * 
  * I use myThreejs in my projects for displaying of my 3D objects in the canvas.
  * 
@@ -76,13 +76,14 @@ import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 //import { StereoEffect, spatialMultiplexsIndexs } from '/anhr/three.js/dev/examples/jsm/effects/StereoEffect.js';
 import { StereoEffect, spatialMultiplexsIndexs } from '../../three.js/dev/examples/jsm/effects/StereoEffect.js';
 import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
+import { myPoints } from './myPoints/myPoints.js';
 
 //https://github.com/mrdoob/stats.js/
 //import Stats from '../../three.js/dev/examples/jsm/libs/stats.module.js';
 
 var debug = {
 
-	opacity: 1 //непрозрачность frustumPoints
+	//opacity: 1 //непрозрачность frustumPoints
 
 };
 /*
@@ -523,6 +524,13 @@ export function create( createXDobjects, options ) {
 			} );
 			renderer.setPixelRatio( window.devicePixelRatio );
 			options.renderer = renderer;//for getShaderMaterialPoints
+/*
+			options.render = function () {//for myPoints
+
+				renderer.render( scene, camera );
+
+			}
+*/
 			//			cursor = renderer.domElement.style.cursor;
 
 			//resize
@@ -1448,7 +1456,7 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 						} else {
 
 							display = 'block';
-							_this.select( { object: mesh, index: value } );
+							_this.select( { object: getMesh(), index: value } );
 
 						}
 						if ( axesHelper !== undefined )
@@ -1975,6 +1983,30 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					controls.update();//if scale != 1 and position != 0 of the screen, то после открытия canvas положение картинки смещено. Положение восстанавливается только если подвигать мышью
 			}
 
+			defaultPoint.size = options.point.size;
+
+			var pointName = 'Point_' + getCanvasName();
+			cookie.getObject( pointName, options.point, options.point );
+/*
+var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
+fragment_loader.setResponseType( 'text' );
+fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.txt", function ( fragment_text ) {
+	var arrayFuncs = [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
+		new THREE.Vector4( 0, 0, 0.25, 1 ),
+		new THREE.Vector4( -0.25, 0.3, 0.5, -1 ),
+
+	];
+	var points = new THREE.Points(
+
+		new THREE.BufferGeometry().setFromPoints( options.getPoints( 0, arrayFuncs, 1, 9 ), 4 ),
+		new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } )
+
+	);
+	points.geometry.addAttribute( 'color',
+		new THREE.Float32BufferAttribute( options.getColors( 0, arrayFuncs, {name:'',min:-1,max:1} ), 3 ) );
+	group.add(points);
+} );
+*/
 			createXDobjects( group, options );
 
 			if ( options.frustumPoints ) {
@@ -2165,12 +2197,12 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 				mesh.userData.default.rotation.copy( mesh.rotation );
 
 			} );
-
+/*
 			defaultPoint.size = options.point.size;
 
 			var pointName = 'Point_' + getCanvasName();
 			cookie.getObject( pointName, options.point, options.point );
-			
+*/			
 			if ( gui !== undefined ) {
 
 				//THREE.AxesHelper gui
@@ -2528,14 +2560,24 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 
 				group.children.forEach( function ( mesh ) {
 
+/*
 					if ( ( mesh instanceof THREE.Points === false ) || ( mesh.geometry.attributes.size === undefined ) )
 						return;
+*/						
+					if ( mesh instanceof THREE.Points === false )
+						return;
 
+					if ( mesh.geometry.attributes.size === undefined ) {
+
+						mesh.material.size = pointSize;
+						return;
+
+					}
 					if ( options.point.opacity !== undefined )
 						mesh.material.uniforms.opacity.value = options.point.opacity;
 
 					//scale
-					var scale = getGlobalScale( mesh );
+					var scale = myPoints.getGlobalScale( mesh );
 					var cameraPosition = new THREE.Vector3( camera.position.x / scale.x, camera.position.y / scale.y, camera.position.z / scale.z );
 					scale = ( scale.x + scale.y + scale.z ) / 3;
 
@@ -2593,7 +2635,7 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 		var params = arrayCreates.shift();
 		if ( params === undefined )
 			return;
-		create( params.createXDobjects, params.options );
+		myThreejs.create( params.createXDobjects, params.options );
 
 	}
 
@@ -2603,8 +2645,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 
 	}
 
-	var arrayScripts = [
-	];
 	if ( options.dat !== undefined ) {
 
 		loadScript.sync( '../../../../dropdownMenu/master/styles/gui.css', optionsStyle );
@@ -2883,14 +2923,14 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 	 * @param {object} scale options.scales.w
 	 * @returns array of mesh colors.
 	 */
-	options.getСolors = function ( t, arrayFuncs, scale, positions, colors ) {
+	options.getColors = function ( t, arrayFuncs, scale, positions, colors ) {
 
 		if ( t === undefined )
-			console.error( 'getСolors: t = ' + t );
+			console.error( 'getColors: t = ' + t );
 
 		if ( ( positions !== undefined ) && Array.isArray(arrayFuncs) && ( arrayFuncs.length !== positions.count ) ) {
 
-			console.error( 'getСolors failed! arrayFuncs.length: ' + arrayFuncs.length + ' != positions.count: ' + positions.count );
+			console.error( 'getColors failed! arrayFuncs.length: ' + arrayFuncs.length + ' != positions.count: ' + positions.count );
 			return colors;
 
 		}
@@ -3032,7 +3072,9 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 
 			var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
 				funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
-				func = ( funcs === undefined ) && ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
+				func = ( funcs === undefined ) || ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
+//ошибка если навести мышку на куб
+//				func = ( funcs === undefined ) && ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
 				pointName = !isArrayFuncs ?
 					undefined :
 					intersection.object.userData.pointName === undefined ?
@@ -3043,7 +3085,7 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					Array.isArray(func.w) ?
 						execFunc( func, 'w', group.userData.t, options.a, options.b ) :
 						func.w;
-			if ( color === undefined ) {
+			if ( ( color === undefined ) && ( intersection.object.geometry.attributes.ca !== undefined ) ) {
 
 				var vector = new THREE.Vector3().fromArray(intersection.object.geometry.attributes.ca.array, intersection.index * intersection.object.geometry.attributes.ca.itemSize);
 				color = new THREE.Color( vector.x, vector.y, vector.z );
@@ -3152,21 +3194,142 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 
 	}
 
-	if ( arrayScripts.length > 0 ) {
+	myPoints.loadShaderText( function () {
 
-		//ATTENTION!!! If you use loadScript.sync, then you can not see some source code files during debugging.
-		loadScript.async( arrayScripts, {
-			onload: onloadScripts,
-			onerror: function ( str, e ) {
+		var arrayScripts = [];
+		if ( arrayScripts.length > 0 ) {
 
-				console.error( str );
+			//ATTENTION!!! If you use loadScript.sync, then you can not see some source code files during debugging.
+			loadScript.async( arrayScripts, {
+				onload: onloadScripts,
+				onerror: function ( str, e ) {
 
-			},
+					console.error( str );
 
-		} );
+				},
+
+			} );
+
+		}
+		else onloadScripts();
+		
+	} );
+
+	/**
+	 * This is a basic asyncronous shader loader for THREE.js.
+	 * Thanks to https://www.davideaversa.it/2016/10/three-js-shader-loading-external-file/
+	 * https://github.com/THeK3nger/threejs-async-shaders-example
+	 * 
+	 * It uses the built-in THREE.js async loading capabilities to load shaders from files!
+	 * 
+	 * `onProgress` and `onError` are stadard TREE.js stuff. Look at 
+	 * https://threejs.org/examples/webgl_loader_obj.html for an example. 
+	 * 
+	 * @param {String} vertex_url URL to the vertex shader code.
+	 * @param {String} fragment_url URL to fragment shader code
+	 * @param {function(String, String)} onLoad Callback function(vertex, fragment) that take as input the loaded vertex and fragment contents.
+	 * @param {object} [options] followed options is available
+	 * @param {function(event)} [options.onProgress] Callback for the `onProgress` event.
+	 * @param {function(event)} [options.onError] Callback for the `onError` event.
+	 */
+/*
+	function ShaderLoader( vertex_url, fragment_url, onLoad, options ) {
+
+		options = options || {};
+		var vertex_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
+		vertex_loader.setResponseType( 'text' );
+		vertex_loader.load( vertex_url, function ( vertex_text ) {
+
+			var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
+			fragment_loader.setResponseType( 'text' );
+			fragment_loader.load( fragment_url, function ( fragment_text ) {
+
+				onLoad( vertex_text, fragment_text );
+
+			}, options.onProgress, options.onError );
+
+		}, options.onProgress, options.onError );
 
 	}
-	else onloadScripts();
+*/
+	/*
+		//Thanks to https://stackoverflow.com/a/42594856/5175935
+		window.getRunningScript = () => {
+			return () => {
+	
+	//Not compatible with FireFox
+	//			return new Error().stack.match(/at (https?:[^:]*)/)[1];
+				return new Error().stack.match(/(https?:[^:]*)/)[0];
+	
+			}
+		}
+		var runningScript = getRunningScript()();
+	console.warn( 'runningScript = ' + runningScript );
+	*/
+/*
+	//Thanks to https://stackoverflow.com/a/27369985/5175935
+	var getCurrentScript = function () {
+
+		if ( document.currentScript && ( document.currentScript.src !== '' ) )
+			return document.currentScript.src;
+		var scripts = document.getElementsByTagName( 'script' ),
+			str = scripts[scripts.length - 1].src;
+		if ( str !== '' )
+			return src;
+		//Thanks to https://stackoverflow.com/a/42594856/5175935
+		return new Error().stack.match( /(https?:[^:]*)/ )[0];
+
+	};
+	//console.warn( 'getCurrentScript = ' + getCurrentScript() );
+	//Thanks to https://stackoverflow.com/a/27369985/5175935
+	var getCurrentScriptPath = function () {
+		var script = getCurrentScript(),
+			path = script.substring( 0, script.lastIndexOf( '/' ) );
+		return path;
+	};
+	//console.warn( 'getCurrentScriptPath = ' + getCurrentScriptPath() );
+	var currentScriptPath = getCurrentScriptPath() + '/myPoints';
+
+	if( shader === undefined ) {
+
+		shader = {}
+		ShaderLoader( currentScriptPath + "/vertex.txt", currentScriptPath + "/fragment.txt",
+			function ( vertex, fragment ) {
+
+				shader.vertex = vertex;
+				shader.fragment = fragment;
+
+				var arrayScripts = [];
+				if ( arrayScripts.length > 0 ) {
+
+					//ATTENTION!!! If you use loadScript.sync, then you can not see some source code files during debugging.
+					loadScript.async( arrayScripts, {
+						onload: onloadScripts,
+						onerror: function ( str, e ) {
+
+							console.error( str );
+
+						},
+
+					} );
+
+				}
+				else onloadScripts();
+
+			},
+			{
+
+				onError: function ( event ) {
+
+					console.error( event.srcElement.responseURL + ' status = ' + event.srcElement.status + ' ' + event.srcElement.statusText );
+
+				}
+
+			}
+
+		);
+	} else onloadScripts();
+*/
 
 }
 var spriteTextIntersectionName = 'spriteTextIntersection';
@@ -3417,7 +3580,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 		points = getShaderMaterialPoints( {
 
 			getPoints: options.getPoints,
-			getСolors: options.getСolors,
+			getColors: options.getColors,
 			renderer: options.renderer,
 			tMin: pointsOptions.tMin,
 			arrayFuncs: arrayFuncs,
@@ -3437,7 +3600,7 @@ export function Points( arrayFuncs, options, pointsOptions ) {
 
 		);
 		points.geometry.addAttribute( 'color',
-			new THREE.Float32BufferAttribute( options.getСolors( pointsOptions.tMin, arrayFuncs, options.scales.w ), 3 ) );
+			new THREE.Float32BufferAttribute( options.getColors( pointsOptions.tMin, arrayFuncs, options.scales.w ), 3 ) );
 
 	}
 	points.name = pointsOptions.name;//'Wave';
@@ -3558,7 +3721,7 @@ export function limitAngles( rotation ) {
 	limitAngle( 'z' );
 
 }
-
+/*
 function getGlobalScale( mesh ) {
 
 	var parent = mesh.parent, scale = new THREE.Vector3( 1, 1, 1 );
@@ -3571,7 +3734,7 @@ function getGlobalScale( mesh ) {
 	return scale;
 
 }
-
+*/
 /**
  * @callback getPoints
  * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
@@ -3582,7 +3745,7 @@ function getGlobalScale( mesh ) {
  */
 
 /**
- * @callback getСolors
+ * @callback getColors
  * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
  * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array.
  * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
@@ -3595,7 +3758,7 @@ function getGlobalScale( mesh ) {
  * @param {object} params
  * @param {getPoints} params.getPoints get array of THREE.Vector4 points.
  * See https://github.com/anhr/myThreejs#optionsgetpoints-t-arrayfuncs-a-b- for details.
- * @param {getСolors} params.getСolors Get array of mesh colors.
+ * @param {getColors} params.getColors Get array of mesh colors.
  * See https://github.com/anhr/myThreejs#optionsget%D1%81olors-t-arrayfuncs-scale- for details.
  * @param {THREE.WebGLRenderer} params.renderer WebGLRenderer.
  * See https://threejs.org/docs/index.html#api/en/constants/Renderer for details.
@@ -3619,7 +3782,7 @@ export function getShaderMaterialPoints( params ) {
 		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
 	geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( geometry.attributes.position.count, 1 ) );
 	geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute(
-		params.getСolors( params.tMin, params.arrayFuncs, params.scales.w, params.opacity ? geometry.attributes.position : undefined ), 4 ) );
+		params.getColors( params.tMin, params.arrayFuncs, params.scales.w, params.opacity ? geometry.attributes.position : undefined ), 4 ) );
 	
 	//Аппроксимация функции https://mycurvefit.com/
 	//Z Count	Y Count	length	allocated
@@ -3647,11 +3810,15 @@ export function getShaderMaterialPoints( params ) {
 		//See https://threejs.org/examples/webgl_custom_attributes_points2.html
 		//D: \My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\examples\webgl_custom_attributes_points2.html
 		//https://www.khronos.org/opengl/wiki/OpenGL_Shading_Language
+		//Обзор спецификации GLSL ES 2.0 http://a-gro-pro.blogspot.com/2013/06/glsl-es-20.html
+		//Open GL 4. Язык шейдеров. Книга рецептов http://www.cosmic-rays.ru/books61/2015ShadingLanguage.pdf
 
 		uniforms: {
 
 			color: { value: new THREE.Color( 0xffffff ) },
 			pointTexture: { value: texture },
+
+			//если убрать эту переменную, то размер точек невозможно будет регулировать
 			opacity: { value: ( params.shaderMaterial !== undefined ) &&
 					( params.shaderMaterial.point !== undefined ) &&
 					( params.shaderMaterial.point.opacity !== undefined ) ?
@@ -3683,7 +3850,7 @@ export function getShaderMaterialPoints( params ) {
 
 			"uniform vec4 color;",
 			"uniform sampler2D pointTexture;",
-			"uniform float opacity;",
+//			"uniform float opacity;",
 
 			"varying vec4 vColor;",
 

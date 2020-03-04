@@ -288,7 +288,7 @@ function getShaderMaterialPoints( params, onReady ) {
 		var size = new THREE.Vector2();
 		params.renderer.getSize( size );
 
-		var scale = getGlobalScale( points );
+		var scale = myPoints.getGlobalScale( points );
 		return this.attributes.size.array[index] * ( -size.y * 0.005 + 2.99 ) / ( ( scale.x + scale.y + scale.z ) / 3 );
 
 	}

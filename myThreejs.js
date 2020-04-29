@@ -1,4 +1,4 @@
-﻿/**
+/**
  * myThreejs
  *
  * I use myThreejs in my projects for displaying of my 3D objects in the canvas.
@@ -14,18 +14,21 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import { create, Points, setArrayFuncs, limitAngles, getShaderMaterialPoints, getWorldPosition } from './index.js';
+import {
+    create, points, setArrayFuncs, limitAngles, getShaderMaterialPoints, getWorldPosition//, addParticle
+} from './index.js';
 import { myPoints } from './myPoints/myPoints.js';
 
-var myThreejs = {
+var MYTHREEJS = {
 
 	create: create,
-    Points: Points,
-    myPoints: myPoints.create,
+    points: points,
+//    myPoints: myPoints.create,
+    getShaderMaterialPoints: myPoints.getShaderMaterialPoints,
 	setArrayFuncs: setArrayFuncs,
 	limitAngles: limitAngles,
-	getShaderMaterialPoints: getShaderMaterialPoints,
-	getWorldPosition: getWorldPosition,
+    getWorldPosition: getWorldPosition,
+//    addParticle: addParticle,
 
 }
-export default myThreejs;
+export default MYTHREEJS;

@@ -77,8 +77,9 @@ import * as THREE from '../../../three.js/dev/build/three.module.js';
  * [float] - array of rotations of the points.
  * Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' )
  * @param {object} [pointsOptions.cloud] position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.Default is undefined.
+ * @param {boolean} [pointsOptions.opacity] if true then opacity of the point is depend from distance to all  meshes points from the group with defined mesh.userData.cloud. See options.getColors for details. Default is undefined.
  */
-function create( arrayFuncs, group, options, pointsOptions/*, onReady*/ ) {
+function create( arrayFuncs, group, options, pointsOptions ) {
 
 	if ( ( typeof arrayFuncs !== 'function' ) && ( arrayFuncs.length === 0 ) )
 		arrayFuncs.push( new THREE.Vector3() );
@@ -102,7 +103,12 @@ function create( arrayFuncs, group, options, pointsOptions/*, onReady*/ ) {
 			scales: options.scales,
 			shaderMaterial: pointsOptions.shaderMaterial,
 			opacity: pointsOptions.opacity,
-//group:group,
+			position: pointsOptions.position,
+			pointSize: options.point.size,
+			path: pointsOptions.path,
+			uniforms: pointsOptions.uniforms,
+			boFrustumPoints: pointsOptions.boFrustumPoints,
+			arrayCloud: pointsOptions.cloud === undefined ? undefined : options.arrayCloud,
 
 		}, function ( points ) {
 
@@ -115,6 +121,9 @@ function create( arrayFuncs, group, options, pointsOptions/*, onReady*/ ) {
 			} );
 */			
 			Points( points );
+			if ( !points.userData.boFrustumPoints )
+				options.addParticle( points );
+			
 //			group.add( points );
 //			onReady( points );
 //			options.render();
@@ -134,7 +143,7 @@ function create( arrayFuncs, group, options, pointsOptions/*, onReady*/ ) {
 
 	}
 	function Points( points ) {
-
+		
 		points.name = pointsOptions.name;//'Wave';
 		points.userData.arrayFuncs = arrayFuncs;
 		if ( pointsOptions.pointIndexes !== undefined )
@@ -221,6 +230,11 @@ function create( arrayFuncs, group, options, pointsOptions/*, onReady*/ ) {
 		}
 		setRotations();
 		group.add( points );
+//console.warn('group.add( ' + points.name + ' )');
+		if ( pointsOptions.onReady !== undefined )
+			pointsOptions.onReady( points );
+
+		options.guiSelectPoint.addMesh( points );
 
 	}
 //	return points;
@@ -263,6 +277,7 @@ function create( arrayFuncs, group, options, pointsOptions/*, onReady*/ ) {
  * Example: new Float32Array( arrayFuncs.length ).
  * @param {object} params.scales axes scales.
  * See options.scales of myThreejs.create( createXDobjects, options ) https://github.com/anhr/myThreejs#mythreejscreate-createxdobjects-options-.
+ * @param {boolean} [params.opacity] if true then opacity of the point is depend from distance to all  meshes points from the group with defined mesh.userData.cloud. See options.getColors for details. Default is undefined.
  * @param {function(THREE.Points)} onReady Callback function that take as input the new THREE.Points.
  */
 function getShaderMaterialPoints( params, onReady ) {
@@ -272,155 +287,155 @@ function getShaderMaterialPoints( params, onReady ) {
 		geometry = params.arrayFuncs();
 	else geometry = new THREE.BufferGeometry().setFromPoints( params.getPoints( params.tMin, params.arrayFuncs, params.a, params.b ),
 		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
-	geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( geometry.attributes.position.count, 1 ) );
-	geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute(
-		params.getColors( params.tMin, params.arrayFuncs, params.scales.w, params.opacity ? geometry.attributes.position : undefined ), 4 ) );
+//	geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( geometry.attributes.position.count, 1 ) );
+	if (params.arrayCloud !== undefined ){
 
-	//Аппроксимация функции https://mycurvefit.com/
-	//Z Count	Y Count	length	allocated
-	//					1		348
-	//3			3		27		2004
-	//5			3		45		3156
-	//100		100		1000000	64000276
-	geometry.getPointSize = function ( index ) {
+		for ( var i = 0; i < geometry.attributes.position.count; i++ ){
 
-		//размер области точки, в которой должна находиться мышка зависит от высоты холста canvas
-		var size = new THREE.Vector2();
-		params.renderer.getSize( size );
+			params.arrayCloud.push( new THREE.Vector4().fromArray( geometry.attributes.position.array, i * geometry.attributes.position.itemSize ) );
 
-		var scale = myPoints.getGlobalScale( points );
-		return this.attributes.size.array[index] * ( -size.y * 0.005 + 2.99 ) / ( ( scale.x + scale.y + scale.z ) / 3 );
-
+		}
+		
 	}
+	if ( !params.boFrustumPoints )
+		geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute(
+	//		params.getColors( params.tMin, params.arrayFuncs, params.scales.w, params.opacity ? geometry.attributes.position : undefined, undefined, geometry.attributes.position.count ),
+			params.getColors( params.tMin, params.arrayFuncs, params.scales.w, { opacity: params.opacity, positions: geometry.attributes.position } ),
+			4 ) );
+/*		
+	///////////////////////////////////////
+	//https://threejs.org/docs/index.html#api/en/textures/DataTexture
+	//http://localhost/anhr/Three.js/dev/Examples/webaudio_visualizer.html
+
+	// create a buffer with color data
+
+	var format = THREE.RGBAFormat,//LuminanceFormat,//Available formats https://threejs.org/docs/index.html#api/en/constants/Textures
+								//D:\My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\src\constants.js
+		itemSize = format === THREE.RGBAFormat ? 4 : format === THREE.RGBFormat ? 3 : format === THREE.LuminanceFormat ? 1 : NaN,
+		width = 2, height = 1,//format === THREE.LuminanceFormat ? 1 : 2,
+		size = width * height,
+		type = THREE.FloatType;
+	var data = type === THREE.FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size );
+
+	if( !isNaN( itemSize ) ) {
+
+		function addItem( i, vector ) {
+
+			var stride = i * itemSize;
+
+			data[stride] = vector.x;
+			if ( itemSize > 1 ) {
+
+				data[stride + 1] = vector.y;
+				if ( itemSize > 2 ) {
+
+					data[stride + 2] = vector.z;
+					if ( itemSize > 3 )
+						data[stride + 3] = vector.w;
+
+				}
+
+			}
+
+		}
+		addItem( 0, new THREE.Vector4( 10.0, 100, 100, 1 ) );
+		addItem( 1, new THREE.Vector4( 5.0, 10.0, 20.0, 30.0 ) );
+
+	} else console.error( 'itemSize = ' + itemSize );
+
+	// used the buffer to create a DataTexture
+
+	var cloudPoints = new THREE.DataTexture( data, width, height, format, type );
+//	cloudPoints.wrapS = THREE.RepeatWrapping;
+//	cloudPoints.wrapT = THREE.RepeatWrapping;
+	///////////////////////////////////////
+*/
 
 	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
 	texture.wrapS = THREE.RepeatWrapping;
 	texture.wrapT = THREE.RepeatWrapping;
+	var uniforms = {
 
-	/*
-	 * если тут загрузить shaderText из файла
-	 * то почемуто не видно points на холсте.
-	 * points появляется если покрутить камеру.
-	 * Если points сделать обычный без THREE.ShaderMaterial то все работает хорошо
-	 * Для решения проблемы загружаю shaderText в myPoints.loadShaderText еще до того как запускаю animate()
-	 */
-	
-	var points = new THREE.Points( geometry, new THREE.ShaderMaterial( {
+		color: { value: new THREE.Color( 0xffffff ) },
+		pointTexture: { value: texture },
+//		cloudPoints: { value: cloudPoints },
 
-		//See https://threejs.org/examples/webgl_custom_attributes_points2.html
-		//D: \My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\examples\webgl_custom_attributes_points2.html
-		//https://www.khronos.org/opengl/wiki/OpenGL_Shading_Language
-		//Обзор спецификации GLSL ES 2.0 http://a-gro-pro.blogspot.com/2013/06/glsl-es-20.html
-		//Open GL 4. Язык шейдеров. Книга рецептов http://www.cosmic-rays.ru/books61/2015ShadingLanguage.pdf
+		//если убрать эту переменную, то размер точек невозможно будет регулировать
+		opacity: {
+			value: ( params.shaderMaterial !== undefined ) &&
+				( params.shaderMaterial.point !== undefined ) &&
+				( params.shaderMaterial.point.opacity !== undefined ) ?
+				params.shaderMaterial.point.opacity : 1.0
+		},//Float in the range of 0.0 - 1.0 indicating how transparent the material is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque.
+		//			cameraPosition: { value: myPoints.camera.position },
+		pointSize: { value: ( params.shaderMaterial !== undefined ) && ( params.shaderMaterial.point !== undefined ) ?
+			params.shaderMaterial.point.size :
+			params.pointSize === undefined ? 0.0 : params.pointSize },
+	/*			
+		pointSize: { value: params.pointSize === undefined ?
+			params.shaderMaterial === undefined ? 0.0 : params.shaderMaterial.point.size :
+			params.pointSize },
+	*/				
+	//			pointsPosition: { value: params.position === undefined ? new THREE.Vector3( 0, 0, 0 ) : params.position },
+	//			pointsPosition: { value: new THREE.Vector3( 0.4, 0.4, 2.0 ) },
 
-		uniforms: {
-
-			color: { value: new THREE.Color( 0xffffff ) },
-			pointTexture: { value: texture },
-
-			//если убрать эту переменную, то размер точек невозможно будет регулировать
-			opacity: {
-				value: ( params.shaderMaterial !== undefined ) &&
-					( params.shaderMaterial.point !== undefined ) &&
-					( params.shaderMaterial.point.opacity !== undefined ) ?
-					params.shaderMaterial.point.opacity : 1.0
-			},//Float in the range of 0.0 - 1.0 indicating how transparent the material is.
-			//A value of 0.0 indicates fully transparent, 1.0 is fully opaque.
-
-		},
-		vertexShader: shaderText.vertex,
-		fragmentShader: shaderText.fragment,
-		transparent: true,
-		//		opacity: 0.1,
-
-	} ) );
-	points.userData.shaderMaterial = params.shaderMaterial;
-	onReady( points );
-
-	/**
-	 * This is a basic asyncronous shader loader for THREE.js.
-	 * Thanks to https://www.davideaversa.it/2016/10/three-js-shader-loading-external-file/
-	 * https://github.com/THeK3nger/threejs-async-shaders-example
-	 * 
-	 * It uses the built-in THREE.js async loading capabilities to load shaders from files!
-	 * 
-	 * `onProgress` and `onError` are stadard TREE.js stuff. Look at 
-	 * https://threejs.org/examples/webgl_loader_obj.html for an example. 
-	 * 
-	 * @param {String} vertex_url URL to the vertex shader code.
-	 * @param {String} fragment_url URL to fragment shader code
-	 * @param {function(String, String)} onLoad Callback function(vertex, fragment) that take as input the loaded vertex and fragment contents.
-	 * @param {object} [options] followed options is available
-	 * @param {function(event)} [options.onProgress] Callback for the `onProgress` event.
-	 * @param {function(event)} [options.onError] Callback for the `onError` event.
-	 */
-/*
-	function ShaderLoader( vertex_url, fragment_url, onLoad, options ) {
-
-		options = options || {};
-		var vertex_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
-		vertex_loader.setResponseType( 'text' );
-		vertex_loader.load( vertex_url, function ( vertex_text ) {
-
-			var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
-			fragment_loader.setResponseType( 'text' );
-			fragment_loader.load( fragment_url, function ( fragment_text ) {
-
-				onLoad( vertex_text, fragment_text );
-
-			}, options.onProgress, options.onError );
-
-		}, options.onProgress, options.onError );
-		
 	}
-*/
-/*
-	//Thanks to https://stackoverflow.com/a/42594856/5175935
-	window.getRunningScript = () => {
-		return () => {
+	if( params.uniforms !== undefined )
+		params.uniforms( uniforms );
 
-//Not compatible with FireFox
-//			return new Error().stack.match(/at (https?:[^:]*)/)[1];
-			return new Error().stack.match(/(https?:[^:]*)/)[0];
+	loadShaderText(function ( shaderText ) {
+
+		//See description of the
+		//const int cloudPointsWidth = %s;
+		//in the \frustumPoints\vertex.c
+		if ( uniforms.cloudPointsWidth )
+			shaderText.vertex = shaderText.vertex.replace( '%s', uniforms.cloudPointsWidth.value + '.' );
+
+		var points = new THREE.Points( geometry, new THREE.ShaderMaterial( {
+
+			//See https://threejs.org/examples/webgl_custom_attributes_points2.html
+			//D: \My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\examples\webgl_custom_attributes_points2.html
+			//OpenGL Shading Language https://www.khronos.org/opengl/wiki/OpenGL_Shading_Language
+			//Обзор спецификации GLSL ES 2.0 http://a-gro-pro.blogspot.com/2013/06/glsl-es-20.html
+			//Open GL 4. Язык шейдеров. Книга рецептов http://www.cosmic-rays.ru/books61/2015ShadingLanguage.pdf
+			//OpenGL® 4.5 Reference Pages. Ключевые слова по алфавиту https://www.khronos.org/registry/OpenGL-Refpages/gl4/
+
+			uniforms: uniforms,
+			vertexShader: shaderText.vertex,
+			fragmentShader: shaderText.fragment,
+			transparent: true,
+			//		opacity: 0.1,
+
+		} ) );
+		points.userData.shaderMaterial = params.shaderMaterial;
+		if( onReady !== undefined )
+			onReady( points );
+		var requestId;
+		var needsUpdate = false;
+/*
+		function animate() {
+
+			requestId = requestAnimationFrame( animate );
+			if ( needsUpdate )
+				return;
+			needsUpdate = true;
+			if ( points.material.uniforms.cloudPoints !== undefined )
+				points.material.uniforms.cloudPoints.value.needsUpdate = needsUpdate;
 
 		}
-	}
-	var runningScript = getRunningScript()();
-console.warn( 'runningScript = ' + runningScript );
+		animate();
 */
+		//нужно что бы обновились точки в frustumPoints
+		if ( points.material.uniforms.cloudPoints !== undefined )
+			points.material.uniforms.cloudPoints.value.needsUpdate = true;
+	}, params.path );
+	
 /*
-	//Thanks to https://stackoverflow.com/a/27369985/5175935
-	var getCurrentScript = function () {
-
-		if ( document.currentScript && ( document.currentScript.src !== '' ) )
-			return document.currentScript.src;
-		var scripts = document.getElementsByTagName( 'script' ),
-			str = scripts[scripts.length - 1].src;
-		if ( str !== '' )
-			return src;
-		//Thanks to https://stackoverflow.com/a/42594856/5175935
-		return new Error().stack.match(/(https?:[^:]*)/)[0];
-
-	};
-//console.warn( 'getCurrentScript = ' + getCurrentScript() );
-	//Thanks to https://stackoverflow.com/a/27369985/5175935
-	var getCurrentScriptPath = function () {
-		var script = getCurrentScript(),
-			path = script.substring( 0, script.lastIndexOf( '/' ) );
-		return path;
-	};
-//console.warn( 'getCurrentScriptPath = ' + getCurrentScriptPath() );
-	var currentScriptPath = getCurrentScriptPath();
+	if ( requestId !== undefined )
+		window.cancelAnimationFrame( requestId );
 */
-/*
-var options = {};
-var vertex_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
-vertex_loader.setResponseType( 'text' );
-vertex_loader.load( currentScriptPath + "/vertex.txt", function ( vertex ) {
-	var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
-	fragment_loader.setResponseType( 'text' );
-	fragment_loader.load( currentScriptPath + "/fragment.txt", function ( fragment ) {
-*/
+//	return points;
+
 /*
 		var points = new THREE.Points( geometry, new THREE.ShaderMaterial( {
 
@@ -454,62 +469,127 @@ vertex_loader.load( currentScriptPath + "/vertex.txt", function ( vertex ) {
 		points.userData.shaderMaterial = params.shaderMaterial;
 //		onReady( points );
 */
-/*
-		var arrayFuncs = [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
-			new THREE.Vector4( 0, 0, 0.25, 1 ),
-			new THREE.Vector4( -0.25, 0.3, 0.5, -1 ),
 
-		];
-		var points = new THREE.Points(
+}
 
-			new THREE.BufferGeometry().setFromPoints( params.getPoints( 0, arrayFuncs, 1, 9 ), 4 ),
-			new THREE.PointsMaterial( { size: 0.5, vertexColors: THREE.VertexColors } )
+/**Не работает
+ * map of vertex.
+ * For preventing of the duplicate loading of the vertex from file.
+ * key: path to vertex file
+ * value: vertex code
+ * */
+//const vertexMap = new Map();
 
-		);
-		points.geometry.addAttribute( 'color',
-			new THREE.Float32BufferAttribute( params.getColors( 0, arrayFuncs, {name:'',min:-1,max:1} ), 3 ) );
-//		params.group.add(points);
-		onReady( points );
+/**
+ * Loading of the vertex and fragment contents from external files.
+ * Thanks to https://stackoverflow.com/a/48188509/5175935
+ * @param {function()} onLoad Callback function that called after success loading.
+ * */
+function loadShaderText ( onload, path ) {
 
-	}, options.onProgress, options.onError );
+	var shaderText = {};
+/*	
+	if ( ( shaderText !== undefined ) && ( shaderText.vertex !== undefined ) && ( path === undefined ) ) {
 
-}, options.onProgress, options.onError );
-*/
-/*
-	ShaderLoader( currentScriptPath + "/vertex.txt", currentScriptPath + "/fragment.txt",
+		if( shaderText.fragment === undefined )
+			console.error( 'shaderText.fragment = ' + shaderText.fragment );
+		onload();
+		return;
+
+	}
+*/	
+//	arrayOnLoad.push( onload );
+
+	/**
+	 * This is a basic asyncronous shader loader for THREE.js.
+	 * Thanks to https://www.davideaversa.it/2016/10/three-js-shader-loading-external-file/
+	 * https://github.com/THeK3nger/threejs-async-shaders-example
+	 * 
+	 * It uses the built-in THREE.js async loading capabilities to load shaders from files!
+	 * 
+	 * `onProgress` and `onError` are stadard TREE.js stuff. Look at 
+	 * https://threejs.org/examples/webgl_loader_obj.html for an example. 
+	 * 
+	 * @param {String} vertex_url URL to the vertex shader code.
+	 * @param {String} fragment_url URL to fragment shader code
+	 * @param {function(String, String)} onLoad Callback function(vertex, fragment) that take as input the loaded vertex and fragment contents.
+	 * @param {object} [options] followed options is available
+	 * @param {function(event)} [options.onProgress] Callback for the `onProgress` event.
+	 * @param {function(event)} [options.onError] Callback for the `onError` event.
+	 */
+	function ShaderLoader( vertex_url, fragment_url, onLoad, options ) {
+
+		options = options || {};
+		var vertex_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
+		vertex_loader.setResponseType( 'text' );
+		vertex_loader.load( vertex_url, function ( vertex_text ) {
+
+			var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
+			fragment_loader.setResponseType( 'text' );
+			fragment_loader.load( fragment_url, function ( fragment_text ) {
+
+				onLoad( vertex_text, fragment_text );
+
+			}, options.onProgress, options.onError );
+
+		}, options.onProgress, options.onError );
+
+	}
+	/*
+		//Thanks to https://stackoverflow.com/a/42594856/5175935
+		window.getRunningScript = () => {
+			return () => {
+	
+	//Not compatible with FireFox
+	//			return new Error().stack.match(/at (https?:[^:]*)/)[1];
+				return new Error().stack.match(/(https?:[^:]*)/)[0];
+	
+			}
+		}
+		var runningScript = getRunningScript()();
+	console.warn( 'runningScript = ' + runningScript );
+	*/
+
+	//Thanks to https://stackoverflow.com/a/27369985/5175935
+	//Такая же функция есть в frustumPoints.js но если ее использовать то она будет возвращать путь на frustumPoints.js
+	var getCurrentScript = function () {
+
+		if ( document.currentScript && ( document.currentScript.src !== '' ) )
+			return document.currentScript.src;
+		var scripts = document.getElementsByTagName( 'script' ),
+			str = scripts[scripts.length - 1].src;
+		if ( str !== '' )
+			return src;
+		//Thanks to https://stackoverflow.com/a/42594856/5175935
+		return new Error().stack.match( /(https?:[^:]*)/ )[0];
+
+	};
+	//Thanks to https://stackoverflow.com/a/27369985/5175935
+	var getCurrentScriptPath = function () {
+		var script = getCurrentScript(),
+			path = script.substring( 0, script.lastIndexOf( '/' ) );
+		return path;
+	};
+	//console.warn( 'getCurrentScriptPath = ' + getCurrentScriptPath() );
+	var currentScriptPath = getCurrentScriptPath();
+
+//	shaderText = {};
+//console.warn('path: ' + path + ( path === undefined ? '' : ' path.vertex: ' + path.vertex ) );
+	path = path || {};
+	path.vertex = path.vertex || currentScriptPath + "/vertex.c";
+	path.fragment = path.fragment || currentScriptPath + "/fragment.c";
+	ShaderLoader( path.vertex, path.fragment,
 		function ( vertex, fragment ) {
 
-			var points = new THREE.Points( geometry, new THREE.ShaderMaterial( {
-
-				//See https://threejs.org/examples/webgl_custom_attributes_points2.html
-				//D: \My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\examples\webgl_custom_attributes_points2.html
-				//https://www.khronos.org/opengl/wiki/OpenGL_Shading_Language
-				//Обзор спецификации GLSL ES 2.0 http://a-gro-pro.blogspot.com/2013/06/glsl-es-20.html
-				//Open GL 4. Язык шейдеров. Книга рецептов http://www.cosmic-rays.ru/books61/2015ShadingLanguage.pdf
-
-				uniforms: {
-
-					color: { value: new THREE.Color( 0xffffff ) },
-					pointTexture: { value: texture },
-
-					//если убрать эту переменную, то размер точек невозможно будет регулировать
-					opacity: {
-						value: ( params.shaderMaterial !== undefined ) &&
-							( params.shaderMaterial.point !== undefined ) &&
-							( params.shaderMaterial.point.opacity !== undefined ) ?
-							params.shaderMaterial.point.opacity : 1.0
-					},//Float in the range of 0.0 - 1.0 indicating how transparent the material is.
-					//A value of 0.0 indicates fully transparent, 1.0 is fully opaque.
-
-				},
-				vertexShader: vertex,
-				fragmentShader: fragment,
-				transparent: true,
-				//		opacity: 0.1,
-
-			} ) );
-			points.userData.shaderMaterial = params.shaderMaterial;
-			onReady( points );
+//console.warn( 'path: ' + path + ' shaderText.vertex = ' + shaderText.vertex );
+/*
+			if( vertexMap.has(path.vertex) )
+				console.error( 'Duplucate vertex. file: ' + path.vertex );
+			else vertexMap.set( path.vertex, vertex );
+*/
+			shaderText.vertex = vertex;
+			shaderText.fragment = fragment;
+			onload( shaderText );
 
 		},
 		{
@@ -523,14 +603,13 @@ vertex_loader.load( currentScriptPath + "/vertex.txt", function ( vertex ) {
 		}
 
 	);
-*/
 
 }
 
 /**
  * The vertex and fragment contents
  * */
-var shaderText;
+//var shaderText;
 /**
  * Loading of the vertex and fragment contents from external files.
  * Creating the new points and adding it into group
@@ -541,132 +620,6 @@ export var myPoints = {
 	 * Creating the new points and adding it into group
 	 * */
 	create: create,
-	/**
-	 * Loading of the vertex and fragment contents from external files.
-	 * Thanks to https://stackoverflow.com/a/48188509/5175935
-	 * @param {function()} onLoad Callback function that called after success loading.
-	 * */
-	loadShaderText: function ( onload ) {
-
-		if ( shaderText !== undefined ) {
-
-			onload();
-			return;
-
-		}
-
-		/**
-		 * This is a basic asyncronous shader loader for THREE.js.
-		 * Thanks to https://www.davideaversa.it/2016/10/three-js-shader-loading-external-file/
-		 * https://github.com/THeK3nger/threejs-async-shaders-example
-		 * 
-		 * It uses the built-in THREE.js async loading capabilities to load shaders from files!
-		 * 
-		 * `onProgress` and `onError` are stadard TREE.js stuff. Look at 
-		 * https://threejs.org/examples/webgl_loader_obj.html for an example. 
-		 * 
-		 * @param {String} vertex_url URL to the vertex shader code.
-		 * @param {String} fragment_url URL to fragment shader code
-		 * @param {function(String, String)} onLoad Callback function(vertex, fragment) that take as input the loaded vertex and fragment contents.
-		 * @param {object} [options] followed options is available
-		 * @param {function(event)} [options.onProgress] Callback for the `onProgress` event.
-		 * @param {function(event)} [options.onError] Callback for the `onError` event.
-		 */
-		function ShaderLoader( vertex_url, fragment_url, onLoad, options ) {
-
-			options = options || {};
-			var vertex_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
-			vertex_loader.setResponseType( 'text' );
-			vertex_loader.load( vertex_url, function ( vertex_text ) {
-
-				var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
-				fragment_loader.setResponseType( 'text' );
-				fragment_loader.load( fragment_url, function ( fragment_text ) {
-
-					onLoad( vertex_text, fragment_text );
-
-				}, options.onProgress, options.onError );
-
-			}, options.onProgress, options.onError );
-
-		}
-		/*
-			//Thanks to https://stackoverflow.com/a/42594856/5175935
-			window.getRunningScript = () => {
-				return () => {
-		
-		//Not compatible with FireFox
-		//			return new Error().stack.match(/at (https?:[^:]*)/)[1];
-					return new Error().stack.match(/(https?:[^:]*)/)[0];
-		
-				}
-			}
-			var runningScript = getRunningScript()();
-		console.warn( 'runningScript = ' + runningScript );
-		*/
-		//Thanks to https://stackoverflow.com/a/27369985/5175935
-		var getCurrentScript = function () {
-
-			if ( document.currentScript && ( document.currentScript.src !== '' ) )
-				return document.currentScript.src;
-			var scripts = document.getElementsByTagName( 'script' ),
-				str = scripts[scripts.length - 1].src;
-			if ( str !== '' )
-				return src;
-			//Thanks to https://stackoverflow.com/a/42594856/5175935
-			return new Error().stack.match( /(https?:[^:]*)/ )[0];
-
-		};
-		//console.warn( 'getCurrentScript = ' + getCurrentScript() );
-		//Thanks to https://stackoverflow.com/a/27369985/5175935
-		var getCurrentScriptPath = function () {
-			var script = getCurrentScript(),
-				path = script.substring( 0, script.lastIndexOf( '/' ) );
-			return path;
-		};
-		//console.warn( 'getCurrentScriptPath = ' + getCurrentScriptPath() );
-		var currentScriptPath = getCurrentScriptPath();
-
-		shaderText = {}
-		ShaderLoader( currentScriptPath + "/vertex.c", currentScriptPath + "/fragment.c",
-			function ( vertex, fragment ) {
-
-				shaderText.vertex = vertex;
-				shaderText.fragment = fragment;
-				onload();
-/*
-				var arrayScripts = [];
-				if ( arrayScripts.length > 0 ) {
-
-					//ATTENTION!!! If you use loadScript.sync, then you can not see some source code files during debugging.
-					loadScript.async( arrayScripts, {
-						onload: onloadScripts,
-						onerror: function ( str, e ) {
-
-							console.error( str );
-
-						},
-
-					} );
-
-				}
-				else onloadScripts();
-*/				
-
-			},
-			{
-
-				onError: function ( event ) {
-
-					console.error( event.srcElement.responseURL + ' status = ' + event.srcElement.status + ' ' + event.srcElement.statusText );
-
-				}
-
-			}
-
-		);
-
-	},
 	getGlobalScale: function ( mesh ) {
 
 		var parent = mesh.parent, scale = new THREE.Vector3( 1, 1, 1 );
@@ -678,6 +631,10 @@ export var myPoints = {
 		}
 		return scale;
 
-	}
+	},
+	/**
+	* get THREE.Points with THREE.ShaderMaterial material
+	* */
+	getShaderMaterialPoints: getShaderMaterialPoints,
 
 }

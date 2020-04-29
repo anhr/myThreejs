@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -98,6 +98,57 @@
 			
 			//Points
 
+/*
+			myThreejs.points( function(){
+
+				var geometry = new THREE.BufferGeometry(),
+					geometryLength = 8,//( zEnd - zStart + 1 ) * xCount * yCount;
+					itemSize = 4,
+					array = new Float32Array( geometryLength * itemSize );
+				geometry.addAttribute( 'position', new THREE.BufferAttribute( array, itemSize ) );
+				if ( itemSize === 3 ) {
+
+					geometry.attributes.position.setXYZ( 0, 3, 1, 1 );
+					geometry.attributes.position.setXYZ( 1, -3, 1, 1 );
+					geometry.attributes.position.setXYZ( 2, 3, -1, 1 );
+					geometry.attributes.position.setXYZ( 3, -3, -1, 1 );
+					geometry.attributes.position.setXYZ( 4, 3, 1, -1 );
+					geometry.attributes.position.setXYZ( 5, -3, 1, -1 );
+					geometry.attributes.position.setXYZ( 6, 3, -1, -1 );
+					geometry.attributes.position.setXYZ( 7, -3, -1, -1 );
+
+				} else {
+
+					geometry.attributes.position.setXYZW( 0, 3, 1, 1, -1 );
+					geometry.attributes.position.setXYZW( 1, -3, 1, 1, -1 );
+					geometry.attributes.position.setXYZW( 2, 3, -1, 1, -1 );
+					geometry.attributes.position.setXYZW( 3, -3, -1, 1, -1 );
+					geometry.attributes.position.setXYZW( 4, 3, 1, -1, 1 );
+					geometry.attributes.position.setXYZW( 5, -3, 1, -1, 1 );
+					geometry.attributes.position.setXYZW( 6, 3, -1, -1, 1 );
+					geometry.attributes.position.setXYZW( 7, -3, -1, -1, 1 );
+
+				}
+
+				return geometry;
+
+			}, group, options, {
+
+				name: 'Functions',
+				tMin: tMin,
+//				pointSize: 5.0,
+				position: new THREE.Vector3( 0.4, 0.4, 2 ),//same as camera position
+				//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
+				//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
+				//scale: new THREE.Vector3( 2, 2, 2 ),
+				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
+				shaderMaterial: {},
+				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+
+			} );
+*/
+
 			arrayFuncs = [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 				/*
 				new THREE.Vector3( -0.5, 0.5, -1 ),//3D point. White color
@@ -175,8 +226,38 @@
 
 				},
 				*/
-				[ 0, 0, 0, 1 ],//4D point.
-				[ -0.25, 0.25, 0.5, -1 ],//4D point.
+				[ -0.5, 0.5, new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5' ), 1 ],//4D point.
+				[ -0.5, 0.5, 0.0, 1 ],//4D point.
+				[0.25, 0, 0.75, -1],//4D point.
+//				[0.5, 0, 0.75, -1],//4D point.
+/*
+				{
+
+					vector: new THREE.Vector4(
+						new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' ),//x
+						new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-b' ),//y
+						//new Function( 't', 'a', 'b', 'return 0' ),
+						//new Function( 't', 'a', 'b', 'return 0.2' ),
+						new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.1' ),//z
+						new Function( 't', 'return 1-2*t' ),//w
+						//new THREE.Color( "rgb( 0, 0, 255)" ),//w
+						//1,//w
+					),//Animated 3D point
+					trace: true,//Displays the trace of the point movement.
+
+				},
+*/
+/*
+//				[  3,  1,  1, 1 ],
+				[  -1.9607199430465698,  -0.49455657601356506,  -1.0089999437332153, 1 ],
+				[ -3,  1,  1, 1 ],
+				[  3, -1,  1, 1 ],
+				[ -3, -1,  1, 1 ],
+				[  3,  1, -1, 1 ],
+				[ -3,  1, -1, 1 ],
+				[  3, -1, -1, 1 ],
+				[ -3, -1, -1, 1 ],
+*/
 
 			];
 			/*
@@ -194,10 +275,10 @@
 
 			}
 			*/
-/*			
+/*
 			group.add( myThreejs.myPoints( arrayFuncs, options, {
 
-					name: 'myThreejs.Points',
+					name: 'myThreejs.points',
 					tMin: tMin,
 					//position: new THREE.Vector3( -1, 0, 0 ),
 					//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
@@ -208,11 +289,29 @@
 					shaderMaterial: {},
 					cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
-				} ) );
-*/				
-			myThreejs.myPoints( arrayFuncs, group, options, {
+			} ) );
+*/
 
-				name: 'myThreejs.Points',
+			myThreejs.points( arrayFuncs, group, options, {
+
+				name: 'myThreejs.points',
+				tMin: tMin,
+//				pointSize: 5.0,
+				//position: new THREE.Vector3( 0.4, 0.4, 2 ),//same as camera position
+				//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
+				//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
+				//scale: new THREE.Vector3( 2, 2, 2 ),
+				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
+				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
+				shaderMaterial: {},
+				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+
+			} );
+
+/*
+			myThreejs.points( arrayFuncs, group, options, {
+
+				name: 'myThreejs.points',
 				tMin: tMin,
 				//position: new THREE.Vector3( -1, 0, 0 ),
 				//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
@@ -223,17 +322,8 @@
 				shaderMaterial: {},
 				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
-			},
-/*			
-			function ( points ) {
-
-//				points.geometry.attributes.position.needsUpdate = true;
-				setTimeout( function () { group.add( points );}, 0 );
-					
-			}
-*/			
-
-			);
+			},);
+*/
 
 			//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 			arrayFuncs = [
@@ -298,7 +388,7 @@
 			points.userData.cloud = {};//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 			//points.position.copy( new THREE.Vector3( 0.1, 0.2, 0.3 ) );
 			//points.scale.copy( new THREE.Vector3( 1.1, 1.2, 1.3 ) );
-			group.add( points );
+			//group.add( points );
 
 			//points with ShaderMaterial
 			//https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
@@ -399,7 +489,7 @@
 			var material = myThreejs.getShaderMaterial();
 			var points2 = new THREE.Points( geometry, material );
 */
-			var points2 = new myThreejs.getShaderMaterialPoints( {
+			myThreejs.getShaderMaterialPoints( {
 
 				getPoints: options.getPoints,
 				getColors: options.getColors,
@@ -409,39 +499,45 @@
 				a: a, b: b,
 				sizes: sizes,
 				scales: options.scales,
+				pointSize: options.point.size,
 
-			} );
-//			var points2 = shaderMaterialPoints.points;
-			points2.name = 'ShaderMaterial';
-			points2.userData.arrayFuncs = arrayFuncs;//3D object animation.
-			points2.userData.raycaster = {
+			}, function( points ) {
 
-				onIntersection: function ( raycaster, intersection, scene, mouse ) {
+	//			var points = shaderMaterialPoints.points;
+				points.name = 'ShaderMaterial';
+				points.userData.arrayFuncs = arrayFuncs;//3D object animation.
+				points.userData.raycaster = {
 
-					options.addSpriteTextIntersection( intersection, scene, mouse );
+					onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-				},
-				onIntersectionOut: function ( scene ) {
+						options.addSpriteTextIntersection( intersection, scene, mouse );
 
-					options.removeSpriteTextIntersection( scene );
+					},
+					onIntersectionOut: function ( scene ) {
 
-				},
+						options.removeSpriteTextIntersection( scene );
 
-			}
-			points2.userData.selectPlayScene = function ( t ) {
+					},
 
-				/*
-				var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
-				points2.rotation.set( angle, 0, 0 );
-				myThreejs.limitAngles( points2.rotation );
-				*/
-/*
-				points2.geometry.attributes.size.setX( 1, 0.1 * ( t + 1 ) );
-				points2.geometry.attributes.size.needsUpdate = true;
-*/
+				}
+				points.userData.selectPlayScene = function ( t ) {
 
-			}
-			//group.add( points2 );
+					/*
+					var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
+					points.rotation.set( angle, 0, 0 );
+					myThreejs.limitAngles( points.rotation );
+					*/
+	/*
+					points.geometry.attributes.size.setX( 1, 0.1 * ( t + 1 ) );
+					points.geometry.attributes.size.needsUpdate = true;
+	*/
+
+				}
+				group.add( points );
+				options.guiSelectPoint.addMesh( points );
+				options.addParticle( points );
+				
+			});
 
 			//cubes
 			var cubeType = 'cube';
@@ -490,7 +586,7 @@
 					cube.userData.cube = cube;
 
 				}
-				group.add( cube );
+				//group.add( cube );
 
 			}
 			addCube( new THREE.Vector3( -1, 0, 0 ), 0xffffff, function ( t ) {
@@ -534,7 +630,7 @@
 			player: playerOptions,//3D objects animation.
 			a: 1.1,
 			b: 0.3,
-			point: { size: 0.025 },//The apparent angular size of a point in radians. Applies to points with ShaderMaterial. The size of the dot seems constant and does not depend on the distance to the camera
+//			point: { size: 0.025 },//The apparent angular size of a point in radians. Applies to points with ShaderMaterial. The size of the dot seems constant and does not depend on the distance to the camera
 			canvas: {
 
 				width: window.innerWidth / 2,
@@ -597,7 +693,7 @@
 
 			//Points
 			/*
-			group.add( myThreejs.Points( [
+			group.add( myThreejs.points( [
 
 				new THREE.Vector2( 0.1, 0.5 ),
 				new THREE.Vector3( 0.2, 0.5, -1 ),

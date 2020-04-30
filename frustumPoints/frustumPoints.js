@@ -123,98 +123,35 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 	function saveSettings() { cookie.setObject( cookieName, shaderMaterial ); }
 
 	var points, zeroPoint = new Vector3(), cameraDistanceDefault = camera.position.distanceTo( zeroPoint ), _this = this,
-		lines = [], groupFrustumPoints = new Group(), names, cloudPoints, cloud = function(){
+		lines = [], groupFrustumPoints = new Group(), names, cloudPoints,
+		cloud = function () {
+			
+			var uniforms,
+				CP = 'CP';//Cloud Point
+			this.create = function ( _uniforms ) {
 
-			var format = RGBAFormat,//LuminanceFormat,//Available formats https://threejs.org/docs/index.html#api/en/constants/Textures
-				//D:\My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\src\constants.js
-				itemSize = format === RGBAFormat ? 4 : format === RGBFormat ? 3 : format === THREE.LuminanceFormat ? 1 : NaN;
-			this.create = function ( uniforms ) {
-
-				var width = options.arrayCloud.length, height = 1,//format === THREE.LuminanceFormat ? 1 : 2,
-					size = width * height,
-					type = FloatType;
-				//console.warn( 'width = ' + width );
-				if ( itemSize !== 4 ) {
-
-					console.error( 'itemSize !== 4' );
-					return;
-
-				}
-				var data = type === FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size );
-
-				if ( !isNaN( itemSize ) ) {
-/*
-					function addItem( i, vector ) {
-
-						var stride = i * itemSize;
-
-						data[stride] = vector.x;
-						if ( itemSize > 1 ) {
-
-							data[stride + 1] = vector.y;
-							if ( itemSize > 2 ) {
-
-								data[stride + 2] = vector.z;
-								if ( itemSize > 3 )
-									data[stride + 3] = vector.w;
-
-							}
-
-						}
-
-					}
-*/					
-					for ( var i = 0; i < options.arrayCloud.length; i++ ) {
-
-						this.updateItem( i, options.arrayCloud[i], data );
-//							addItem( i, options.arrayCloud[i] );
-
-					}
-					/*						
-											addItem( 0, new Vector4( 10.0, 100, 100, 1 ) );
-											addItem( 1, new Vector4( 5.0, 10.0, 20.0, 30.0 ) );
-					*/
-
-				} else console.error( 'itemSize = ' + itemSize );
-
-				// used the buffer to create a DataTexture
-
-				cloudPoints = new DataTexture( data, width, height, format, type );
-				//	cloudPoints.wrapS = THREE.RepeatWrapping;
-				//	cloudPoints.wrapT = THREE.RepeatWrapping;
-				///////////////////////////////////////
-
-				uniforms.cloudPoints = { value: cloudPoints };
-
-uniforms.cloudPoints0 = { value: new Vector4().fromArray( cloudPoints.image.data, 0 * 4 ) };
-uniforms.cloudPoints0z = { value: uniforms.cloudPoints.value.image.data[2] };
-				uniforms.cloudPointsWidth = { value: width };
+				uniforms = _uniforms;
+				for ( var i = 0; i < options.arrayCloud.length; i++ )
+					this.updateItem( i, options.arrayCloud[i] );//, data );
+//				uniforms.cloudPointsWidth = { value: options.arrayCloud.length };//use for editing of the shader text. See function getShaderMaterialPoints for details
 
 			}
-			this.updateItem = function ( i, vector, data ) {
+			this.editShaderText = function ( shaderText ) {
 
-				if ( data === undefined ) {
+				var uniforms = '', distanceToCloudPoints = '';
+				for ( var i = 0; i < options.arrayCloud.length; i++ ) {
 
-					if ( cloudPoints === undefined )
-						return;//The cDisplay checkbox of the frustumPoints' is not checked
-					data = cloudPoints.image.data;
-
-				}
-				var stride = i * itemSize;
-
-				data[stride] = vector.x;
-				if ( itemSize > 1 ) {
-
-					data[stride + 1] = vector.y;
-					if ( itemSize > 2 ) {
-
-						data[stride + 2] = vector.z;
-						if ( itemSize > 3 )
-							data[stride + 3] = vector.w;
-
-					}
+					uniforms += 'uniform vec4 ' + CP + i + ';\r\n';
+					distanceToCloudPoints += '\tDTCP(' + CP + i + ');\r\n';
 
 				}
+				shaderText.vertex = shaderText.vertex.replace( '%cloudPoints', uniforms );
+				shaderText.vertex = shaderText.vertex.replace( '%DTCP', distanceToCloudPoints );
+
+			}
+			this.updateItem = function ( i, vector ) {
+
+				uniforms[CP + i] = { value: vector };
 
 			}
 
@@ -778,90 +715,7 @@ if ( points.geometry.attributes.ca !== undefined )
 				},
 				uniforms: function( uniforms ){
 
-					///////////////////////////////////////
-					// create a buffer with position and color data
-					//https://threejs.org/docs/index.html#api/en/textures/DataTexture
-					//http://localhost/anhr/Three.js/dev/Examples/webaudio_visualizer.html
-/*этот код иногда не работает потому что иногда frustumPjints создаются до того как точки с userData.cloud !== undefined будут добавленвы в group
-					var array = [];//All points from mesh with userData.cloud !== undefined
-					group.children.forEach( function ( mesh ) {
-
-						if ( !mesh.userData.cloud )
-							return;
-						if ( mesh.geometry.attributes.position.itemSize !== 4 ) {
-
-							console.error( 'mesh.geometry.attributes.position.itemSize = ' + mesh.geometry.attributes.position.itemSize );
-							return;
-
-						}
-						for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ){
-
-							array.push( new Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ) );
-
-						}
-
-					} );
-*/
-/*
-					var format = RGBAFormat,//LuminanceFormat,//Available formats https://threejs.org/docs/index.html#api/en/constants/Textures
-												//D:\My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\src\constants.js
-						itemSize = format === RGBAFormat ? 4 : format === RGBFormat ? 3 : format === THREE.LuminanceFormat ? 1 : NaN,
-*/
 					cloud.create( uniforms );
-/*
-					var width = options.arrayCloud.length, height = 1,//format === THREE.LuminanceFormat ? 1 : 2,
-						size = width * height,
-						type = FloatType;
-//console.warn( 'width = ' + width );
-					if ( itemSize !== 4 ) {
-
-						console.error( 'itemSize !== 4' );
-						return;
-
-					}
-					var data = type === FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size );
-
-					if( !isNaN( itemSize ) ) {
-
-						function addItem( i, vector ) {
-
-							var stride = i * itemSize;
-
-							data[stride] = vector.x;
-							if ( itemSize > 1 ) {
-
-								data[stride + 1] = vector.y;
-								if ( itemSize > 2 ) {
-
-									data[stride + 2] = vector.z;
-									if ( itemSize > 3 )
-										data[stride + 3] = vector.w;
-
-								}
-
-							}
-
-						}
-						for ( var i = 0; i < options.arrayCloud.length; i++ ) {
-
-							cloud.updateCloudPointsItem( i, options.arrayCloud[i] );
-//							addItem( i, options.arrayCloud[i] );
-
-						}
-
-					} else console.error( 'itemSize = ' + itemSize );
-
-					// used the buffer to create a DataTexture
-
-					cloudPoints = new DataTexture( data, width, height, format, type );
-				//	cloudPoints.wrapS = THREE.RepeatWrapping;
-				//	cloudPoints.wrapT = THREE.RepeatWrapping;
-					///////////////////////////////////////
-					
-					uniforms.cloudPoints = { value: cloudPoints };
-					uniforms.cloudPointsWidth = { value: width };
-*/					
-//uniforms.cameraRotation = { value: new Vector3( 1, 2, 3 ) };
 
 					//rotate the quaternion vector to 180 degrees
 					cameraQuaternionDefault.x = - cameraQuaternionDefault.x;
@@ -876,9 +730,9 @@ if ( points.geometry.attributes.ca !== undefined )
 					uniforms.cameraRotation = { value: camera.rotation };
 					uniforms.cameraRotationDefault = { value: cameraRotationDefault };
 */
-//					uniforms.cameraQuaternionDefault = { value: cameraQuaternionDefault };
 					uniforms.cameraQuaternion = { value: camera.quaternion };
-//					uniforms.cameraQuaternion = { value: new Quaternion( -camera.quaternion._x, -camera.quaternion._y, -camera.quaternion._z, camera.quaternion._w,  ) };
+
+					return cloud;
 
 				},
 				onReady: function ( newPoints ) {
@@ -1367,17 +1221,8 @@ if ( points.geometry.attributes.ca !== undefined )
 //				array.push( new Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ) );
 
 			}
-if ( points !== undefined ) {//The cDisplay checkbox of the frustumPoints' is checked
-	
-	points.material.uniforms.cloudPoints0.value = new Vector4().fromArray( cloudPoints.image.data, 0 * 4 );
-	//points.material.uniforms.cloudPoints0z.value = points.material.uniforms.cloudPoints.value.image.data[2];
-	//points.material.uniforms.cloudPoints.value = cloudPoints;
-
-}
 
 		} );
-//		points.geometry.attributes.position.needsUpdate = true;
-//		points.needsUpdate = true;
 
 	}
 

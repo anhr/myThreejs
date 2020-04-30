@@ -109,6 +109,13 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 			uniforms: pointsOptions.uniforms,
 			boFrustumPoints: pointsOptions.boFrustumPoints,
 			arrayCloud: pointsOptions.cloud === undefined ? undefined : options.arrayCloud,
+			points: {
+
+				position: pointsOptions.position,
+				rotation: pointsOptions.rotation,
+				scale: pointsOptions.scale,
+
+			}
 
 		}, function ( points ) {
 
@@ -287,7 +294,6 @@ function getShaderMaterialPoints( params, onReady ) {
 		geometry = params.arrayFuncs();
 	else geometry = new THREE.BufferGeometry().setFromPoints( params.getPoints( params.tMin, params.arrayFuncs, params.a, params.b ),
 		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
-//	geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( geometry.attributes.position.count, 1 ) );
 	if (params.arrayCloud !== undefined ){
 
 		for ( var i = 0; i < geometry.attributes.position.count; i++ ){
@@ -299,57 +305,8 @@ function getShaderMaterialPoints( params, onReady ) {
 	}
 	if ( !params.boFrustumPoints )
 		geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute(
-	//		params.getColors( params.tMin, params.arrayFuncs, params.scales.w, params.opacity ? geometry.attributes.position : undefined, undefined, geometry.attributes.position.count ),
 			params.getColors( params.tMin, params.arrayFuncs, params.scales.w, { opacity: params.opacity, positions: geometry.attributes.position } ),
 			4 ) );
-/*		
-	///////////////////////////////////////
-	//https://threejs.org/docs/index.html#api/en/textures/DataTexture
-	//http://localhost/anhr/Three.js/dev/Examples/webaudio_visualizer.html
-
-	// create a buffer with color data
-
-	var format = THREE.RGBAFormat,//LuminanceFormat,//Available formats https://threejs.org/docs/index.html#api/en/constants/Textures
-								//D:\My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\src\constants.js
-		itemSize = format === THREE.RGBAFormat ? 4 : format === THREE.RGBFormat ? 3 : format === THREE.LuminanceFormat ? 1 : NaN,
-		width = 2, height = 1,//format === THREE.LuminanceFormat ? 1 : 2,
-		size = width * height,
-		type = THREE.FloatType;
-	var data = type === THREE.FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size );
-
-	if( !isNaN( itemSize ) ) {
-
-		function addItem( i, vector ) {
-
-			var stride = i * itemSize;
-
-			data[stride] = vector.x;
-			if ( itemSize > 1 ) {
-
-				data[stride + 1] = vector.y;
-				if ( itemSize > 2 ) {
-
-					data[stride + 2] = vector.z;
-					if ( itemSize > 3 )
-						data[stride + 3] = vector.w;
-
-				}
-
-			}
-
-		}
-		addItem( 0, new THREE.Vector4( 10.0, 100, 100, 1 ) );
-		addItem( 1, new THREE.Vector4( 5.0, 10.0, 20.0, 30.0 ) );
-
-	} else console.error( 'itemSize = ' + itemSize );
-
-	// used the buffer to create a DataTexture
-
-	var cloudPoints = new THREE.DataTexture( data, width, height, format, type );
-//	cloudPoints.wrapS = THREE.RepeatWrapping;
-//	cloudPoints.wrapT = THREE.RepeatWrapping;
-	///////////////////////////////////////
-*/
 
 	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
 	texture.wrapS = THREE.RepeatWrapping;
@@ -358,7 +315,6 @@ function getShaderMaterialPoints( params, onReady ) {
 
 		color: { value: new THREE.Color( 0xffffff ) },
 		pointTexture: { value: texture },
-//		cloudPoints: { value: cloudPoints },
 
 		//если убрать эту переменную, то размер точек невозможно будет регулировать
 		opacity: {
@@ -367,29 +323,25 @@ function getShaderMaterialPoints( params, onReady ) {
 				( params.shaderMaterial.point.opacity !== undefined ) ?
 				params.shaderMaterial.point.opacity : 1.0
 		},//Float in the range of 0.0 - 1.0 indicating how transparent the material is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque.
-		//			cameraPosition: { value: myPoints.camera.position },
 		pointSize: { value: ( params.shaderMaterial !== undefined ) && ( params.shaderMaterial.point !== undefined ) ?
 			params.shaderMaterial.point.size :
 			params.pointSize === undefined ? 0.0 : params.pointSize },
-	/*			
-		pointSize: { value: params.pointSize === undefined ?
-			params.shaderMaterial === undefined ? 0.0 : params.shaderMaterial.point.size :
-			params.pointSize },
-	*/				
-	//			pointsPosition: { value: params.position === undefined ? new THREE.Vector3( 0, 0, 0 ) : params.position },
-	//			pointsPosition: { value: new THREE.Vector3( 0.4, 0.4, 2.0 ) },
 
 	}
+	var cloud;
 	if( params.uniforms !== undefined )
-		params.uniforms( uniforms );
+		cloud = params.uniforms( uniforms );
 
 	loadShaderText(function ( shaderText ) {
 
 		//See description of the
 		//const int cloudPointsWidth = %s;
 		//in the \frustumPoints\vertex.c
-		if ( uniforms.cloudPointsWidth )
-			shaderText.vertex = shaderText.vertex.replace( '%s', uniforms.cloudPointsWidth.value + '.' );
+		if ( cloud !== undefined ) {
+
+			cloud.editShaderText( shaderText );
+
+		}
 
 		var points = new THREE.Points( geometry, new THREE.ShaderMaterial( {
 
@@ -410,24 +362,15 @@ function getShaderMaterialPoints( params, onReady ) {
 		points.userData.shaderMaterial = params.shaderMaterial;
 		if( onReady !== undefined )
 			onReady( points );
+/*			
 		var requestId;
 		var needsUpdate = false;
+*/		
 /*
-		function animate() {
-
-			requestId = requestAnimationFrame( animate );
-			if ( needsUpdate )
-				return;
-			needsUpdate = true;
-			if ( points.material.uniforms.cloudPoints !== undefined )
-				points.material.uniforms.cloudPoints.value.needsUpdate = needsUpdate;
-
-		}
-		animate();
-*/
 		//нужно что бы обновились точки в frustumPoints
 		if ( points.material.uniforms.cloudPoints !== undefined )
 			points.material.uniforms.cloudPoints.value.needsUpdate = true;
+*/			
 	}, params.path );
 	
 /*

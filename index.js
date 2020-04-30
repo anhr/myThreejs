@@ -2140,8 +2140,8 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 
 						//
 
-						zCount: 5,// The count of layers of the frustum of the camera's field of view. Default is 50
-						yCount: 3,// The count of vertical points for each z level of the  frustum of the camera's field of view.. Default is 30
+						//zCount: 5,// The count of layers of the frustum of the camera's field of view. Default is 50
+						//yCount: 3,// The count of vertical points for each z level of the  frustum of the camera's field of view.. Default is 30
 
 						//изменение размеров усеченной пирамиды FrustumPoints
 

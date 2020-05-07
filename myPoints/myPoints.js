@@ -76,7 +76,15 @@ import * as THREE from '../../../three.js/dev/build/three.module.js';
  * float - rotation of the points.
  * [float] - array of rotations of the points.
  * Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' )
- * @param {object} [pointsOptions.cloud] position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.Default is undefined.
+ * @param {array} [pointsOptions.arrayCloud] Array of points with cloud.
+ * If you define the array of points with cloud, then you can define a points with cloud.
+ * For example you can define
+ * arrayCloud: options.arrayCloud
+ * on the params of the getShaderMaterialPoints( params, onReady ) function.
+ * Or
+ * arrayCloud: options.arrayCloud
+ * on the pointsOptions of the myThreejs.points function.
+ * Default is undefined
  * @param {boolean} [pointsOptions.opacity] if true then opacity of the point is depend from distance to all  meshes points from the group with defined mesh.userData.cloud. See options.getColors for details. Default is undefined.
  */
 function create( arrayFuncs, group, options, pointsOptions ) {
@@ -108,7 +116,8 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 			path: pointsOptions.path,
 			uniforms: pointsOptions.uniforms,
 			boFrustumPoints: pointsOptions.boFrustumPoints,
-			arrayCloud: pointsOptions.cloud === undefined ? undefined : options.arrayCloud,
+//			arrayCloud: pointsOptions.cloud === undefined ? undefined : options.arrayCloud,
+			arrayCloud: pointsOptions.arrayCloud,
 			points: {
 
 				position: pointsOptions.position,
@@ -119,33 +128,29 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 
 		}, function ( points ) {
 
-/*
-			var requestId = window.requestAnimationFrame( function () {
-
-				Points( points );
-				group.add( points );
-
-			} );
-*/			
 			Points( points );
 			if ( !points.userData.boFrustumPoints )
 				options.addParticle( points );
-			
-//			group.add( points );
-//			onReady( points );
-//			options.render();
 			
 		} );
 	else {
 
 		var points = new THREE.Points(
 
-			new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, options.a, options.b ), 4 ),
-			new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } )
+			typeof arrayFuncs === 'function' ? arrayFuncs() :
+				new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, options.a, options.b ), 4 ),
+			new THREE.PointsMaterial( { size: options.point.size / options.point.sizePointsMaterial, vertexColors: THREE.VertexColors } )
 
 		);
+		if ( pointsOptions.arrayCloud !== undefined )
+			points.userData.cloud = {
+
+				indexArray: pushArrayCloud( pointsOptions.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
+
+			}
 		points.geometry.addAttribute( 'color',
-			new THREE.Float32BufferAttribute( options.getColors( pointsOptions.tMin, arrayFuncs, options.scales.w ), 3 ) );
+			new THREE.Float32BufferAttribute( options.getColors( pointsOptions.tMin, arrayFuncs, options.scales.w,
+				{ positions: points.geometry.attributes.position }), 4 ) );
 		Points( points );
 
 	}
@@ -184,8 +189,18 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 			setRotations( t );
 
 		}
+/*		
 		if ( pointsOptions.cloud !== undefined )
 			points.userData.cloud = pointsOptions.cloud;
+*/
+/*
+		if ( pointsOptions.arrayCloud !== undefined ) {
+
+			console.warn('Deprecated points.userData.cloud');
+			points.userData.cloud = {};
+
+		}
+*/		
 		function setPositions( t ) {
 
 			t = t || pointsOptions.tMin;
@@ -242,9 +257,44 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 			pointsOptions.onReady( points );
 
 		options.guiSelectPoint.addMesh( points );
+/*		
+		if ( !points.userData.boFrustumPoints )
+			options.arrayCloud.frustumPoints.updateCloudPoint( points );
+*/			
 
 	}
 //	return points;
+
+}
+
+/**
+ * Pushes to clouds array all points from geometry
+ * @param {[]} arrayCloud
+ * @param {THREE.BufferGeometry} geometry
+ * @returns index of the new array item
+ */
+function pushArrayCloud( arrayCloud, geometry ) {
+
+	if ( arrayCloud === undefined ) {
+
+		console.error( 'pushArrayCloud function failed! arrayCloud = ' + arrayCloud );
+		return;
+
+	}
+
+	//Массив точек, имеющих облако params.arrayCloud, разбил на группы points
+	//В каждой группе points содержатся все точки, из одного mesh
+	//Это сделал потому что если одновременно имеются точки с 
+	// shaderMaterial и без shaderMaterial, то порядок добавления точек в params.arrayCloud
+	// Не совпадает с порядком расположения mesh в group
+	// потому что точки без shaderMaterial добавляются сразу после создания
+	// а точки с shaderMaterial добаляются только после вызова loadShaderText в function getShaderMaterialPoints
+	var index = arrayCloud.length,
+		points = [];
+	arrayCloud.push( points );
+	for ( var i = 0; i < geometry.attributes.position.count; i++ )
+		points.push( new THREE.Vector4().fromArray( geometry.attributes.position.array, i * geometry.attributes.position.itemSize ) );
+	return index;
 
 }
 
@@ -294,15 +344,7 @@ function getShaderMaterialPoints( params, onReady ) {
 		geometry = params.arrayFuncs();
 	else geometry = new THREE.BufferGeometry().setFromPoints( params.getPoints( params.tMin, params.arrayFuncs, params.a, params.b ),
 		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
-	if (params.arrayCloud !== undefined ){
-
-		for ( var i = 0; i < geometry.attributes.position.count; i++ ){
-
-			params.arrayCloud.push( new THREE.Vector4().fromArray( geometry.attributes.position.array, i * geometry.attributes.position.itemSize ) );
-
-		}
-		
-	}
+	var indexArrayCloud = params.arrayCloud === undefined ? undefined : pushArrayCloud( params.arrayCloud, geometry );//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
 	if ( !params.boFrustumPoints )
 		geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute(
 			params.getColors( params.tMin, params.arrayFuncs, params.scales.w, { opacity: params.opacity, positions: geometry.attributes.position } ),
@@ -330,7 +372,7 @@ function getShaderMaterialPoints( params, onReady ) {
 	}
 	var cloud;
 	if( params.uniforms !== undefined )
-		cloud = params.uniforms( uniforms );
+		cloud = params.uniforms( uniforms );//frustumPoints
 
 	loadShaderText(function ( shaderText ) {
 
@@ -360,68 +402,21 @@ function getShaderMaterialPoints( params, onReady ) {
 
 		} ) );
 		points.userData.shaderMaterial = params.shaderMaterial;
+		if (params.arrayCloud !== undefined )
+			points.userData.cloud = { indexArray: indexArrayCloud, }
+		points.userData.shaderMaterial = params.shaderMaterial;
 		if( onReady !== undefined )
 			onReady( points );
-/*			
-		var requestId;
-		var needsUpdate = false;
-*/		
-/*
-		//нужно что бы обновились точки в frustumPoints
-		if ( points.material.uniforms.cloudPoints !== undefined )
-			points.material.uniforms.cloudPoints.value.needsUpdate = true;
-*/			
+			
+		//Convert all points with cloud and shaderMaterial from local to world positions
+		// i.e. calculate scales, positions and rotation of the points.
+		//Converting of all points with cloud, but not shaderMaterial see updateCloudPoint in the frustumPoints.create function
+		if ( !points.userData.boFrustumPoints )
+			params.arrayCloud.frustumPoints.updateCloudPoint( points );
+
 	}, params.path );
-	
-/*
-	if ( requestId !== undefined )
-		window.cancelAnimationFrame( requestId );
-*/
-//	return points;
-
-/*
-		var points = new THREE.Points( geometry, new THREE.ShaderMaterial( {
-
-			//See https://threejs.org/examples/webgl_custom_attributes_points2.html
-			//D: \My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\examples\webgl_custom_attributes_points2.html
-			//https://www.khronos.org/opengl/wiki/OpenGL_Shading_Language
-			//Обзор спецификации GLSL ES 2.0 http://a-gro-pro.blogspot.com/2013/06/glsl-es-20.html
-			//Open GL 4. Язык шейдеров. Книга рецептов http://www.cosmic-rays.ru/books61/2015ShadingLanguage.pdf
-
-			uniforms: {
-
-				color: { value: new THREE.Color( 0xffffff ) },
-				pointTexture: { value: texture },
-
-				//если убрать эту переменную, то размер точек невозможно будет регулировать
-				opacity: {
-					value: ( params.shaderMaterial !== undefined ) &&
-						( params.shaderMaterial.point !== undefined ) &&
-						( params.shaderMaterial.point.opacity !== undefined ) ?
-						params.shaderMaterial.point.opacity : 1.0
-				},//Float in the range of 0.0 - 1.0 indicating how transparent the material is.
-				//A value of 0.0 indicates fully transparent, 1.0 is fully opaque.
-
-			},
-			vertexShader: vertex,
-			fragmentShader: fragment,
-			transparent: true,
-			//		opacity: 0.1,
-
-		} ) );
-		points.userData.shaderMaterial = params.shaderMaterial;
-//		onReady( points );
-*/
 
 }
-
-/**Не работает
- * map of vertex.
- * For preventing of the duplicate loading of the vertex from file.
- * key: path to vertex file
- * value: vertex code
- * */
-//const vertexMap = new Map();
 
 /**
  * Loading of the vertex and fragment contents from external files.
@@ -431,17 +426,6 @@ function getShaderMaterialPoints( params, onReady ) {
 function loadShaderText ( onload, path ) {
 
 	var shaderText = {};
-/*	
-	if ( ( shaderText !== undefined ) && ( shaderText.vertex !== undefined ) && ( path === undefined ) ) {
-
-		if( shaderText.fragment === undefined )
-			console.error( 'shaderText.fragment = ' + shaderText.fragment );
-		onload();
-		return;
-
-	}
-*/	
-//	arrayOnLoad.push( onload );
 
 	/**
 	 * This is a basic asyncronous shader loader for THREE.js.
@@ -478,20 +462,6 @@ function loadShaderText ( onload, path ) {
 		}, options.onProgress, options.onError );
 
 	}
-	/*
-		//Thanks to https://stackoverflow.com/a/42594856/5175935
-		window.getRunningScript = () => {
-			return () => {
-	
-	//Not compatible with FireFox
-	//			return new Error().stack.match(/at (https?:[^:]*)/)[1];
-				return new Error().stack.match(/(https?:[^:]*)/)[0];
-	
-			}
-		}
-		var runningScript = getRunningScript()();
-	console.warn( 'runningScript = ' + runningScript );
-	*/
 
 	//Thanks to https://stackoverflow.com/a/27369985/5175935
 	//Такая же функция есть в frustumPoints.js но если ее использовать то она будет возвращать путь на frustumPoints.js
@@ -516,20 +486,12 @@ function loadShaderText ( onload, path ) {
 	//console.warn( 'getCurrentScriptPath = ' + getCurrentScriptPath() );
 	var currentScriptPath = getCurrentScriptPath();
 
-//	shaderText = {};
-//console.warn('path: ' + path + ( path === undefined ? '' : ' path.vertex: ' + path.vertex ) );
 	path = path || {};
 	path.vertex = path.vertex || currentScriptPath + "/vertex.c";
 	path.fragment = path.fragment || currentScriptPath + "/fragment.c";
 	ShaderLoader( path.vertex, path.fragment,
 		function ( vertex, fragment ) {
 
-//console.warn( 'path: ' + path + ' shaderText.vertex = ' + shaderText.vertex );
-/*
-			if( vertexMap.has(path.vertex) )
-				console.error( 'Duplucate vertex. file: ' + path.vertex );
-			else vertexMap.set( path.vertex, vertex );
-*/
 			shaderText.vertex = vertex;
 			shaderText.fragment = fragment;
 			onload( shaderText );
@@ -579,5 +541,9 @@ export var myPoints = {
 	* get THREE.Points with THREE.ShaderMaterial material
 	* */
 	getShaderMaterialPoints: getShaderMaterialPoints,
+	/**
+	 * Pushes to clouds array all point from geometry
+	 */
+	pushArrayCloud: pushArrayCloud,
 
 }

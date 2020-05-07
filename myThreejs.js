@@ -15,7 +15,9 @@
  */
 
 import {
-    create, points, setArrayFuncs, limitAngles, getShaderMaterialPoints, getWorldPosition//, addParticle
+
+    create, points, setArrayFuncs, limitAngles, getWorldPosition
+
 } from './index.js';
 import { myPoints } from './myPoints/myPoints.js';
 
@@ -23,12 +25,17 @@ var MYTHREEJS = {
 
 	create: create,
     points: points,
-//    myPoints: myPoints.create,
-    getShaderMaterialPoints: myPoints.getShaderMaterialPoints,
 	setArrayFuncs: setArrayFuncs,
 	limitAngles: limitAngles,
     getWorldPosition: getWorldPosition,
-//    addParticle: addParticle,
+    /**
+    * get THREE.Points with THREE.ShaderMaterial material
+    * */
+    getShaderMaterialPoints: myPoints.getShaderMaterialPoints,
+	/**
+	 * Pushes to clouds array all point from geometry
+	 */
+    pushArrayCloud: myPoints.pushArrayCloud,
 
 }
 export default MYTHREEJS;

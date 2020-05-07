@@ -2,6 +2,33 @@
  * frustumPoints
  * 
  * Array of points, statically fixed in front of the camera.
+ * I use frustumPoints for displaying of the clouds around points.
+ * 
+ * For using please define an array of the points with cloud:
+ * 
+ * var arrayCloud = [];
+ *
+ * Then you can define:
+ * 
+ * arrayCloud: options.arrayCloud
+ * 
+ * on the params of the getShaderMaterialPoints( params, onReady ) function.
+ * Or
+ * 
+ * arrayCloud: options.arrayCloud
+ * 
+ * on the pointsOptions of the myThreejs.points function.
+ *
+ * Or
+ * if points is new THREE.Points(...) then:
+ *
+ * if ( options.arrayCloud !== undefined )
+ * 	points.userData.cloud = {
+ *
+ * 		indexArray: myThreejs.pushArrayCloud( options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
+ *
+ * 	}
+*
  *
  * @author Andrej Hristoliubov https://anhr.github.io/AboutMe/
  *
@@ -21,7 +48,6 @@ import {
 	Group,
 	BufferGeometry,
 	BufferAttribute,
-//	Quaternion,
 
 	//lines
 	LineBasicMaterial,
@@ -38,7 +64,6 @@ import myThreejs from './../myThreejs.js';
 import cookie from '../../../cookieNodeJS/master/cookie.js';
 import clearThree from '../../../commonNodeJS/master/clearThree.js';
 import { spatialMultiplexsIndexs } from '../../../three.js/dev/examples/jsm/effects/StereoEffect.js';
-//import { getCurrentScriptPath } from './myPoints/myPoints.js';
 
 //memory limit
 //import roughSizeOfObject from '../../commonNodeJS/master/SizeOfObject.js';
@@ -89,6 +114,8 @@ var debug = {
  */
 function create( camera, controls, group, cookieName, spatialMultiplex, renderer, options, shaderMaterialDefault, cFrustumPoints ) {
 
+	if ( options.arrayCloud === undefined )
+		return;//нет точек с облаком. Поэтому нет смысла создавать frustumPoints
 	shaderMaterialDefault = shaderMaterialDefault || {};
 	shaderMaterialDefault.point = shaderMaterialDefault.point || {};
 	shaderMaterialDefault.point.size = shaderMaterialDefault.point.size || 0;//0.01;//Size of each frustum point
@@ -125,15 +152,19 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 	var points, zeroPoint = new Vector3(), cameraDistanceDefault = camera.position.distanceTo( zeroPoint ), _this = this,
 		lines = [], groupFrustumPoints = new Group(), names, cloudPoints,
 		cloud = function () {
-			
+
 			var uniforms,
 				CP = 'CP';//Cloud Point
 			this.create = function ( _uniforms ) {
 
 				uniforms = _uniforms;
-				for ( var i = 0; i < options.arrayCloud.length; i++ )
-					this.updateItem( i, options.arrayCloud[i] );//, data );
-//				uniforms.cloudPointsWidth = { value: options.arrayCloud.length };//use for editing of the shader text. See function getShaderMaterialPoints for details
+				for ( var i = 0; i < options.arrayCloud.length; i++ ) {
+
+					var arrayVectors = options.arrayCloud[i];
+					for ( var j = 0; j < arrayVectors.length; j++ )
+						this.updateItem( i + '_' + j, arrayVectors[j] );
+
+				}
 
 			}
 			this.editShaderText = function ( shaderText ) {
@@ -141,17 +172,37 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 				var uniforms = '', distanceToCloudPoints = '';
 				for ( var i = 0; i < options.arrayCloud.length; i++ ) {
 
-					uniforms += 'uniform vec4 ' + CP + i + ';\r\n';
-					distanceToCloudPoints += '\tDTCP(' + CP + i + ');\r\n';
+					var arrayVectors = options.arrayCloud[i];
+					for ( var j = 0; j < arrayVectors.length; j++ ) {
+
+						var index = i + '_' + j;
+						uniforms += 'uniform vec4 ' + CP + index + ';\r\n';
+						distanceToCloudPoints += '\tDTCP(' + CP + index + ');\r\n';
+
+					}
 
 				}
 				shaderText.vertex = shaderText.vertex.replace( '%cloudPoints', uniforms );
 				shaderText.vertex = shaderText.vertex.replace( '%DTCP', distanceToCloudPoints );
 
 			}
-			this.updateItem = function ( i, vector ) {
+			this.updateItem = function ( i, vector, test ) {
 
+				if ( test && ( uniforms[CP + i] === undefined ) )
+					console.error( 'uniforms[CP + ' + i + '] = ' + uniforms[CP + i] );
 				uniforms[CP + i] = { value: vector };
+
+			}
+			this.updateMesh = function ( mesh ) {
+
+				for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
+
+					this.updateItem( mesh.userData.cloud.indexArray + '_' + i,
+						myThreejs.getWorldPosition( mesh,
+							new Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ) ),
+						true );
+
+				}
 
 			}
 
@@ -224,8 +275,6 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 			&& ( debug.linesiInMono || ( spatialMultiplex !== spatialMultiplexsIndexs.Mono ) );
 
 	}
-	//mouse cursor
-//	var cursor = {};
 	function update( onReady ) {
 
 		if ( points === undefined ) {
@@ -233,110 +282,52 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 			progress();
 
 		}
-/*
-		cursor.requestId = window.requestAnimationFrame( function () {
 
-			//start
-			renderer.domElement.style.cursor = 'progress';
-			renderer.cursor = renderer.domElement.style.cursor;//эта строка нужна что бы новый курсор оставался при движении мыши
-			cursor.requestId = window.requestAnimationFrame( function () {
+	}
+	this.onChangeControls = function ( ) {
 
-				//progress1
-				//две фазы прогресса progress1 и progress2 нужно что бы указатель мыши переключился на progress
-				//сразу после того как пользователь отпустил кнопку мыши
-				//Иначе после отпускания кнопки мыши на экране ничего не происходит в течении некоторого времени
-				//Не знаю почему это надо
-				cursor.requestId = window.requestAnimationFrame( function () {
+		if ( !debug.notHiddingFrustumPoints ) {
 
-					//progress2
-					if ( points === undefined ) {
+			//Updating of the canvas is too slow if FrustumPoints count is very big (about 'Z Count' = 50 and 'Y Count' = 30).
+			//I am hidding all points during  changing of the contdrol and show it again after 500 msec for resolving of the problem.
+			if ( timeoutControls === undefined ) {
 
-						progress();
+				group.remove( points );
+				group.remove( groupFrustumPoints );
+				options.removeParticle( points );
 
-					} else {
+			}
+			clearTimeout( timeoutControls );
+			timeoutControls = setTimeout( function () {
 
-//						options.getColors( 0, undefined, options.scales.w, points.geometry.attributes.position, points.geometry.attributes.ca );
-						options.getColors( 0, undefined, options.scales.w, {
+				group.add( groupFrustumPoints );
+				if ( shaderMaterial.info )
+					options.addParticle( points );
 
-								opacity: true,
-								positions: points.geometry.attributes.position,
-//								colors: points.geometry.attributes.ca.array,
+				clearTimeout( timeoutControls );
+				timeoutControls = undefined;
 
-							} );
-if ( points.geometry.attributes.ca !== undefined )
-	points.geometry.attributes.ca.needsUpdate = true;
-						group.add( points );
+				if ( !debug.notMoveFrustumPoints ) {
 
-					}
+					_this.update();
 
-					//mouse cursor
-					renderer.cursor = cursor.cursor;
+				}
 
-					cursor.requestId = window.requestAnimationFrame( function () {
+			}, 500 );
 
-						//ready
-						renderer.domElement.style.cursor = '';//cursor.cursor;
-						window.cancelAnimationFrame( cursor.requestId );
-						cursor.requestId = undefined;
-						if ( onReady !== undefined )
-							onReady();
+		} else if ( !debug.notMoveFrustumPoints ) {
 
-					} );
+			_this.update();
 
-				} );
-
-			} );
-
-		} );
-*/
-
+		}
+				
 	}
 	function progress() {
 
 		if ( !shaderMaterial.display )
 			return;
 
-		var cameraPerspectiveHelper = new CameraHelper( camera ), timeoutControls;
-		if ( controls !== undefined )
-			controls.addEventListener( 'change', function ( o ) {
-
-				if ( !debug.notHiddingFrustumPoints ) {
-
-					//Updating of the canvas is too slow if FrustumPoints count is very big (about 'Z Count' = 50 and 'Y Count' = 30).
-					//I am hidding all points during  changing of the contdrol and show it again after 500 msec for resolving of the problem.
-					if ( timeoutControls === undefined ) {
-
-						group.remove( points );
-						group.remove( groupFrustumPoints );
-						options.removeParticle( points );
-
-					}
-					clearTimeout( timeoutControls );
-					timeoutControls = setTimeout( function () {
-
-	//					group.add( points );если тут добавлять в группу то сначала будут видны старые точки.
-						group.add( groupFrustumPoints );
-						if ( shaderMaterial.info )
-							options.addParticle( points );
-
-						clearTimeout( timeoutControls );
-						timeoutControls = undefined;
-
-						if ( !debug.notMoveFrustumPoints ) {
-
-							_this.update();
-
-						}
-
-					}, 500 );
-
-				} else if ( !debug.notMoveFrustumPoints ) {
-
-					_this.update();
-
-				}
-
-			} );
+		var cameraPerspectiveHelper = new CameraHelper( camera );
 
 		var array, indexArray = 0;//, names;// = [];
 
@@ -422,17 +413,6 @@ if ( points.geometry.attributes.ca !== undefined )
 
 			//смещение по оси x
 			zx = 0;
-/*
-			zxCount = zCount;//На столько частей надо поделить xStep что бы получить xzStep шаг смешения по оси x
-			zSqrtInt = 0,
-		if ( !isLines() )
-			for ( zxCount = 0; zxCount < zCount; zxCount++ ) {
-
-				if ( zSqrtInt !== sqrtInt( zxCount ) )
-					break;
-
-			}
-*/		
 		var yCount = shaderMaterial.yCount,
 			xCount = yCount * ( shaderMaterial.square ? 1 : parseInt( camera.aspect ) ),
 			zy = 0;//смещение по оси y
@@ -447,10 +427,6 @@ if ( points.geometry.attributes.ca !== undefined )
 
 		var zStart = parseInt( ( zCount * shaderMaterial.stereo.hide ) / 100 ),
 			zEnd = zStart + zCount - 1;
-/*
-		if ( isLines() )
-			zx = 0;
-*/
 		function Z( z ){
 
 			//console.warn( 'z ' + z );
@@ -472,14 +448,6 @@ if ( points.geometry.attributes.ca !== undefined )
 
 			if ( isLines() )
 				zx = z;
-/*
-			else if ( zSqrtInt !== sqrtInt( z ) ) {
-
-				zx = 0;
-				zSqrtInt = sqrtInt( z );
-
-			}
-*/
 
 			for ( var y = 0; y < yCount; y++ ) {
 
@@ -487,15 +455,7 @@ if ( points.geometry.attributes.ca !== undefined )
 					if ( z >= zStart ) {
 
 						function addPoint( point/*, pointName*/ ) {
-/*
-							if ( ( x === 0 ) && ( y === 0 ) )
-								console.warn( 'point ' + ( indexArray / itemSize ) +
-									' x ' + x + ' y ' + y + ' z ' + z +
-									' zy ' + zy +
-									' zx ' + zx + //' xzStep ' + xzStep + ' xStep ' + xStep
-									' point.x ' + point.x + ' point.y ' + point.y + ' point.z ' + point.z
-								);
-*/								
+
 							names.push(
 
 								x === 0 ?
@@ -514,11 +474,10 @@ if ( points.geometry.attributes.ca !== undefined )
 						addPoint( new Vector3(
 
 							pointStart.x + xStep * x + xzStep * zx,
-//							pointStart.y + yStep * y + yzStep * sqrtInt( z ),
 							pointStart.y + yStep * y + yzStep * zy,
 							pointStart.z + zStep * z * z
 
-						) );//, 'x=' + x + ' y=' + y + ' z=' + z );
+						) );
 
 					}
 
@@ -537,16 +496,8 @@ if ( points.geometry.attributes.ca !== undefined )
 			if ( zStart > zEnd )
 				return;
 			Z( zStart );
-//			if( ( zStart + 1 ) >= zEnd )
-			if( zStart >= zEnd ) {
-
-/*
-				if( ( zStart + 1 ) !== zEnd  )
-					console.error( '(zStart + 1 ) = ' + (zStart + 1) + ' !== zEnd = ' + zEnd );
-*/					
+			if( zStart >= zEnd )
 				return;
-
-			}
 			Z( zEnd );
 			var zMid = parseInt( ( zStart + zEnd ) / 2 );
 			if ( zMid === zStart )
@@ -565,8 +516,7 @@ if ( points.geometry.attributes.ca !== undefined )
 		//for testing set 'Z Count' = 100 and 'Y count' = 1000
 		//saveSettings();
 
-		//if ( group.children.indexOf( points ) !== -1 )
-			removePoints( true );
+		removePoints( true );
 
 		var itemSize = 3;
 		_this.pointIndexes = function( pointIndex ) {
@@ -609,7 +559,6 @@ if ( points.geometry.attributes.ca !== undefined )
 				z = name.z;
 
 			}
-//				console.warn( 'pointName( ' + pointIndex + ' ) z = ' + ( z + zStart ) + ' y = ' + y + ' x ' + x );
 			return { x: x, y: y, z: z };
 
 		}
@@ -642,33 +591,6 @@ if ( points.geometry.attributes.ca !== undefined )
 		myThreejs.points( //array
 			function () {
 
-/*
-				var geometry = new BufferGeometry(),
-					geometryLength = 8,//( zEnd - zStart + 1 ) * xCount * yCount;
-					itemSize = 4,
-					array = new Float32Array( geometryLength * itemSize );
-				geometry.addAttribute( 'position', new BufferAttribute( array, itemSize ) );
-
-				geometry.attributes.position.setXYZW( 0,  3,  1,  1, -1 );
-				geometry.attributes.position.setXYZW( 1, -3,  1,  1, -1 );
-				geometry.attributes.position.setXYZW( 2,  3, -1,  1, -1 );
-				geometry.attributes.position.setXYZW( 3, -3, -1,  1, -1 );
-				geometry.attributes.position.setXYZW( 4,  3,  1, -1,  1 );
-				geometry.attributes.position.setXYZW( 5,  3,  1, -1,  1 );
-				geometry.attributes.position.setXYZW( 6,  3, -1, -1,  1 );
-				geometry.attributes.position.setXYZW( 7,  3, -1, -1,  1 );
-*/
-/*
-				geometry.attributes.position.setXYZ( 0,  3.2,  1,  1 );
-				geometry.attributes.position.setXYZ( 1, -3.2,  1,  1 );
-				geometry.attributes.position.setXYZ( 2,  3.2, -1,  1 );
-				geometry.attributes.position.setXYZ( 3, -3.2, -1,  1 );
-				geometry.attributes.position.setXYZ( 4,  3.2,  1, -1 );
-				geometry.attributes.position.setXYZ( 5, -3.2,  1, -1 );
-				geometry.attributes.position.setXYZ( 6,  3.2, -1, -1 );
-				geometry.attributes.position.setXYZ( 7, -3.2, -1, -1 );
-*/
-
 				var geometry = new BufferGeometry(),
 					geometryLength = ( zEnd - zStart + 1 ) * xCount * yCount;
 
@@ -696,7 +618,6 @@ if ( points.geometry.attributes.ca !== undefined )
 				path: {
 					
 					vertex: path + '/vertex.c',
-//					fragment: path + '/fragment.c',
 
 				},
 				pointName: function( pointIndex ) {
@@ -709,8 +630,7 @@ if ( points.geometry.attributes.ca !== undefined )
 				},
 				controllers: function ( /*cFrustumPoints*/ ) {
 
-//					if ( cFrustumPoints !== undefined )
-						cFrustumPoints.appendChild({ xCount: xCount, yCount: yCount, zCount: zCount,  });
+					cFrustumPoints.appendChild({ xCount: xCount, yCount: yCount, zCount: zCount,  });
 
 				},
 				uniforms: function( uniforms ){
@@ -740,8 +660,6 @@ if ( points.geometry.attributes.ca !== undefined )
 					points = newPoints;
 					points.userData.boFrustumPoints = true;
 					points.userData.isInfo = function() { return shaderMaterial.info; }
-//					pointSize = undefined;
-//					guiSelectPoint.addMesh( points );
 					
 					saveSettings();
 					if ( shaderMaterial.info )
@@ -749,11 +667,6 @@ if ( points.geometry.attributes.ca !== undefined )
 
 					if ( !shaderMaterial.display )
 						removePoints();
-/*
-					pointSize = points === undefined ?
-						0 :
-						points.userData.shaderMaterial === undefined ? shaderMaterial.point.size : points.userData.shaderMaterial.point.size;
-*/						
 					pointOpacity = points === undefined ?
 						1.0 :
 						points.userData.shaderMaterial === undefined ? shaderMaterial.point.opacity : points.userData.shaderMaterial.point.opacity;
@@ -761,13 +674,6 @@ if ( points.geometry.attributes.ca !== undefined )
 				},
 
 		} );
-		//array = null;
-/*		
-		points.userData.boFrustumPoints = true;
-		points.userData.isInfo = function() { return shaderMaterial.info; }
-		pointSize = undefined;
-		guiSelectPoint.addMesh( points );
-*/		
 
 		if ( isLines() ) {
 
@@ -800,16 +706,9 @@ if ( points.geometry.attributes.ca !== undefined )
 				}
 
 		}
-/*		
-		group.add( points );
-		saveSettings();
-		if ( shaderMaterial.info )
-			options.addParticle( points );
-*/			
 
 	}
 	update();
-//	var pointSize;
 	var pointOpacity;
 	this.setSpatialMultiplexs = function( spatialMultiplexNew ) {
 
@@ -834,7 +733,6 @@ if ( points.geometry.attributes.ca !== undefined )
 				( pointOpacity === points.userData.shaderMaterial.point.opacity ) )
 		)
 			return false;
-//		pointSize = points.userData.shaderMaterial.point.size;
 		pointOpacity = points.userData.shaderMaterial.point.opacity;
 		points.material.uniforms.opacity.value = points.userData.shaderMaterial.point.opacity;
 		return true;
@@ -846,13 +744,8 @@ if ( points.geometry.attributes.ca !== undefined )
 
 		//Эта команда нужна в случае изменения размера окна браузера когда canvas на весь экран
 		setPointsParams();
-//		pointSize = 0;//update point's size
 
 	}
-/*
-	var raycaster;
-	this.setRaycaster = function ( _raycaster ) { raycaster = _raycaster; }
-*/
 
 	/**
 	* @callback FolderPoint
@@ -998,13 +891,11 @@ if ( points.geometry.attributes.ca !== undefined )
 			if ( shaderMaterial.display ) {
 
 				update();
-//				displayControllers( true );
 
 			} else {
 
 				options.removeParticle( points );
 				removePoints();
-//				displayControllers( false );
 
 			}
 			displayControllers( shaderMaterial.display );
@@ -1053,7 +944,6 @@ if ( points.geometry.attributes.ca !== undefined )
 		var cOpacity = fStereo.add( shaderMaterial.stereo, 'opacity', 0.0, 1.0, 0.01 ).onChange( function ( value ) { update(); } );
 		dat.controllerNameAndTitle( cOpacity, lang.opacity, lang.opacityTitle );
 
-		//Stereo
 		/////////////////////////////////
 
 		//Shift of the frustum layer near to the camera in percents
@@ -1095,24 +985,7 @@ if ( points.geometry.attributes.ca !== undefined )
 		}, {
 
 				settings: { offset: 0.1 },
-				//min: 0.01, max: 1.0, step: 0.01,
-/*не помню зачем это написал
-			setOpacity: function( value ) {
 
-				if ( folderPoint.opacity.getValue() !== value )
-					folderPoint.opacity.setValue( value );
-				points.userData.shaderMaterial.point.opacity = value;
-
-				lines.forEach( function ( line ) {
-
-					line.material.opacity = value;
-
-				} );
-
-				saveSettings();
-				
-			}
-*/
 		} );
 
 		var toUpdate = true,//Когда пользователь нажимает кнопку Default надо установить toUpdate = false
@@ -1137,10 +1010,9 @@ if ( points.geometry.attributes.ca !== undefined )
 				options.guiSelectPoint.setIndexMesh( index, points );
 
 				saveSettings();
-//				options.addParticle( points );
 				canUpdate = true;
 
-				points.userData.controllers();// myThreejs.cFrustumPoints );
+				points.userData.controllers();
 				
 			} );
 
@@ -1193,7 +1065,6 @@ if ( points.geometry.attributes.ca !== undefined )
 	this.getSelectedIndex = function ( cFrustumPoints ) { return cFrustumPoints.selectPoint( names ); }
 	this.selectPoint = function ( cFrustumPoints ) {
 
-//		var index = cFrustumPoints.selectPoint( names );
 		var index = this.getSelectedIndex( cFrustumPoints );
 		if ( index === null )
 			return;
@@ -1202,8 +1073,6 @@ if ( points.geometry.attributes.ca !== undefined )
 	}
 	this.updateCloudPoints = function () {
 
-//		var array = [];//All points from mesh with userData.cloud !== undefined
-		var index = 0;
 		group.children.forEach( function ( mesh ) {
 
 			if ( !mesh.userData.cloud )
@@ -1214,17 +1083,30 @@ if ( points.geometry.attributes.ca !== undefined )
 				return;
 
 			}
+			cloud.updateMesh( mesh );
+/*
 			for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
-				cloud.updateItem( index, new Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ) );
-				index++;
-//				array.push( new Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ) );
+				cloud.updateItem( mesh.userData.cloud.indexArray + '_' + i,
+					new Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ),
+					true );
 
 			}
+*/
 
 		} );
 
 	}
+	this.updateCloudPoint = function ( points ) {
+
+		cloud.updateMesh( points );
+
+	}
+
+	//Convert all points with cloud, but not shaderMaterial from local to world positions
+	// i.e. calculate scales, positions and rotation of the points.
+	//Converting of all points with cloud and shaderMaterial see getShaderMaterialPoints function in the myPoints.js file
+	this.updateCloudPoints();
 
 }
 
@@ -1233,8 +1115,6 @@ export var FrustumPoints = {
 	create: create,
 
 }
-
-//export default FrustumPoints;
 
 export function cFrustumPointsF( guiSelectPoint ) {
 
@@ -1288,12 +1168,6 @@ export function cFrustumPointsF( guiSelectPoint ) {
 
 			//thanks to https://stackoverflow.com/a/48780352/5175935
 			cFrustumPoints.domElement.querySelectorAll( 'select option' ).forEach( option => { if ( option.value != '-1' ) option.remove() } );
-/*			
-			var opt = document.createElement( 'option' );
-			opt.innerHTML = lang.notSelected;
-			opt.setAttribute( 'value', -1 );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
-			cPoints.__select.appendChild( opt );
-*/			
 
 			for ( var i = 0; i < count; i++ ) {
 

@@ -95,10 +95,9 @@
 			var a = options.a, b = options.b;
 			var tMin = playerOptions.min === undefined ? 0 : playerOptions.min;
 			var arrayFuncs, sizes;
-			
-			//Points
 
-/*
+			//Points
+			/*
 			myThreejs.points( function(){
 
 				var geometry = new THREE.BufferGeometry(),
@@ -137,18 +136,17 @@
 				name: 'Functions',
 				tMin: tMin,
 //				pointSize: 5.0,
-				position: new THREE.Vector3( 0.4, 0.4, 2 ),//same as camera position
+				//position: new THREE.Vector3( 0.4, 0.4, 2 ),//same as camera position
 				//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
 				//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
-				//scale: new THREE.Vector3( 2, 2, 2 ),
+				scale: new THREE.Vector3( 0.2, 0.2, 0.2 ),
 				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
-				shaderMaterial: {},
-				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+				//shaderMaterial: {},
+				arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
 			} );
-*/
-
+			*/
 			arrayFuncs = [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 				/*
 				new THREE.Vector3( -0.5, 0.5, -1 ),//3D point. White color
@@ -227,9 +225,9 @@
 				},
 				*/
 				[ -0.5, 0.5, new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5' ), 1 ],//4D point.
-				[ -0.5, 0.5, 0.0, 1 ],//4D point.
-				[0.25, 0, 0.75, -1],//4D point.
-//				[0.5, 0, 0.75, -1],//4D point.
+				[ 0.5, 0.5, 0.0, 1 ],//4D point.
+				[ 0.25, 0, 0.75, -1 ],//4D point.
+//				[0, 0, 0, -1],//4D point.
 /*
 				{
 
@@ -275,56 +273,23 @@
 
 			}
 			*/
-/*
-			group.add( myThreejs.myPoints( arrayFuncs, options, {
-
-					name: 'myThreejs.points',
-					tMin: tMin,
-					//position: new THREE.Vector3( -1, 0, 0 ),
-					//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
-					//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
-					//scale: new THREE.Vector3( 2, 2, 2 ),
-					//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
-					//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
-					shaderMaterial: {},
-					cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
-
-			} ) );
-*/
-
 			myThreejs.points( arrayFuncs, group, options, {
 
 				name: 'myThreejs.points',
 				tMin: tMin,
 //				pointSize: 5.0,
 				//position: new THREE.Vector3( 0.4, 0.4, 2 ),//same as camera position
-				//position: new THREE.Vector3( 0.5, 0, 0 ),
+				position: new THREE.Vector3( 0.5, 0, 0 ),
 				//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
 				//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
 				//scale: new THREE.Vector3( 2, 2, 2 ),
 				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
 				shaderMaterial: {},
-				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+				arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+//deprecated				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
 			} );
-
-/*
-			myThreejs.points( arrayFuncs, group, options, {
-
-				name: 'myThreejs.points',
-				tMin: tMin,
-				//position: new THREE.Vector3( -1, 0, 0 ),
-				//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
-				//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
-				//scale: new THREE.Vector3( 2, 2, 2 ),
-				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
-				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
-				shaderMaterial: {},
-				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
-
-			},);
-*/
 
 			//See https://github.com/anhr/myThreejs#arrayfuncs-item for details
 			arrayFuncs = [
@@ -380,16 +345,30 @@
 			}
 			points.userData.selectPlayScene = function ( t ) {
 
+				/*
 				var angle = t * Math.PI * 2 * 1.2;// + Math.PI / 4;//45 degree
 				points.rotation.set( angle, 0, 0 );
 				myThreejs.limitAngles( points.rotation );
+				*/
 				//				setAttributes( a, b );
 
 			}
-			points.userData.cloud = {};//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+
+			//ATTENTION!!! You can adding of the cloud into points only if you want add points into group "group.add( points );"
+			// if you do not want to see a cloud without appropriate point. 
+			
+			//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+			if ( options.arrayCloud !== undefined )
+				points.userData.cloud = {
+
+					indexArray: myThreejs.pushArrayCloud( options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
+
+				}
+
 			//points.position.copy( new THREE.Vector3( 0.1, 0.2, 0.3 ) );
 			//points.scale.copy( new THREE.Vector3( 1.1, 1.2, 1.3 ) );
-			//group.add( points );
+			group.add( points );
+			
 
 			//points with ShaderMaterial
 			//https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
@@ -501,6 +480,7 @@
 				sizes: sizes,
 				scales: options.scales,
 				pointSize: options.point.size,
+				arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
 			}, function( points ) {
 
@@ -523,15 +503,12 @@
 				}
 				points.userData.selectPlayScene = function ( t ) {
 
-					/*
-					var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
-					points.rotation.set( angle, 0, 0 );
-					myThreejs.limitAngles( points.rotation );
-					*/
-	/*
-					points.geometry.attributes.size.setX( 1, 0.1 * ( t + 1 ) );
-					points.geometry.attributes.size.needsUpdate = true;
-	*/
+					//var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
+					//points.rotation.set( angle, 0, 0 );
+					//myThreejs.limitAngles( points.rotation );
+
+					//points.geometry.attributes.size.setX( 1, 0.1 * ( t + 1 ) );
+					//points.geometry.attributes.size.needsUpdate = true;
 
 				}
 				group.add( points );
@@ -626,7 +603,30 @@
 			axesHelperGui: true,
 			stereoEffect: true,
 			menuPlay: true,
-			frustumPoints: true,//display an array of points, statically fixed in front of the camera.
+
+			//Array of points with cloud.
+			//If you define the array of points with cloud, then you can define a points with cloud.
+			//For example you can define
+			//arrayCloud: options.arrayCloud
+			//on the params of the getShaderMaterialPoints( params, onReady ) function.
+			//Or
+			//arrayCloud: options.arrayCloud
+			//on the pointsOptions of the myThreejs.points function.
+			//
+			//Or
+			//if points is new THREE.Points(...) then:
+			//
+			//if ( options.arrayCloud !== undefined )
+			//	points.userData.cloud = {
+			//
+			//		indexArray: myThreejs.pushArrayCloud( options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
+			//
+			//	}
+			arrayCloud: [],
+
+//Currently use arrayCloud
+//frustumPoints: true,//display an array of points, statically fixed in front of the camera.
+
 			dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
 			player: playerOptions,//3D objects animation.
 			a: 1.1,

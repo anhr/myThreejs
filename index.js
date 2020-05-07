@@ -153,8 +153,15 @@ var arrayCreates = [];
  * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui Default is false.
  * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui](https://github.com/anhr/dat.gui) for playing of 3D objects in my projects.
  * See nodejs\menuPlay\index.js Default is false.
- * @param {boolean} [options.frustumPoints] true - display an array of points, statically fixed in front of the camera. Default is false.
- * See frustumPoints.js.
+ * @param {array} [options.arrayCloud] Array of points with cloud.
+ * If you define the array of points with cloud, then you can define a points with cloud.
+ * For example you can define
+ * arrayCloud: options.arrayCloud
+ * on the params of the getShaderMaterialPoints( params, onReady ) function.
+ * Or
+ * arrayCloud: options.arrayCloud
+ * on the pointsOptions of the myThreejs.points function.
+ * Default is undefined
  * @param {object} [options.player] 3D objects animation.
  * @param {number} [options.player.min] Animation start time. Default is 0.
  * @param {number} [options.player.max] Animation end time. Default is 1.
@@ -379,7 +386,7 @@ export function create( createXDobjects, options ) {
 				'';
 	}
 
-	var camera, group, scene, canvas;//, guiSelectPoint;
+	var camera, group, scene, canvas;
 
 	function onloadScripts() {
 
@@ -528,6 +535,7 @@ export function create( createXDobjects, options ) {
 
 			camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 );
 			camera.position.copy( defaultCameraPosition );
+			options.point.sizePointsMaterial = 100;//size of points with material is not ShaderMaterial is options.point.size / options.point.sizePointsMaterial
 
 			// SCENE
 
@@ -544,15 +552,7 @@ export function create( createXDobjects, options ) {
 
 			} );
 			renderer.setPixelRatio( window.devicePixelRatio );
-			options.renderer = renderer;//for getShaderMaterialPoints
-/*
-			options.render = function () {//for myPoints
-
-				renderer.render( scene, camera );
-
-			}
-*/
-			//			cursor = renderer.domElement.style.cursor;
+			options.renderer = renderer;
 
 			//resize
 			renderer.setSizeOld = renderer.setSize;
@@ -578,7 +578,6 @@ export function create( createXDobjects, options ) {
 				( options.canvas !== undefined ) && ( options.canvas.height !== undefined ) ? options.canvas.height : canvas.clientHeight );
 
 			//StereoEffect. https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
-			//if ( THREE.StereoEffect !== undefined )
 			if ( options.stereoEffect ) {
 
 				var cookieName = getCanvasName();
@@ -736,7 +735,6 @@ export function create( createXDobjects, options ) {
 			//item.material.size is NaN if item.material is ShaderMaterial
 			//Влияет только на точки без ShaderMaterial
 			raycaster.params.Points.threshold = 0.01;
-//			if ( frustumPoints !== undefined ) frustumPoints.setRaycaster( raycaster );
 			if ( raycaster.setStereoEffect !== undefined )
 				raycaster.setStereoEffect( {
 
@@ -776,7 +774,6 @@ export function create( createXDobjects, options ) {
 					raycaster.stereo.removeParticle( item );
 
 			}
-//			options.raycaster = raycaster;
 
 			//
 
@@ -790,9 +787,8 @@ export function create( createXDobjects, options ) {
 					cPoints, selectedPointIndex = -1,
 					controllerX, controllerY, controllerZ, controllerW, cTrace, cTraceAll, controllerColor, controllerOpacity,
 					controllerWorld = new THREE.Vector3(),
-//					cursor = '',//'move'//когда точек много, то выбор точки по щелчку мыши происходит медленно. Во время выбора точки меняю курсор мыши.
 					boSetMesh = false;//Для предотвращения лишних вызовов exposePosition если выбрать точку и передвинуть камеру с помошью OrbitControls,
-				if ( options.frustumPoints )
+				if ( options.arrayCloud )//Array of points with cloud
 					cFrustumPoints = new cFrustumPointsF( _this );
 				//сейчас exposePosition вызывается только один раз из this.setMesh
 				function dislayEl( controller, displayController ) {
@@ -881,16 +877,6 @@ export function create( createXDobjects, options ) {
 				}
 				function setPosition( intersectionSelected ) {
 
-/*если это оставить то attribute.position выбранной точки будет неправильной если начать проигрывание player.selectScene
-					setValue( controllerX, position.x );
-					setValue( controllerY, position.y );
-					setValue( controllerZ, position.z );
-					
-					var positionLocal = getObjectLocalPosition( intersectionSelected.object, intersectionSelected.index );
-					setValue( controllerWorld.x, positionLocal.x );
-					setValue( controllerWorld.y, positionLocal.y );
-					setValue( controllerWorld.z, positionLocal.z );
-*/
 					var positionLocal = getObjectLocalPosition( intersectionSelected.object, intersectionSelected.index );
 					setValue( controllerX, positionLocal.x );
 					setValue( controllerY, positionLocal.y );
@@ -921,8 +907,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 							var vColor = new THREE.Vector4().fromArray(
 								intersectionSelected.object.geometry.attributes.ca.array,
 								intersectionSelected.index * intersectionSelected.object.geometry.attributes.ca.itemSize );
-	//Непонятно почему эту строку написал. сюда попадает если щелкнуть мышью по точке							
-	//						color = new THREE.Color( 'rgb(' + vColor.x + ', ' + vColor.y + ', ' + vColor.z + ')' );
 							color = new THREE.Color( vColor.x, vColor.y, vColor.z );
 							opasity = vColor.w;
 
@@ -944,15 +928,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 
 						} else {
 
-							/*Не помню зачем это написал
-							Если это оставить то не будет отображаться цвет выбранной точки frustumPoints
-							потому что сейчас у frustumPoints func.w = undefined 
-							if ( func.w === undefined ) {
-
-								displayControllerColor = none;
-
-							}
-							*/
 							var strColor = '#' + color.getHexString();
 							//Сначала надо установить initialValue потому что для FrustumPoints я устанвил readOnly для controllerColor.
 							//В этом случае я не могу отобразить цвет следующей точки FrustumPoints потому что в режиме readOnly
@@ -963,10 +938,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 							if ( opasity !== undefined ) {
 
 								setValue( controllerOpacity, opasity );
-/*								
-								controllerOpacity.setValue( opasity );
-								controllerOpacity.initialValue = controllerOpacity.getValue();
-*/								
 
 							} else displayControllerOpacity = none;
 							controllerOpacity.userData = { intersection: intersectionSelected, };
@@ -1051,7 +1022,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					if ( index === undefined )
 						return;
 					cMeshs.__select.options[index].mesh = mesh;
-					//					cPoints.__onChange( -1 );
 					this.selectPoint( -1 );
 
 				}
@@ -1111,13 +1081,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					if ( f3DObjects === undefined ) {
 
 						console.error( 'Не знаю как сюда попасть' );
-/*
-						selectedPointIndex = intersectionSelected.index || -1;
-						if ( ( mesh !== undefined ) && ( mesh !== intersectionSelected.object ) && ( axesHelper !== undefined ) )
-							axesHelper.exposePosition();//remove dot lines
-						mesh = intersectionSelected.object;
-						return;//options.dat !== true and gui === undefined. Do not use dat.gui
-*/
 
 					}
 
@@ -1254,7 +1217,7 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					cMeshs = f3DObjects.add( { Meshs: lang.notSelected }, 'Meshs', { [lang.notSelected]: -1 } ).onChange( function ( value ) {
 
 						value = parseInt( value );
-						var mesh = getMesh();//cMeshs.__select.options[cMeshs.__select.options.selectedIndex].mesh;
+						var mesh = getMesh();
 						var display;
 						if ( mesh === undefined ) {
 
@@ -1384,9 +1347,6 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 						}
 						fMesh.domElement.style.display = display;
 
-						//Если оставить эту линию то исчезает трассировка точки если пользователь выбрал эту точку
-//						mesh.userData.traceAll = mesh.userData.traceAll || false;
-
 						if ( ( mesh !== undefined ) && ( mesh.userData.traceAll !== undefined ) )
 							cTraceAll.setValue( mesh.userData.traceAll );
 
@@ -1424,8 +1384,6 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 						mesh.scale[axesName] = value;
 						mesh.needsUpdate = true;
 						exposePosition();
-
-//						setScaleControllers();//Непонятно зачем это поставил
 
 					}
 					cScaleX = dat.controllerZeroStep( fScale, scale, 'x', function ( value ) { setScale( 'x', value ); } );
@@ -1473,8 +1431,6 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 							mesh.position[name] = value;
 							mesh.needsUpdate = true;
 							exposePosition();
-
-							//							setPositionControllers();//непонятно зачем это вставил
 
 						}
 						var position = new THREE.Vector3();
@@ -1630,10 +1586,6 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					opt.innerHTML = lang.notSelected;
 					opt.setAttribute( 'value', -1 );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
 					cPoints.__select.appendChild( opt );
-/*too slow
-					while ( cPoints.__select.length > 1 )
-						cPoints.__select.remove( cPoints.__select.length - 1 );
-*/
 
 				}
 				this.addControllers = function () {
@@ -1927,12 +1879,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 				options.guiSelectPoint.add( gui );
 
-				//Убрал эту строку потому что еще не готовы options.scales которые устанавливаются в getScalesOptions
-//				options.guiSelectPoint.addControllers();
-
 			}
-			//если я оставлю здесь этот вызов, то начальное время tMin будет еще не известно и не удасться установить все 3D объекты в начальное положение
-//			createXDobjects( group );
 
 			//PlayController https://github.com/anhr/controllerPlay. My custom controller in my version of dat.gui https://github.com/anhr/dat.gui for playing of 3D objects in my projects.
 
@@ -2063,6 +2010,25 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.target.set( scene.position.x * 2, scene.position.y * 2, scene.position.z * 2 );
 				controls.update();
+				controls.addEventListener( 'change', function () {
+
+					//change of size of the points if points is not shaderMaterial and if camera is moving
+					var vector = new THREE.Vector3();
+					vector.copy( camera.position );
+					var quaternion = new THREE.Quaternion( -camera.quaternion.x, -camera.quaternion.y, -camera.quaternion.z, camera.quaternion.w );
+					vector.applyQuaternion( quaternion );
+					options.point.sizePointsMaterial = 200 / vector.z;
+					group.children.forEach( function ( mesh ) {
+
+						if ( ( mesh.material !== undefined ) && ( mesh.material.uniforms === undefined ) )
+							mesh.material.size = options.point.size / options.point.sizePointsMaterial;
+
+					} );
+
+					if ( frustumPoints !== undefined )
+						frustumPoints.onChangeControls();
+
+				} );
 
 			}
 
@@ -2092,30 +2058,9 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 			var pointName = 'Point_' + getCanvasName();
 			cookie.getObject( pointName, options.point, options.point );
-/*
-var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
-fragment_loader.setResponseType( 'text' );
-fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.txt", function ( fragment_text ) {
-	var arrayFuncs = [ //arrayFuncs. See https://github.com/anhr/myThreejs#arrayfuncs-item for details
-		new THREE.Vector4( 0, 0, 0.25, 1 ),
-		new THREE.Vector4( -0.25, 0.3, 0.5, -1 ),
-
-	];
-	var points = new THREE.Points(
-
-		new THREE.BufferGeometry().setFromPoints( options.getPoints( 0, arrayFuncs, 1, 9 ), 4 ),
-		new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } )
-
-	);
-	points.geometry.addAttribute( 'color',
-		new THREE.Float32BufferAttribute( options.getColors( 0, arrayFuncs, {name:'',min:-1,max:1} ), 3 ) );
-	group.add(points);
-} );
-*/
-			options.arrayCloud = [];//All points from mesh with userData.cloud !== undefined. For color and opacity of the frustum points.
 			createXDobjects( group, options );
 
-			if ( options.frustumPoints ) {
+			if ( options.arrayCloud ) {//Array of points with cloud
 
 				frustumPoints = new FrustumPoints.create( camera, controls//, guiSelectPoint
 					, group, 'FrustumPoints_' + getCanvasName(), stereoEffect.options.spatialMultiplex, renderer, options,
@@ -2162,6 +2107,7 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 					cFrustumPoints
 				);
 				cFrustumPoints.setFrustumPoints( frustumPoints );
+				options.arrayCloud.frustumPoints = frustumPoints;
 
 			}
 
@@ -2242,8 +2188,6 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 							else {
 
 								boSetColorAttribute = false;
-//								var colorItem = new THREE.Vector3().fromArray( attributes.ca.array, i );
-//								color = new THREE.Color( 1, 1, 1 );//white
 
 							}
 							if ( boSetColorAttribute )
@@ -2303,12 +2247,6 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 				mesh.userData.default.rotation.copy( mesh.rotation );
 
 			} );
-/*
-			defaultPoint.size = options.point.size;
-
-			var pointName = 'Point_' + getCanvasName();
-			cookie.getObject( pointName, options.point, options.point );
-*/			
 			if ( gui !== undefined ) {
 
 				//THREE.AxesHelper gui
@@ -2374,19 +2312,6 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 
 					} );
 					dat.controllerNameAndTitle( this.size, lang.size, lang.sizeTitle );
-/*
-					//opacity
-					if ( point.opacity !== undefined ) {
-
-						this.opacity = fPoint.add( point, 'opacity', 0.0, 1.0, 0.01 ).onChange( function ( value ) {
-
-							PCOptions.setOpacity( value );
-
-						} );
-						dat.controllerNameAndTitle( this.opacity, lang.opacity, lang.opacityTitle );
-
-					}
-*/					
 
 					//point default button
 					dat.controllerNameAndTitle( fPoint.add( {
@@ -2394,10 +2319,6 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 						defaultF: function ( value ) {
 
 							setSize( defaultPoint.size );
-/*не помню зачем это написал
-							if ( PCOptions.setOpacity !== undefined )
-								PCOptions.setOpacity( defaultPoint.opacity );
-*/
 
 						},
 
@@ -2414,7 +2335,9 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 
 						if ( ( mesh.type !== 'Points' ) || mesh.userData.boFrustumPoints )
 							return;
-						mesh.material.uniforms.pointSize.value = value;
+						if ( mesh.material.uniforms === undefined )
+							mesh.material.size = value / options.point.sizePointsMaterial;//PointsMaterial
+						else mesh.material.uniforms.pointSize.value = value;//shaderMaterial
 
 					} );
 					//					options.point.size = value;
@@ -2448,44 +2371,6 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 
 				if ( item.userData.raycaster !== undefined ) {
 
-/*
-					if ( raycaster === undefined ) {
-
-						raycaster = new THREE.Raycaster();
-//item.material.size is NaN if item.material is ShaderMaterial
-						//Влияет только на точки без ShaderMaterial
-						raycaster.params.Points.threshold = 0.01;
-						if( frustumPoints !== undefined ) frustumPoints.setRaycaster( raycaster );
-						if ( raycaster.setStereoEffect !== undefined )
-							raycaster.setStereoEffect( {
-
-								renderer: renderer,
-								camera: camera,
-								stereoEffect: stereoEffect,
-								onIntersection: onIntersection,
-								onIntersectionOut: onIntersectionOut,
-								onMouseDown: function ( intersects ) {
-
-									var intersection = intersects[0];
-									if (
-										( intersection.object.userData.raycaster !== undefined )
-										&& ( intersection.object.userData.raycaster.onMouseDown !== undefined ) ) {
-
-										intersection.object.userData.raycaster.onMouseDown( raycaster, intersection, scene );
-
-									}
-									if ( ( intersection.object.userData.isInfo !== undefined ) && !intersection.object.userData.isInfo() )
-										return;//No display information about frustum point
-									options.guiSelectPoint.select( intersection );
-									if ( ( intersection.object.type === "Points" ) && ( axesHelper !== undefined ) )
-										axesHelper.exposePosition( getPosition( intersection ) );
-
-								}
-
-							} );
-
-					}
-*/
 					if ( raycaster.stereo !== undefined )
 						raycaster.stereo.addParticle( item );
 
@@ -2676,16 +2561,12 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 
 				group.children.forEach( function ( mesh ) {
 
-/*
-					if ( ( mesh instanceof THREE.Points === false ) || ( mesh.geometry.attributes.size === undefined ) )
-						return;
-*/						
 					if ( mesh instanceof THREE.Points === false )
 						return;
 
 					if ( mesh.geometry.attributes.size === undefined ) {
 
-						mesh.material.size = pointSize;
+						mesh.material.size = pointSize / options.point.sizePointsMaterial;
 						return;
 
 					}
@@ -2735,8 +2616,6 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 				)
 					axesHelper.arraySpriteText.forEach( function ( spriteItem ) {
 
-//непонятно зачем сюда засунул defaultPoint.size. Если оставить как было, то размер шрифта будет очень большим
-//						spriteItem.userData.setSize( cameraPosition, Math.tan( defaultPoint.size ) * scale );
 						spriteItem.userData.setSize( cameraPosition, Math.tan( 0.025 ) * scale );
 
 					} );
@@ -3058,7 +2937,6 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 
 		}
 		optionsColor.colors = optionsColor.colors || [];
-//		if ( length === undefined )
 		var length = Array.isArray( arrayFuncs ) ? arrayFuncs.length : optionsColor.positions.count;
 
 		//Standard normal distribution
@@ -3100,23 +2978,9 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 
 			} else if ( optionsColor.colors instanceof THREE.Float32BufferAttribute )
 				vector = new THREE.Vector3( 1, 1, 1 );
-				//colors.setXYZ( i, 1, 1, 1 );//white
 			else optionsColor.colors.push( 1, 1, 1 );//white
-/*			
-			var color = new THREE.Vector3( 255, 255, 255 );//white
-			if ( positions !== undefined )
-				group.children.forEach( function ( mesh ) {
-
-					if ( !mesh.userData.cloud )
-						return;
-					color.fromArray( mesh.geometry.attributes.color.array, 0 );
-
-				} );
-			colors.push( color.x, color.y, color.z );
-*/			
 
 			//opacity
-//			if ( positions !== undefined )
 			if ( optionsColor.opacity !== undefined ) {
 
 				var opacity = 0,
@@ -3127,7 +2991,6 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 						return;
 					for ( var iMesh = 0; iMesh < mesh.geometry.attributes.position.count; iMesh++ ) {
 
-//						var position = new THREE.Vector3().fromBufferAttribute( mesh.geometry.attributes.position, iMesh );
 						var position = getObjectPosition( mesh, iMesh );
 						opacity += getStandardNormalDistribution(
 							getWorldPosition(//myThreejs.getWorldPosition(
@@ -3145,19 +3008,11 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 				if ( optionsColor.colors instanceof THREE.Float32BufferAttribute ) {
 
 					optionsColor.colors.setXYZW( i, vector.x, vector.y, vector.z, opacity );
-					
-//					colors.setX( i + 3, opacity2 === undefined ? opacity : opacity2 );
 
 				}
 				else optionsColor.colors.push( opacity );
-/*				
-				colors.push( getStandardNormalDistribution( myThreejs.getWorldPosition(
-					camera, new THREE.Vector3().fromBufferAttribute( positions, i ) ).distanceTo( new THREE.Vector3() ) * 5 )
-					/ standardNormalDistributionZero );
-*/					
 
 			} else optionsColor.colors.push( 1 );
-//			colors.push( positions !== undefined ? positions.getW( i ) : 1 );//opacity
 
 		}
 		return optionsColor.colors;
@@ -3177,11 +3032,7 @@ fragment_loader.load( "http://localhost/anhr/myThreejs/master/myPoints/fragment.
 		var spriteTextIntersection = findSpriteTextIntersection( scene );
 		var textColor = 'rgb( 128, 128, 128 )',
 			position = getPosition( intersection );
-/*
-			func = intersection.object.userData.arrayFuncs === undefined ? undefined : intersection.object.userData.arrayFuncs[intersection.index];
-if( typeof intersection.object.userData.arrayFuncs === "function" )
-	console.error( 'under constaction. arrayFuncs === "function"' );
-*/
+
 		// Make the spriteText follow the mouse
 		//https://stackoverflow.com/questions/36033879/three-js-object-follows-mouse-position
 		var vector = new THREE.Vector3( mouse.x, mouse.y, 0 );
@@ -3203,8 +3054,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 			var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
 				funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
 				func = ( funcs === undefined ) || ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
-//ошибка если навести мышку на куб
-//				func = ( funcs === undefined ) && ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
 				pointName = !isArrayFuncs ?
 					undefined :
 					intersection.object.userData.pointName === undefined ?
@@ -3220,9 +3069,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 				var vector = new THREE.Vector3().fromArray(intersection.object.geometry.attributes.ca.array, intersection.index * intersection.object.geometry.attributes.ca.itemSize);
 				color = new THREE.Color( vector.x, vector.y, vector.z );
 
-				//не помню почему так написал эту строку
-//				color = new THREE.Color( "rgb(" + vector.x + ", " + vector.y + ", " + vector.z + ")" );
-				
 			}
 			var cookieName = getCanvasName();
 
@@ -3258,7 +3104,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 						typeof funcs === "function" ?
 							color instanceof THREE.Color ?
 								'\n' + lang.color + ': ' + new THREE.Color( color.r, color.g, color.b ).getHexString() :
-//								options.scales.w === undefined ? '' : '\n' + options.scales.w.name + ': ' + position.w :
 								'\n' + options.scales.w.name + ': ' + position.w :
 							''
 
@@ -3287,8 +3132,7 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 						backgroundColor: 'rgba( 0, 0, 0, 1 )',
 
 					},
-					position: pos,//position,//positionProject,
-//					center: new THREE.Vector2( 0.5, 0 ),
+					position: pos,
 					center: new THREE.Vector2( screenPos.x < ( canvas.width / 2 ) ? 0 : 1, screenPos.y < ( canvas.height / 2 ) ? 1 : 0 ),
 					cookieName: cookieName === '' ? '' : '_' + cookieName,
 
@@ -3323,28 +3167,6 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 		} while ( spriteTextIntersection !== undefined )
 
 	}
-/*
-	myPoints.loadShaderText( function () {
-
-		var arrayScripts = [];
-		if ( arrayScripts.length > 0 ) {
-
-			//ATTENTION!!! If you use loadScript.sync, then you can not see some source code files during debugging.
-			loadScript.async( arrayScripts, {
-				onload: onloadScripts,
-				onerror: function ( str, e ) {
-
-					console.error( str );
-
-				},
-
-			} );
-
-		}
-		else onloadScripts();
-		
-	} );
-*/	
 	onloadScripts();
 
 }
@@ -3473,10 +3295,6 @@ function getPosition( intersection ) {
 }
 function getObjectLocalPosition( object, index ) {
 
-/*
-if ( object.geometry.attributes.position === undefined )
-	console.error( 'attributesPosition = ' + object.geometry.attributes.position );
-*/	
 	var attributesPosition = object.geometry.attributes.position,
 		position = attributesPosition.itemSize >= 4 ? new THREE.Vector4( 0, 0, 0, 0 ) : new THREE.Vector3();
 	position.fromArray( attributesPosition.array, index * attributesPosition.itemSize );
@@ -3578,140 +3396,19 @@ function getObjectPosition( object, index ) {
  * float - rotation of the points.
  * [float] - array of rotations of the points.
  * Function - rotation of the points is function of the t. Example: new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' )
- * @param {object} [pointsOptions.cloud] position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.Default is undefined.
+ * @param {array} [pointsOptions.arrayCloud] Array of points with cloud.
+ * If you define the array of points with cloud, then you can define a points with cloud.
+ * For example you can define
+ * arrayCloud: options.arrayCloud
+ * on the params of the getShaderMaterialPoints( params, onReady ) function.
+ * Or
+ * arrayCloud: options.arrayCloud
+ * on the pointsOptions of the myThreejs.points function.
+ * Default is undefined
  * @param {boolean} [pointsOptions.opacity] if true then opacity of the point is depend from distance to all  meshes points from the group with defined mesh.userData.cloud. See options.getColors for details. Default is undefined.
  */
 export function points( arrayFuncs, group, options, pointsOptions ) { myPoints.create( arrayFuncs, group, options, pointsOptions ) }
-/*
-export function Points( arrayFuncs, options, pointsOptions ) {
 
-	if ( (typeof arrayFuncs !== 'function') && ( arrayFuncs.length === 0 ) )
-		arrayFuncs.push( new THREE.Vector3() );
-	pointsOptions = pointsOptions || {};
-	pointsOptions.tMin = pointsOptions.tMin || 0;
-	pointsOptions.name = pointsOptions.name || '';
-	pointsOptions.position = pointsOptions.position || new THREE.Vector3( 0, 0, 0 );
-	pointsOptions.scale = pointsOptions.scale || new THREE.Vector3( 1, 1, 1 );
-	pointsOptions.rotation = pointsOptions.rotation || new THREE.Vector3();
-
-	var points;
-	if ( pointsOptions.shaderMaterial )
-		points = myPoints.getShaderMaterialPoints( {
-
-			getPoints: options.getPoints,
-			getColors: options.getColors,
-			renderer: options.renderer,
-			tMin: pointsOptions.tMin,
-			arrayFuncs: arrayFuncs,
-			a: options.a, b: options.b,
-			sizes: new Float32Array( arrayFuncs.length ),
-			scales: options.scales,
-			shaderMaterial: pointsOptions.shaderMaterial,
-			opacity: pointsOptions.opacity,
-
-		} );
-	else {
-
-		points = new THREE.Points(
-
-			new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, options.a, options.b ), 4 ),
-			new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } )
-
-		);
-		points.geometry.addAttribute( 'color',
-			new THREE.Float32BufferAttribute( options.getColors( pointsOptions.tMin, arrayFuncs, options.scales.w ), 3 ) );
-
-	}
-	points.name = pointsOptions.name;//'Wave';
-	points.userData.arrayFuncs = arrayFuncs;
-	if ( pointsOptions.pointIndexes !== undefined )
-		points.userData.pointIndexes = function ( pointIndex ) { return pointsOptions.pointIndexes( pointIndex ); }
-	if ( pointsOptions.pointName !== undefined )
-		points.userData.pointName = function ( pointIndex ) { return pointsOptions.pointName( pointIndex ); }
-	if ( pointsOptions.controllers !== undefined ) {
-
-		points.userData.addControllers = pointsOptions.addControllers;
-		points.userData.controllers = function()
-			{ return pointsOptions.controllers(); }
-
-	}
-	points.userData.raycaster = {
-
-		onIntersection: function ( raycaster, intersection, scene, mouse ) {
-
-			options.addSpriteTextIntersection( intersection, scene, mouse );
-
-		},
-		onIntersectionOut: function ( scene ) {
-
-			options.removeSpriteTextIntersection( scene );
-
-		},
-
-	}
-	points.userData.selectPlayScene = function ( t ) {
-
-		setPositions( t );
-		setScales( t );
-		setRotations( t );
-
-	}
-	if( pointsOptions.cloud !== undefined )
-		points.userData.cloud = pointsOptions.cloud;
-	function setPositions( t ) {
-
-		t = t || pointsOptions.tMin;
-		function setPosition( axisName ) {
-
-			points.position[axisName] = typeof pointsOptions.position[axisName] === "function" ?
-				pointsOptions.position[axisName]( t, options.a, options.b ) :
-				pointsOptions.position[axisName];
-
-		}
-		setPosition( 'x' );
-		setPosition( 'y' );
-		setPosition( 'z' );
-
-	}
-	setPositions();
-	function setScales( t ) {
-
-		t = t || pointsOptions.tMin;
-		function setScale( axisName ) {
-
-			points.scale[axisName] = typeof pointsOptions.scale[axisName] === "function" ?
-				pointsOptions.scale[axisName]( t, options.a, options.b ) :
-				pointsOptions.scale[axisName];
-
-		}
-		setScale( 'x' );
-		setScale( 'y' );
-		setScale( 'z' );
-
-	}
-	setScales();
-	function setRotations( t ) {
-
-		t = t || pointsOptions.tMin;
-		function setRotation( axisName ) {
-
-			points.rotation[axisName] = typeof pointsOptions.rotation[axisName] === "function" ?
-				pointsOptions.rotation[axisName]( t, options.a, options.b ) :
-				pointsOptions.rotation[axisName];
-			while ( points.rotation[axisName] > Math.PI * 2 )
-				points.rotation[axisName] -= Math.PI * 2
-
-		}
-		setRotation( 'x' );
-		setRotation( 'y' );
-		setRotation( 'z' );
-
-	}
-	setRotations();
-	return points;
-
-}
-*/
 /**
  * Converts the mesh.geometry.attributes.position to mesh.userData.arrayFuncs.
  * Used to restore the default point position.
@@ -3741,20 +3438,6 @@ export function limitAngles( rotation ) {
 	limitAngle( 'z' );
 
 }
-/*
-function getGlobalScale( mesh ) {
-
-	var parent = mesh.parent, scale = new THREE.Vector3( 1, 1, 1 );
-	while ( parent !== null ) {
-
-		scale.multiply( parent.scale );
-		parent = parent.parent;
-
-	}
-	return scale;
-
-}
-*/
 /**
  * @callback getPoints
  * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.

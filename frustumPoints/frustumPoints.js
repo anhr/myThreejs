@@ -282,6 +282,8 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 		if ( points === undefined ) {
 
 			progress();
+			if ( onReady !== undefined )
+				onReady();
 
 		}
 

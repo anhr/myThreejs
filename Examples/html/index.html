@@ -356,18 +356,20 @@
 
 			//ATTENTION!!! You can adding of the cloud into points only if you want add points into group "group.add( points );"
 			// if you do not want to see a cloud without appropriate point. 
-			
-			//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
-			if ( options.arrayCloud !== undefined )
-				points.userData.cloud = {
-
-					indexArray: myThreejs.pushArrayCloud( options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
-
-				}
 
 			//points.position.copy( new THREE.Vector3( 0.1, 0.2, 0.3 ) );
 			//points.scale.copy( new THREE.Vector3( 1.1, 1.2, 1.3 ) );
-			group.add( points );
+			if ( group.add( points ) === group ) {//I’m doing this tricky check so that it would not be possible to add a cloud to the points if they are not added to the group
+
+				//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+				if ( options.arrayCloud !== undefined )
+					points.userData.cloud = {
+
+						indexArray: myThreejs.pushArrayCloud( options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
+
+					}
+				
+			}
 			
 
 			//points with ShaderMaterial
@@ -471,16 +473,19 @@
 */
 			myThreejs.getShaderMaterialPoints( {
 
+				options: options,
+				arrayFuncs: arrayFuncs,
+				//arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+				//tMin: tMin,
+/*
 				getPoints: options.getPoints,
 				getColors: options.getColors,
 				renderer: options.renderer,
-				tMin: tMin,
-				arrayFuncs: arrayFuncs,
 				a: a, b: b,
 				sizes: sizes,
 				scales: options.scales,
 				pointSize: options.point.size,
-				arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+*/
 
 			}, function( points ) {
 

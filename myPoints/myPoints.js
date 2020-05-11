@@ -101,18 +101,22 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 	if ( pointsOptions.shaderMaterial )
 		getShaderMaterialPoints( {
 
+			options: options,
+			pointsOptions: pointsOptions,
+			arrayFuncs: arrayFuncs,
+//			sizes: new Float32Array( arrayFuncs.length ),
+/*
 			getPoints: options.getPoints,
 			getColors: options.getColors,
 			renderer: options.renderer,
 			tMin: pointsOptions.tMin,
-			arrayFuncs: arrayFuncs,
 			a: options.a, b: options.b,
-			sizes: new Float32Array( arrayFuncs.length ),
 			scales: options.scales,
 			shaderMaterial: pointsOptions.shaderMaterial,
 			opacity: pointsOptions.opacity,
 			position: pointsOptions.position,
 			pointSize: options.point.size,
+			saveMeshDefault: options.saveMeshDefault,
 			path: pointsOptions.path,
 			uniforms: pointsOptions.uniforms,
 			boFrustumPoints: pointsOptions.boFrustumPoints,
@@ -125,6 +129,7 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 				scale: pointsOptions.scale,
 
 			}
+*/			
 
 		}, function ( points ) {
 
@@ -299,55 +304,36 @@ function pushArrayCloud( arrayCloud, geometry ) {
 }
 
 /**
- * @callback getPoints
- * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
- * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array.
- * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
- * @param {number} a second parameter of the arrayFuncs item function. Default is 1.
- * @param {number} b third parameter of the arrayFuncs item function. Default is 0.
- */
-
-/**
- * @callback getColors
- * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
- * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array.
- * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
- * @param {object} scale options.scales.w
- * @returns array of mesh colors.
- */
-
-/**
  * get THREE.Points with THREE.ShaderMaterial material
  * @param {object} params
- * @param {getPoints} params.getPoints get array of THREE.Vector4 points.
- * See https://github.com/anhr/myThreejs#optionsgetpoints-t-arrayfuncs-a-b- for details.
- * @param {getColors} params.getColors Get array of mesh colors.
- * See https://github.com/anhr/myThreejs#optionsget%D1%81olors-t-arrayfuncs-scale- for details.
- * @param {THREE.WebGLRenderer} params.renderer WebGLRenderer.
- * See https://threejs.org/docs/index.html#api/en/constants/Renderer for details.
+ * @param {object} options see myThreejs.create options for details
+ * @param {object} pointsOptions see myPoints.create pointsOptions for details
  * @param {number} params.tMin start time. Uses for playing of the points. Default is 0.
  * @param {array} params.arrayFuncs points.geometry.attributes.position array.
  * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
- * @param {number} params.a second parameter of the arrayFuncs item function. Default is 1.
- * @param {number} params.b third parameter of the arrayFuncs item function. Default is 0.
- * @param {Float32Array} params.sizes array of the size attribute of the geometry. Array length is params.arrayFuncs.length.
- * Example: new Float32Array( arrayFuncs.length ).
- * @param {object} params.scales axes scales.
- * See options.scales of myThreejs.create( createXDobjects, options ) https://github.com/anhr/myThreejs#mythreejscreate-createxdobjects-options-.
- * @param {boolean} [params.opacity] if true then opacity of the point is depend from distance to all  meshes points from the group with defined mesh.userData.cloud. See options.getColors for details. Default is undefined.
  * @param {function(THREE.Points)} onReady Callback function that take as input the new THREE.Points.
  */
 function getShaderMaterialPoints( params, onReady ) {
 
-	var geometry;
+	var geometry, tMin = params.pointsOptions === undefined ?
+			params.tMin === undefined ? 0: params.tMin :
+			params.pointsOptions.tMin,
+		arrayCloud = params.pointsOptions === undefined ? params.arrayCloud : params.pointsOptions.arrayCloud;
 	if ( typeof params.arrayFuncs === 'function' )
 		geometry = params.arrayFuncs();
-	else geometry = new THREE.BufferGeometry().setFromPoints( params.getPoints( params.tMin, params.arrayFuncs, params.a, params.b ),
+	else geometry = new THREE.BufferGeometry().setFromPoints
+		( params.options.getPoints( tMin, params.arrayFuncs, params.options.a, params.options.b ),
 		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
-	var indexArrayCloud = params.arrayCloud === undefined ? undefined : pushArrayCloud( params.arrayCloud, geometry );//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
-	if ( !params.boFrustumPoints )
-		geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute(
-			params.getColors( params.tMin, params.arrayFuncs, params.scales.w, { opacity: params.opacity, positions: geometry.attributes.position } ),
+	var indexArrayCloud = arrayCloud === undefined ? undefined : pushArrayCloud( arrayCloud, geometry );//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
+	if ( ( params.pointsOptions === undefined ) || !params.pointsOptions.boFrustumPoints )
+		geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( params.options.getColors
+			( tMin, params.arrayFuncs, params.options.scales.w,
+				{
+
+					opacity: params.pointsOptions === undefined ? undefined : params.pointsOptions.opacity,
+					positions: geometry.attributes.position
+
+				} ),
 			4 ) );
 
 	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
@@ -365,14 +351,18 @@ function getShaderMaterialPoints( params, onReady ) {
 				( params.shaderMaterial.point.opacity !== undefined ) ?
 				params.shaderMaterial.point.opacity : 1.0
 		},//Float in the range of 0.0 - 1.0 indicating how transparent the material is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque.
-		pointSize: { value: ( params.shaderMaterial !== undefined ) && ( params.shaderMaterial.point !== undefined ) ?
-			params.shaderMaterial.point.size :
-			params.pointSize === undefined ? 0.0 : params.pointSize },
+		pointSize: {
+
+			value: ( params.pointsOptions !== undefined ) && ( params.pointsOptions.shaderMaterial !== undefined ) && ( params.pointsOptions.shaderMaterial.point !== undefined ) ?
+				params.pointsOptions.shaderMaterial.point.size :
+				params.options.point.size === undefined ? 0.0 : params.options.point.size
+
+		},
 
 	}
 	var cloud;
-	if( params.uniforms !== undefined )
-		cloud = params.uniforms( uniforms );//frustumPoints
+	if ( ( params.pointsOptions !== undefined ) && ( params.pointsOptions.uniforms !== undefined ) )
+		cloud = params.pointsOptions.uniforms( uniforms );//frustumPoints
 
 	loadShaderText(function ( shaderText ) {
 
@@ -401,20 +391,30 @@ function getShaderMaterialPoints( params, onReady ) {
 			//		opacity: 0.1,
 
 		} ) );
-		points.userData.shaderMaterial = params.shaderMaterial;
-		if (params.arrayCloud !== undefined )
+		points.userData.shaderMaterial = params.pointsOptions === undefined ? params.shaderMaterial : params.pointsOptions.shaderMaterial;
+		if ( params.options.saveMeshDefault !== undefined )
+			params.options.saveMeshDefault( points );
+		if ( ( params.pointsOptions !== undefined ) && ( params.pointsOptions.arrayCloud !== undefined ) )
 			points.userData.cloud = { indexArray: indexArrayCloud, }
-		points.userData.shaderMaterial = params.shaderMaterial;
-		if( onReady !== undefined )
+		points.userData.shaderMaterial = params.pointsOptions === undefined ? params.shaderMaterial : params.pointsOptions.shaderMaterial;
+		if ( onReady !== undefined )
 			onReady( points );
 			
 		//Convert all points with cloud and shaderMaterial from local to world positions
 		// i.e. calculate scales, positions and rotation of the points.
 		//Converting of all points with cloud, but not shaderMaterial see updateCloudPoint in the frustumPoints.create function
-		if ( !points.userData.boFrustumPoints )
-			params.arrayCloud.frustumPoints.updateCloudPoint( points );
+		if (
+			!points.userData.boFrustumPoints &&
+			(
+				(
+					( params.pointsOptions !== undefined ) && ( params.pointsOptions.arrayCloud !== undefined )
+				)
+				|| ( params.arrayCloud !== undefined )
+			)
+		)
+			params.pointsOptions.arrayCloud.frustumPoints.updateCloudPoint( points );
 
-	}, params.path );
+	}, params.pointsOptions === undefined ? undefined : params.pointsOptions.path );
 
 }
 

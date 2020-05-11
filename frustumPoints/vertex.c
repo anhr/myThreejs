@@ -5,7 +5,7 @@ attribute float size;
 varying vec4 vColor;
 uniform float pointSize;
 
-//Cloud Points
+//Cloud Points. See frustumPoints.create.cloud.editShaderText function for details. Example: uniform vec4 CP0_0;
 %cloudPoints
 
 uniform vec3 cameraPositionDefault;//Начальное положение камеры. Это значение не меняется когда пользователь поворачиват камеру
@@ -55,6 +55,7 @@ void main() {
 	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
 	vec3 cPosition = vec3(position.x + cameraPositionDefault.x, position.y + cameraPositionDefault.y, position.z + cameraPositionDefault.z );
+//	vec3 cPosition = vec3(position.x + cameraPosition.x, position.y + cameraPosition.y, position.z + cameraPosition.z );
 
 	//https://stackoverflow.com/questions/9037174/glsl-rotation-with-a-rotation-vector
 	cPosition = cPosition + 2.0*cross(cameraQuaternion.xyz, cross(cameraQuaternion.xyz, cPosition) + cameraQuaternion.w * cPosition);
@@ -69,6 +70,7 @@ void main() {
 //	debug(10.0 * gl_Position.x);
 //	debug(100.0 * texture2D( cloudPoints, vec2( 0., 0. ) ).z);
 //	debug(100.0 * cloudPoints0.z);
+	debug(10.0 * cameraPosition.z);
 /*
 #ifdef quaternion_version 
 	vec3 p = vec3(1,0,0);
@@ -96,7 +98,7 @@ void main() {
 	vColor = vec4(1,1,1,1);
 #endif
 
-	//distance to cloud points
+	//distance to cloud points. See frustumPoints.create.cloud.editShaderText function for details. Example: DTCP(CP0_0);
 %DTCP
 
 	if ( w > 1. ){//перегрузка непрозрачности

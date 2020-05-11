@@ -195,6 +195,8 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 			}
 			this.updateMesh = function ( mesh ) {
 
+				if ( mesh.userData.cloud === undefined )
+					return;
 				for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
 					this.updateItem( mesh.userData.cloud.indexArray + '_' + i,
@@ -585,7 +587,6 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 		};
 		var path = getCurrentScriptPath();
 		var cameraPositionDefault = new Vector3( camera.position.x, camera.position.y, camera.position.z );
-		var cameraRotationDefault = new Vector3( camera.rotation.x, camera.rotation.y, camera.rotation.z );
 		var cameraQuaternionDefault = new Vector4(camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w);
 		
 		myThreejs.points( //array
@@ -744,6 +745,20 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 		//Эта команда нужна в случае изменения размера окна браузера когда canvas на весь экран
 		setPointsParams();
+
+		var cameraQuaternionDefault = new Vector4(camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w);
+		
+		if ( points === undefined )
+			return;//User has changed 'Z Count' of the frustumPoints
+			
+		points.material.uniforms.cameraPositionDefault.value.copy( camera.position );
+
+		//rotate the quaternion vector to 180 degrees
+		cameraQuaternionDefault.x = - cameraQuaternionDefault.x;
+		cameraQuaternionDefault.y = - cameraQuaternionDefault.y;
+		cameraQuaternionDefault.z = - cameraQuaternionDefault.z;
+		
+		points.material.uniforms.cameraPositionDefault.value.applyQuaternion( cameraQuaternionDefault ); 
 
 	}
 
@@ -1100,6 +1115,18 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 	this.updateCloudPoint = function ( points ) {
 
 		cloud.updateMesh( points );
+
+	}
+	this.updateCloudPointItem = function ( points, i ) {
+
+		if ( points.userData.cloud === undefined )
+			return;
+		if ( points.geometry.attributes.position.itemSize !== 4 )
+			console.error( 'points.geometry.attributes.position.itemSize = ' + points.geometry.attributes.position.itemSize );
+		cloud.updateItem( points.userData.cloud.indexArray + '_' + i,
+			myThreejs.getWorldPosition( points,
+				new Vector4().fromArray( points.geometry.attributes.position.array, i * points.geometry.attributes.position.itemSize ) ),
+			true );
 
 	}
 

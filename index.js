@@ -404,7 +404,7 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( '/anhr/myThreejs/master/canvasContainer.html' );
 		elContainer = elContainer.querySelector( '.container' );
 
-		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
+//		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
 
 		//ось z смотрит точно на камеру
 		//camera.rotation = 0
@@ -412,7 +412,7 @@ export function create( createXDobjects, options ) {
 		//camera.position.x = 0;
 		//camera.position.y = 0;
 		//camera.position.z = 2;
-//		var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
+		var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
 
 		//ось x смотрит точно на камеру
 		//camera.rotation.x = 0
@@ -1213,11 +1213,14 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 				this.add = function ( folder ) {
 
 					f3DObjects = folder.addFolder( lang.meshs );
+					var mesh,
+						buttonScaleDefault, buttonPositionDefault, buttonRotationDefault;
 
 					cMeshs = f3DObjects.add( { Meshs: lang.notSelected }, 'Meshs', { [lang.notSelected]: -1 } ).onChange( function ( value ) {
 
 						value = parseInt( value );
-						var mesh = getMesh();
+						mesh = getMesh();
+
 						var display;
 						if ( mesh === undefined ) {
 
@@ -1227,6 +1230,12 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 								axesHelper.exposePosition( getObjectPosition( getMesh(), value ) );
 
 						} else {
+
+
+							var displayDefaultButtons = mesh.userData.default === undefined ? 'none' : 'block';
+							buttonScaleDefault.domElement.parentElement.parentElement.style.display = displayDefaultButtons;
+							buttonPositionDefault.domElement.parentElement.parentElement.style.display = displayDefaultButtons;
+							buttonRotationDefault.domElement.parentElement.parentElement.style.display = displayDefaultButtons;
 
 							display = 'block';
 							var displayPoints = 'none', displayFrustumPoints = 'block';
@@ -1370,6 +1379,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 						setScaleControllers();
 						exposePosition();
+						if ( frustumPoints !== undefined )
+							frustumPoints.updateCloudPoint( mesh );
 
 					},
 						{
@@ -1384,6 +1395,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 						mesh.scale[axesName] = value;
 						mesh.needsUpdate = true;
 						exposePosition();
+						if ( frustumPoints !== undefined )
+							frustumPoints.updateCloudPoint( mesh );
 
 					}
 					cScaleX = dat.controllerZeroStep( fScale, scale, 'x', function ( value ) { setScale( 'x', value ); } );
@@ -1394,7 +1407,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					dat.controllerNameAndTitle( cScaleZ, options.scales.z.name );
 
 					//Default scale button
-					dat.controllerNameAndTitle( fScale.add( {
+					buttonScaleDefault = fScale.add( {
 
 						defaultF: function ( value ) {
 
@@ -1406,7 +1419,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 						},
 
-					}, 'defaultF' ), lang.defaultButton, lang.defaultScaleTitle );
+					}, 'defaultF' );
+					dat.controllerNameAndTitle( buttonScaleDefault, lang.defaultButton, lang.defaultScaleTitle );
 
 					//Position
 
@@ -1423,6 +1437,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 							setPositionControllers();
 							exposePosition();
+							if ( frustumPoints !== undefined )
+								frustumPoints.updateCloudPoint( mesh );
 
 						}, { getLanguageCode: getLanguageCode, } ) );
 
@@ -1444,7 +1460,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					addAxisControllers( 'z' );
 
 					//Restore default position.
-					dat.controllerNameAndTitle( fPosition.add( {
+					buttonPositionDefault = fPosition.add( {
 
 						defaultF: function ( value ) {
 
@@ -1456,7 +1472,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 						},
 
-					}, 'defaultF' ), lang.defaultButton, lang.defaultPositionTitle );
+					}, 'defaultF' );
+					dat.controllerNameAndTitle( buttonPositionDefault, lang.defaultButton, lang.defaultPositionTitle );
 
 					//rotation
 
@@ -1476,6 +1493,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 								if ( !boSetMesh )
 									exposePosition();
+								if ( frustumPoints !== undefined )
+									frustumPoints.updateCloudPoint( mesh );
 
 							} );
 						dat.controllerNameAndTitle( cRotations.x, options.scales.x.name );
@@ -1486,7 +1505,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					addRotationControllers( 'z' );
 
 					//Default rotation button
-					dat.controllerNameAndTitle( fRotation.add( {
+					buttonRotationDefault = fRotation.add( {
 
 						defaultF: function ( value ) {
 
@@ -1498,7 +1517,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 						},
 
-					}, 'defaultF' ), lang.defaultButton, lang.defaultRotationTitle );
+					}, 'defaultF' );
+					dat.controllerNameAndTitle( buttonRotationDefault, lang.defaultButton, lang.defaultRotationTitle );
 
 					//Points
 
@@ -1689,6 +1709,9 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 									points.geometry.attributes.position.needsUpdate = true;
 
 									exposePosition( intersection.index );
+
+									if ( frustumPoints !== undefined )
+										frustumPoints.updateCloudPointItem( points, intersection.index );
 
 								} );
 
@@ -2012,6 +2035,13 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 				controls.update();
 				controls.addEventListener( 'change', function () {
 
+					/*
+					console.warn('camera.position = ' + camera.position.x + ' ' + camera.position.y + ' ' + camera.position.z
+						+ '\r\ncamera.quaternion = ' + camera.quaternion.x + ' ' + camera.quaternion.y + ' ' + camera.quaternion.z
+						+ '\r\ncamera.scale = ' + camera.scale.x + ' ' + camera.scale.y + ' ' + camera.scale.z
+						);
+					*/
+
 					//change of size of the points if points is not shaderMaterial and if camera is moving
 					var vector = new THREE.Vector3();
 					vector.copy( camera.position );
@@ -2235,6 +2265,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 			//default setting for each 3D object
 			group.children.forEach( function ( mesh ) {
 
+				options.saveMeshDefault( mesh );
+/*				
 				mesh.userData.default = mesh.userData.default || {};
 
 				mesh.userData.default.scale = new THREE.Vector3();
@@ -2245,6 +2277,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 				mesh.userData.default.rotation = new THREE.Euler();
 				mesh.userData.default.rotation.copy( mesh.rotation );
+*/				
 
 			} );
 			if ( gui !== undefined ) {
@@ -2732,6 +2765,24 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 	}
 
+	/**
+	 * Save scale, position and rotation to the userData.default of the mesh
+	 * @param {any} mesh
+	 */
+	options.saveMeshDefault = function ( mesh ) {
+
+		mesh.userData.default = mesh.userData.default || {};
+
+		mesh.userData.default.scale = new THREE.Vector3();
+		mesh.userData.default.scale.copy( mesh.scale );
+
+		mesh.userData.default.position = new THREE.Vector3();
+		mesh.userData.default.position.copy( mesh.position );
+
+		mesh.userData.default.rotation = new THREE.Euler();
+		mesh.userData.default.rotation.copy( mesh.rotation );
+
+	}
 	/**
 	 * Get array of THREE.Vector4 points.
 	 * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.

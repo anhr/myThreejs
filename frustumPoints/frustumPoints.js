@@ -281,9 +281,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 		if ( points === undefined ) {
 
-			progress();
-			if ( onReady !== undefined )
-				onReady();
+			progress( onReady );
 
 		}
 
@@ -326,7 +324,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 		}
 				
 	}
-	function progress() {
+	function progress( onReady ) {
 
 		if ( !shaderMaterial.display )
 			return;
@@ -673,6 +671,8 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 					pointOpacity = points === undefined ?
 						1.0 :
 						points.userData.shaderMaterial === undefined ? shaderMaterial.point.opacity : points.userData.shaderMaterial.point.opacity;
+					if ( onReady !== undefined )
+						onReady();
 
 				},
 

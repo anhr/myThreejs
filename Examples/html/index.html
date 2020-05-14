@@ -224,9 +224,9 @@
 
 				},
 				*/
-				[ -0.5, 0.5, new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5' ), 1 ],//4D point.
-				[ 0.5, 0.5, 0.0, 1 ],//4D point.
-				[ 0.25, 0, 0.75, -1 ],//4D point.
+				[ 0.5, 0.5, new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5' ), 1 ],//4D point.
+				//[ -0.5, 0.5, 0.0, 1 ],//4D point.
+				//[ 0.25, 0, 0.75, -1 ],//4D point.
 //				[0, 0, 0, -1],//4D point.
 /*
 				{
@@ -471,21 +471,13 @@
 			var material = myThreejs.getShaderMaterial();
 			var points2 = new THREE.Points( geometry, material );
 */
+			/*
 			myThreejs.getShaderMaterialPoints( {
 
 				options: options,
 				arrayFuncs: arrayFuncs,
 				//arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 				//tMin: tMin,
-/*
-				getPoints: options.getPoints,
-				getColors: options.getColors,
-				renderer: options.renderer,
-				a: a, b: b,
-				sizes: sizes,
-				scales: options.scales,
-				pointSize: options.point.size,
-*/
 
 			}, function( points ) {
 
@@ -521,6 +513,7 @@
 				options.addParticle( points );
 				
 			});
+			*/
 
 			//cubes
 			var cubeType = 'cube';

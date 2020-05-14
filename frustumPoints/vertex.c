@@ -57,6 +57,7 @@ void main() {
 	vec3 cPosition = vec3(position.x + cameraPositionDefault.x, position.y + cameraPositionDefault.y, position.z + cameraPositionDefault.z );
 //	vec3 cPosition = vec3(position.x + cameraPosition.x, position.y + cameraPosition.y, position.z + cameraPosition.z );
 
+	//Rotate position
 	//https://stackoverflow.com/questions/9037174/glsl-rotation-with-a-rotation-vector
 	cPosition = cPosition + 2.0*cross(cameraQuaternion.xyz, cross(cameraQuaternion.xyz, cPosition) + cameraQuaternion.w * cPosition);
 	gl_Position = projectionMatrix * mvPosition;

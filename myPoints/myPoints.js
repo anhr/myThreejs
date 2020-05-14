@@ -97,6 +97,7 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 	pointsOptions.position = pointsOptions.position || new THREE.Vector3( 0, 0, 0 );
 	pointsOptions.scale = pointsOptions.scale || new THREE.Vector3( 1, 1, 1 );
 	pointsOptions.rotation = pointsOptions.rotation || new THREE.Vector3();
+	pointsOptions.group = group;
 
 	if ( pointsOptions.shaderMaterial )
 		getShaderMaterialPoints( {
@@ -306,8 +307,8 @@ function pushArrayCloud( arrayCloud, geometry ) {
 /**
  * get THREE.Points with THREE.ShaderMaterial material
  * @param {object} params
- * @param {object} options see myThreejs.create options for details
- * @param {object} pointsOptions see myPoints.create pointsOptions for details
+ * @param {object} params.options see myThreejs.create options for details
+ * @param {object} params.pointsOptions see myPoints.create pointsOptions for details
  * @param {number} params.tMin start time. Uses for playing of the points. Default is 0.
  * @param {array} params.arrayFuncs points.geometry.attributes.position array.
  * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
@@ -403,6 +404,7 @@ function getShaderMaterialPoints( params, onReady ) {
 		//Convert all points with cloud and shaderMaterial from local to world positions
 		// i.e. calculate scales, positions and rotation of the points.
 		//Converting of all points with cloud, but not shaderMaterial see updateCloudPoint in the frustumPoints.create function
+/*		
 		if (
 			!points.userData.boFrustumPoints &&
 			(
@@ -413,6 +415,16 @@ function getShaderMaterialPoints( params, onReady ) {
 			)
 		)
 			params.pointsOptions.arrayCloud.frustumPoints.updateCloudPoint( points );
+*/
+		if ( points.userData.boFrustumPoints ) {
+
+			params.pointsOptions.group.children.forEach( function ( mesh ){
+
+				params.options.arrayCloud.frustumPoints.updateCloudPoint( mesh );
+				
+			});
+
+		}
 
 	}, params.pointsOptions === undefined ? undefined : params.pointsOptions.path );
 

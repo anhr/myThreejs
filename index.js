@@ -1056,6 +1056,7 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 
 					if ( !options.dat )
 						return;
+/*
 					if ( mesh.userData.boFrustumPoints ) {
 
 						for ( var i = 0; i < cMeshs.__select.options.length; i++ ) {
@@ -1063,6 +1064,23 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 							var option = cMeshs.__select.options[i];
 							if ( ( option.mesh !== undefined ) && option.mesh.userData.boFrustumPoints )
 								return;//duplicate FrustumPoints. Сюда попадает когда пользователь меняет количество слоев или Y точек в FrustumPoints. 
+
+						}
+
+					}
+*/
+					//Test for duplicate item
+					for ( var i = 0; i < cMeshs.__select.options.length; i++ ) {
+
+						var option = cMeshs.__select.options[i];
+						if ( mesh.userData.boFrustumPoints && ( option.mesh !== undefined ) && option.mesh.userData.boFrustumPoints )
+							return;//duplicate FrustumPoints. Сюда попадает когда пользователь меняет количество слоев или Y точек в FrustumPoints. 
+						if ( option.mesh !== undefined && ( option.mesh.name === mesh.name ) ) {
+
+//							console.error('guiSelectPointF.addMesh: Duplicate item ' + mesh.name );
+							return;//сюда попадает когда создаются точки без shaderMaterial
+							//Сначала вызывается из myPoints create.Points function
+							//Потом из guiSelectPointF.addControllers
 
 						}
 
@@ -3490,45 +3508,17 @@ export function limitAngles( rotation ) {
 
 }
 /**
- * @callback getPoints
- * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
- * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array.
- * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
- * @param {number} a second parameter of the arrayFuncs item function. Default is 1.
- * @param {number} b third parameter of the arrayFuncs item function. Default is 0.
- */
-
-/**
- * @callback getColors
- * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
- * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array.
- * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
- * @param {object} scale options.scales.w
- * @returns array of mesh colors.
- */
-
-/**
  * get THREE.Points with THREE.ShaderMaterial material
  * @param {object} params
- * @param {getPoints} params.getPoints get array of THREE.Vector4 points.
- * See https://github.com/anhr/myThreejs#optionsgetpoints-t-arrayfuncs-a-b- for details.
- * @param {getColors} params.getColors Get array of mesh colors.
- * See https://github.com/anhr/myThreejs#optionsget%D1%81olors-t-arrayfuncs-scale- for details.
- * @param {THREE.WebGLRenderer} params.renderer WebGLRenderer.
- * See https://threejs.org/docs/index.html#api/en/constants/Renderer for details.
+ * @param {object} params.options see myThreejs.create options for details
+ * @param {object} params.pointsOptions see myPoints.create pointsOptions for details
  * @param {number} params.tMin start time. Uses for playing of the points. Default is 0.
  * @param {array} params.arrayFuncs points.geometry.attributes.position array.
  * See https://github.com/anhr/myThreejs#arrayfuncs-item  for details.
- * @param {number} params.a second parameter of the arrayFuncs item function. Default is 1.
- * @param {number} params.b third parameter of the arrayFuncs item function. Default is 0.
- * @param {Float32Array} params.sizes array of the size attribute of the geometry. Array length is params.arrayFuncs.length.
- * Example: new Float32Array( arrayFuncs.length ).
- * @param {object} params.scales axes scales.
- * See options.scales of myThreejs.create( createXDobjects, options ) https://github.com/anhr/myThreejs#mythreejscreate-createxdobjects-options-.
- * @returns THREE.Points with THREE.ShaderMaterial material
+ * @param {function(THREE.Points)} onReady Callback function that take as input the new THREE.Points.
  */
 export function getShaderMaterialPoints( params ) {
 
-	return myPoints.getShaderMaterialPoints( params );
+	myPoints.getShaderMaterialPoints( params );
 	
 }

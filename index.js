@@ -276,6 +276,22 @@ export function create( createXDobjects, options ) {
 
 	options = options || {};
 
+	if ( options.arrayCloud !== undefined ) {
+
+		options.arrayCloud.getCloudsCount = function() {
+
+			var count = 0;
+			for ( var i = 0; i < options.arrayCloud.length; i++ ) {
+
+				var arrayVectors = options.arrayCloud[i];
+				count += arrayVectors.length;
+
+			}
+			return count;
+
+		}
+
+	}
 	options.a = options.a || 1;
 	options.b = options.b || 0;
 
@@ -404,7 +420,7 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( '/anhr/myThreejs/master/canvasContainer.html' );
 		elContainer = elContainer.querySelector( '.container' );
 
-//		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
+		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
 
 		//ось z смотрит точно на камеру
 		//camera.rotation = 0
@@ -412,7 +428,7 @@ export function create( createXDobjects, options ) {
 		//camera.position.x = 0;
 		//camera.position.y = 0;
 		//camera.position.z = 2;
-		var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
+		//var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
 
 		//ось x смотрит точно на камеру
 		//camera.rotation.x = 0
@@ -1686,6 +1702,10 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 										attributes = intersection.object.geometry.attributes,
 										i = intersection.index;
 									setColorAttribute( attributes, i, color );
+									attributes.position.setW( i, value );
+
+									if ( frustumPoints !== undefined )
+										frustumPoints.updateCloudPointItem( intersection.object, intersection.index );
 
 								} );
 							controller.domElement.querySelector( '.slider-fg' ).style.height = '40%';
@@ -2152,7 +2172,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 						// Default is 100
 						square: true,// true - Square base of the frustum points.Default is false
 					},
-					cFrustumPoints
+					cFrustumPoints, palette
 				);
 				cFrustumPoints.setFrustumPoints( frustumPoints );
 				options.arrayCloud.frustumPoints = frustumPoints;
@@ -3476,7 +3496,12 @@ function getObjectPosition( object, index ) {
  * Default is undefined
  * @param {boolean} [pointsOptions.opacity] if true then opacity of the point is depend from distance to all  meshes points from the group with defined mesh.userData.cloud. See options.getColors for details. Default is undefined.
  */
-export function points( arrayFuncs, group, options, pointsOptions ) { myPoints.create( arrayFuncs, group, options, pointsOptions ) }
+export function points( arrayFuncs, group, options, pointsOptions ) {
+
+	options.palette = palette;
+	myPoints.create( arrayFuncs, group, options, pointsOptions);
+
+}
 
 /**
  * Converts the mesh.geometry.attributes.position to mesh.userData.arrayFuncs.

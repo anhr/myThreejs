@@ -295,7 +295,8 @@ function pushArrayCloud( arrayCloud, geometry ) {
 	// Не совпадает с порядком расположения mesh в group
 	// потому что точки без shaderMaterial добавляются сразу после создания
 	// а точки с shaderMaterial добаляются только после вызова loadShaderText в function getShaderMaterialPoints
-	var index = arrayCloud.length,
+//	var index = arrayCloud.length,
+	var index = arrayCloud.getCloudsCount(),
 		points = [];
 	arrayCloud.push( points );
 	for ( var i = 0; i < geometry.attributes.position.count; i++ )
@@ -340,11 +341,13 @@ function getShaderMaterialPoints( params, onReady ) {
 	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
 	texture.wrapS = THREE.RepeatWrapping;
 	texture.wrapT = THREE.RepeatWrapping;
+
 	var uniforms = {
 
-		color: { value: new THREE.Color( 0xffffff ) },
+//		color: { value: new THREE.Color( 0xffffff ) },
 		pointTexture: { value: texture },
 
+/*
 		//если убрать эту переменную, то размер точек невозможно будет регулировать
 		opacity: {
 			value: ( params.shaderMaterial !== undefined ) &&
@@ -352,6 +355,7 @@ function getShaderMaterialPoints( params, onReady ) {
 				( params.shaderMaterial.point.opacity !== undefined ) ?
 				params.shaderMaterial.point.opacity : 1.0
 		},//Float in the range of 0.0 - 1.0 indicating how transparent the material is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque.
+*/		
 		pointSize: {
 
 			value: ( params.pointsOptions !== undefined ) && ( params.pointsOptions.shaderMaterial !== undefined ) && ( params.pointsOptions.shaderMaterial.point !== undefined ) ?
@@ -361,6 +365,7 @@ function getShaderMaterialPoints( params, onReady ) {
 		},
 
 	}
+
 	var cloud;
 	if ( ( params.pointsOptions !== undefined ) && ( params.pointsOptions.uniforms !== undefined ) )
 		cloud = params.pointsOptions.uniforms( uniforms );//frustumPoints
@@ -425,6 +430,12 @@ function getShaderMaterialPoints( params, onReady ) {
 			});
 
 		}
+
+		//нужно что бы обновились точки в frustumPoints
+		if ( points.material.uniforms.palette !== undefined )
+			points.material.uniforms.palette.value.needsUpdate = true;
+		if ( points.material.uniforms.cloudPoints !== undefined )
+			points.material.uniforms.cloudPoints.value.needsUpdate = true;
 
 	}, params.pointsOptions === undefined ? undefined : params.pointsOptions.path );
 

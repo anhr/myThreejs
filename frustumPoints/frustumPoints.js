@@ -40,7 +40,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
 */
-
+/*
 import {
 
 	Vector3, Vector4,
@@ -60,10 +60,11 @@ import {
 	DataTexture,
 
 } from '../../../three.js/dev/build/three.module.js';
-import myThreejs from './../myThreejs.js';
+*/
+import { myThreejs, THREE } from './../myThreejs.js';
 import cookie from '../../../cookieNodeJS/master/cookie.js';
 import clearThree from '../../../commonNodeJS/master/clearThree.js';
-import { spatialMultiplexsIndexs } from '../../../three.js/dev/examples/jsm/effects/StereoEffect.js';
+//import { spatialMultiplexsIndexs } from '../../../three.js/dev/examples/jsm/effects/StereoEffect.js';
 
 //memory limit
 //import roughSizeOfObject from '../../commonNodeJS/master/SizeOfObject.js';
@@ -155,89 +156,42 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 	shaderMaterial.stereo.hide = shaderMaterialDefault.stereo.hide;
 	shaderMaterial.stereo.opacity = shaderMaterialDefault.stereo.opacity;
 
-	var points, zeroPoint = new Vector3(), cameraDistanceDefault = camera.position.distanceTo( zeroPoint ), _this = this,
-		lines = [], groupFrustumPoints = new Group(), names,
+	var points, zeroPoint = new THREE.Vector3(), cameraDistanceDefault = camera.position.distanceTo( zeroPoint ), _this = this,
+		lines = [], groupFrustumPoints = new THREE.Group(), names,
 //		cloudPoints,
 		cloud = function () {
 
-/*
-			var format = RGBAFormat,//LuminanceFormat,//Available formats https://threejs.org/docs/index.html#api/en/constants/Textures
-				//D:\My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\src\constants.js
-				itemSize,// = format === RGBAFormat ? 4 : format === RGBFormat ? 3 : format === THREE.LuminanceFormat ? 1 : NaN,
-				data;//array of all point's position with cloud
-*/				
 			var uniforms;
 			this.create = function ( _uniforms ) {
 
 				uniforms = _uniforms;
-/*
-				var width = options.arrayCloud.getCloudsCount();
-				var height = 1,//format === THREE.LuminanceFormat ? 1 : 2,
-				size = width * height,
-				type = FloatType;
-				//console.warn( 'width = ' + width );
-				if ( itemSize !== 4 ) {
-
-					console.error( 'itemSize !== 4' );
-					return;
-
-				}
-//				data = type === FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size );
-				// used the buffer to create a DataTexture
-
-//				cloudPoints = new DataTexture( data, width, height, format, type );
-
-				uniforms.cloudPoints = {
-
-					value: new DataTexture( type === FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size ),//data,
-						width, height, format, type )
-
-				};
-*/
 
 				//array of all points with cloud
-				this.cloudPoints = new this.addUniforms( RGBAFormat, options.arrayCloud.getCloudsCount(), 'cloudPoints' );
-/*				
-				var uniformKey = 'cloudPoints';
-				itemSize = this.addUniforms( format, options.arrayCloud.getCloudsCount(), uniformKey );
-				data = uniforms[uniformKey].value.image.data;
-*/				
+				this.cloudPoints = new this.addUniforms( THREE.RGBAFormat, options.arrayCloud.getCloudsCount(), 'cloudPoints' );
 
 				//function of distance between points. Use for creating of the cloud around point
-//				var uniformKey = 'distanceTable';
-				new this.addUniforms( LuminanceFormat, 256, 'distanceTable', function ( data, itemSize, updateItem ) {
+				//distanceTable is array of points
+				//Every point contains two coordinates:
+				//first coordinate is distance from cloud point to frustum point
+				//second  coordinate is function of distance
+				//Такая структура distanceTable позволяет неравномерно распределять точки по дистанции
+				//Если function of distance меняется быстро, то надо наставить побольше точек
+				//Если function of distance почти не меняется, точек можно поставить поменьше
+				//Это позволит поставить последнюю точку на достаточно большой дистанции
+				//и таким образом можно учитывать малое влияние облака на большом расстоянии.
+				var distanceTableCount = 3,//256,//distanceTable pints count
+					pointLength = 2;//Every point contains two coordinates
+				new this.addUniforms( THREE.LuminanceFormat,//RGFormat,//RGBFormat,
+					distanceTableCount * pointLength, 'distanceTable', function ( data, itemSize, updateItem ) {
 
-/*
-					function updateItem( i, vector ) {
+					for ( var i = 0; i < data.length / itemSize; i += pointLength ) {
 
-						if ( vector.x === undefined ) {
-
-							vector.x = vector.r;
-							vector.y = vector.g;
-							vector.z = vector.b;
-							vector.w = 1;
-
-						}
-						var itemSize = vector.y === undefined ? 1 : vector.z === undefined ? 2 : vector.w === undefined ? 3 : 4,
-							stride = i * itemSize;
-						data[stride] = vector.x;
-						if ( itemSize > 1 ) {
-
-							data[stride + 1] = vector.y;
-							if ( itemSize > 2 ) {
-
-								data[stride + 2] = vector.z;
-								if ( itemSize > 3 )
-									data[stride + 3] = vector.w;
-
-							}
-
-						}
+//						updateItem( i, itemSize === 3 ? new THREE.Vector3( i, 0, 0 ) : itemSize === 2 ? new THREE.Vector2( i, 0 ) : - i / ( data.length - 1 ) + 1 );
+						var x = i / pointLength;
+						updateItem( i, x );//first coordinate is distance from cloud point to frustum point
+						updateItem( i + 1, - x / ( data.length / pointLength - 1 ) + 1 );//second  coordinate is function of distance
 
 					}
-*/					
-					for ( var i = 0; i < data.length / itemSize; i++ )
-						updateItem( i, itemSize === 3 ? new Vector3( i, 0, 0 ) : itemSize === 2 ? new Vector2( i, 0 ) : - i / ( data.length - 1 ) + 1 );
 
 				} );
 
@@ -246,11 +200,11 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 				//format = RGBAFormat,//LuminanceFormat,//Available formats https://threejs.org/docs/index.html#api/en/constants/Textures
 				//D:\My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\src\constants.js
-				var itemSize = format === RGBAFormat ? 4 : format === RGBFormat ? 3 : format === LuminanceFormat ? 1 : NaN;
+				var itemSize = format === THREE.RGBAFormat ? 4 : format === THREE.RGBFormat ? 3 : format === THREE.LuminanceFormat ? 1 : NaN;
 				var height = 1,//format === THREE.LuminanceFormat ? 1 : 2,
 					size = width * height,
-					type = FloatType,
-					data = type === FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size );
+					type = THREE.FloatType,
+					data = type === THREE.FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size );
 				/*Uncaught TypeError: Right-hand side of 'instanceof' is not callable
 				if( !this instanceof cloud )
 					console.error('');
@@ -281,26 +235,10 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 						w = vector.w;
 
 					}
-//					var vectorSize = vector.y === undefined ? 1 : vector.z === undefined ? 2 : vector.w === undefined ? 3 : 4;
 					var vectorSize = y === undefined ? 1 : z === undefined ? 2 : w === undefined ? 3 : 4;
 					if ( vectorSize !== itemSize )
 						console.error( 'frustumPoints.create.cloud.addUniforms.updateItem: vectorSize = ' + vectorSize + ' !== itemSize = ' + itemSize )
 					var stride = i * itemSize;
-/*
-					data[stride] = vector.x;
-					if ( itemSize > 1 ) {
-
-						data[stride + 1] = vector.y;
-						if ( itemSize > 2 ) {
-
-							data[stride + 2] = vector.z;
-							if ( itemSize > 3 )
-								data[stride + 3] = vector.w;
-
-						}
-
-					}
-*/
 					data[stride] = x;
 					if ( itemSize > 1 ) {
 
@@ -322,7 +260,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 				uniforms[key] = {
 
-					value: new DataTexture( data,
+					value: new THREE.DataTexture( data,
 						width, height, format, type )
 
 				};
@@ -343,27 +281,6 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 				shaderText.vertex = shaderText.vertex.replace( '%scloudPointsWidth', scloudPointsWidth + '.' );
 
 			}
-/*			
-			this.updateItem = function ( i, vector ) {
-
-				var stride = i * itemSize;
-
-				data[stride] = vector.x;
-				if ( itemSize > 1 ) {
-
-					data[stride + 1] = vector.y;
-					if ( itemSize > 2 ) {
-
-						data[stride + 2] = vector.z;
-						if ( itemSize > 3 )
-							data[stride + 3] = vector.w;
-
-					}
-
-				}
-
-			}
-*/			
 			this.updateMesh = function ( mesh ) {
 
 				if ( mesh.userData.cloud === undefined )
@@ -372,7 +289,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 					this.cloudPoints.updateItem( mesh.userData.cloud.indexArray + i,
 						myThreejs.getWorldPosition( mesh,
-							new Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ) ) );
+							new THREE.Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ) ) );
 
 				}
 
@@ -499,7 +416,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 		if ( !shaderMaterial.display )
 			return;
 
-		var cameraPerspectiveHelper = new CameraHelper( camera );
+		var cameraPerspectiveHelper = new THREE.CameraHelper( camera );
 
 		var array, indexArray = 0;//, names;// = [];
 
@@ -507,7 +424,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 			var points = cameraPerspectiveHelper.pointMap[pointName],
 				position = cameraPerspectiveHelper.geometry.attributes.position;
-			return new Vector3().fromArray( position.array, points[0] * position.itemSize )
+			return new THREE.Vector3().fromArray( position.array, points[0] * position.itemSize )
 
 		}
 
@@ -570,7 +487,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 		point_f3.y = point_f3.y + ( ( pointn3y - point_f3.y ) * shaderMaterial.far ) / 100;
 		point_f1.z = point_f2.z = point_f3.z = point_f1.z + ( ( pointn1z - point_f1.z ) * shaderMaterial.far ) / 100;
 
-		var pointStart = new Vector3().copy( point_n1 );
+		var pointStart = new THREE.Vector3().copy( point_n1 );
 
 		function sqrtInt( value ) {
 
@@ -643,7 +560,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 							indexArray++;
 
 						}
-						addPoint( new Vector3(
+						addPoint( new THREE.Vector3(
 
 							pointStart.x + xStep * x + xzStep * zx,
 							pointStart.y + yStep * y + yzStep * zy,
@@ -756,13 +673,13 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 			return path;
 		};
 		var path = getCurrentScriptPath();
-		var cameraPositionDefault = new Vector3( camera.position.x, camera.position.y, camera.position.z );
-		var cameraQuaternionDefault = new Vector4(camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w);
+		var cameraPositionDefault = new THREE.Vector3( camera.position.x, camera.position.y, camera.position.z );
+		var cameraQuaternionDefault = new THREE.Vector4(camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w);
 		
 		myThreejs.points( //array
 			function () {
 
-				var geometry = new BufferGeometry(),
+				var geometry = new THREE.BufferGeometry(),
 					geometryLength = ( zEnd - zStart + 1 ) * xCount * yCount;
 
 				array = new Float32Array( geometryLength * itemSize );
@@ -772,7 +689,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 				eachZ( zStart, zEnd );
 
-				geometry.addAttribute( 'position', new BufferAttribute( array, itemSize ) );
+				geometry.setAttribute( 'position', new THREE.BufferAttribute( array, itemSize ) );
 
 				return geometry;
 
@@ -838,7 +755,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 					var uniformKey = 'palette'//, size = 256,
 						itemSize = cloud.addUniforms( RGBFormat, 256, uniformKey, function ( data, itemSize, updateItem )
 */						
-					new cloud.addUniforms( RGBFormat, 256, 'palette', function ( data, itemSize, updateItem ) {
+					new cloud.addUniforms( THREE.RGBFormat, 256, 'palette', function ( data, itemSize, updateItem ) {
 
 							var min, max;
 							if ( options.scales.w !== undefined ) {
@@ -857,7 +774,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 								updateItem ( i, options.palette.toColor( ( max - min ) * i / ( size - 1 ) + min, min, max ) );
 /*
 							for ( var i = 0; i < data.length / itemSize; i++ )
-								updateItem( i, itemSize === 3 ? new Vector3( i, 0, 0 ) : itemSize === 2 ? new Vector2( i, 0 ) : i );
+								updateItem( i, itemSize === 3 ? new THREE.Vector3( i, 0, 0 ) : itemSize === 2 ? new THREE.Vector2( i, 0 ) : i );
 */								
 
 						} );
@@ -928,7 +845,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 					for ( var z = zStart; z < zCount; z++ ) {
 
 						var vector = array[x + xCount * y + xCount * yCount * ( z - zStart )];
-						geometry.vertices.push( new Vector3( vector.x, vector.y, vector.z ) );
+						geometry.vertices.push( new THREE.Vector3( vector.x, vector.y, vector.z ) );
 
 					}
 					var line = new Line( geometry, material );
@@ -981,7 +898,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 		//Эта команда нужна в случае изменения размера окна браузера когда canvas на весь экран
 		setPointsParams();
 
-		var cameraQuaternionDefault = new Vector4(camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w);
+		var cameraQuaternionDefault = new THREE.Vector4(camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w);
 		
 		if ( points === undefined )
 			return;//User has changed 'Z Count' of the frustumPoints
@@ -1342,7 +1259,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 			for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
 
 				cloud.updateItem( mesh.userData.cloud.indexArray + '_' + i,
-					new Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ),
+					new THREE.Vector4().fromArray( mesh.geometry.attributes.position.array, i * mesh.geometry.attributes.position.itemSize ),
 					true );
 
 			}
@@ -1366,7 +1283,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 			console.error( 'points.geometry.attributes.position.itemSize = ' + points.geometry.attributes.position.itemSize );
 		cloud.updateItem( points.userData.cloud.indexArray + '_' + i,
 			myThreejs.getWorldPosition( points,
-				new Vector4().fromArray( points.geometry.attributes.position.array, i * points.geometry.attributes.position.itemSize ) ),
+				new THREE.Vector4().fromArray( points.geometry.attributes.position.array, i * points.geometry.attributes.position.itemSize ) ),
 			true );
 
 	}

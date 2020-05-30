@@ -20,8 +20,16 @@ import {
 
 } from './index.js';
 import { myPoints } from './myPoints/myPoints.js';
-
-var MYTHREEJS = {
+/*
+//import * as THREE from 'https://threejs.org/build/three.module.js';
+import * as THREE from '../../three.js/dev/build/three.module.js';
+//export var three = {THREE: THREE};
+import { WEBGL } from '../../three.js/dev/examples/jsm/WebGL.js';
+*/
+import { THREE, WEBGL, ConvexBufferGeometry } from '../../nodejs/three.js';
+//var MYTHREEJS =
+var myThreejs =
+{
 
 	create: create,
     points: points,
@@ -36,6 +44,11 @@ var MYTHREEJS = {
 	 * Pushes to clouds array all point from geometry
 	 */
     pushArrayCloud: myPoints.pushArrayCloud,
+/*    
+    THREE: threejs.THREE,
+    WEBGL: threejs.WEBGL,
+*/    
 
 }
-export default MYTHREEJS;
+//export default MYTHREEJS;
+export { myThreejs, THREE, WEBGL, ConvexBufferGeometry }

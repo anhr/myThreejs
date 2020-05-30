@@ -48,7 +48,9 @@ import {
 
 } from '../../three.js/dev/build/three.module.js';//'http://localhost/threejs/three.js/build/three.module.js';
 */
-import * as THREE from '../../three.js/dev/build/three.module.js';
+//import * as THREE from '../../three.js/dev/build/three.module.js';
+//import * as THREE from 'https://threejs.org/build/three.module.js';
+import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions } from '../../nodejs/three.js';
 
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 import cookie from '../../cookieNodeJS/master/cookie.js';
@@ -73,9 +75,8 @@ import ColorPicker from '../../colorpicker/master/colorpicker.js';
 import PositionController from '../../commonNodeJS/master/PositionController.js';
 import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
 import ScaleController from '../../commonNodeJS/master/ScaleController.js';
-//import { StereoEffect, spatialMultiplexsIndexs } from '/anhr/three.js/dev/examples/jsm/effects/StereoEffect.js';
-import { StereoEffect, spatialMultiplexsIndexs } from '../../three.js/dev/examples/jsm/effects/StereoEffect.js';
-import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
+//import { StereoEffect, spatialMultiplexsIndexs } from '../../three.js/dev/examples/jsm/effects/StereoEffect.js';
+//import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
 import { myPoints } from './myPoints/myPoints.js';
 
 //https://github.com/mrdoob/stats.js/
@@ -596,19 +597,23 @@ export function create( createXDobjects, options ) {
 			//StereoEffect. https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
 			if ( options.stereoEffect ) {
 
-				var cookieName = getCanvasName();
-				stereoEffect = new StereoEffect( renderer, {
+				if ( StereoEffect !== undefined ) {
 
-					spatialMultiplex: spatialMultiplexsIndexs.Mono, //.SbS,
-					far: camera.far,
-					camera: camera,
-					stereoAspect: 1,
-					cookie: cookie,
-					cookieName: cookieName === '' ? '' : '_' + cookieName,
-					elParent: canvas.parentElement,
+					var cookieName = getCanvasName();
+					stereoEffect = new StereoEffect( renderer, {
 
-				} );
-				stereoEffect.options.spatialMultiplex = spatialMultiplexsIndexs.Mono;
+						spatialMultiplex: spatialMultiplexsIndexs.Mono, //.SbS,
+						far: camera.far,
+						camera: camera,
+						stereoAspect: 1,
+						cookie: cookie,
+						cookieName: cookieName === '' ? '' : '_' + cookieName,
+						elParent: canvas.parentElement,
+
+					} );
+					stereoEffect.options.spatialMultiplex = spatialMultiplexsIndexs.Mono;
+
+				} else console.warn( 'stereoEffect = ' + stereoEffect );
 
 			}
 
@@ -620,7 +625,8 @@ export function create( createXDobjects, options ) {
 				var strLight = 'mathBoxLight',
 					light,// = scene.getObjectByName( strLight ),
 					position = new THREE.Vector3( 0.5 * options.scale, 0.5 * options.scale, 0.5 * options.scale ), controllers = {},
-					axesEnum = THREE.AxesHelperOptions.axesEnum, multiplier = 2 * options.scale;
+					axesEnum = AxesHelperOptions === undefined ? undefined : AxesHelperOptions.axesEnum,
+					multiplier = 2 * options.scale;
 
 				function isLight() {
 
@@ -1758,7 +1764,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 						return controller;
 
 					}
-					var axesEnum = THREE.AxesHelperOptions.axesEnum;
+					var axesEnum = AxesHelperOptions.axesEnum;
 					controllerX = axesGui( axesEnum.x );
 					controllerY = axesGui( axesEnum.y );
 					controllerZ = axesGui( axesEnum.z );
@@ -2105,7 +2111,9 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 			if ( options.axesHelper ) {
 
 				var cookieName = getCanvasName();
-				axesHelper = new THREE.AxesHelper( 1 * scale, {
+//				axesHelper = new THREE.AxesHelper
+				axesHelper = new AxesHelper
+					( 1 * scale, {
 
 					cookie: cookie,
 					cookieName: cookieName === '' ? '' : '_' + cookieName,
@@ -3402,7 +3410,7 @@ export function getWorldPosition( object, pos ) {
 	var position = new THREE.Vector3(),
 		positionAngle = new THREE.Vector3();
 	position = pos.clone();
-
+//position.multiply( new THREE.Vector4(0,0,0,0) );
 	position.multiply( object.scale );
 
 	//rotation

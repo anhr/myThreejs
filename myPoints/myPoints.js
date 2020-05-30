@@ -14,7 +14,8 @@
  * http://www.apache.org/licenses/LICENSE-2.0
 */
 
-import * as THREE from '../../../three.js/dev/build/three.module.js';
+//import * as THREE from '../../../three.js/dev/build/three.module.js';
+import { THREE } from '../../../nodejs/three.js';
 
 /**
  * Creating the new points and adding it into group
@@ -328,7 +329,7 @@ function getShaderMaterialPoints( params, onReady ) {
 		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
 	var indexArrayCloud = arrayCloud === undefined ? undefined : pushArrayCloud( arrayCloud, geometry );//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
 	if ( ( params.pointsOptions === undefined ) || !params.pointsOptions.boFrustumPoints )
-		geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( params.options.getColors
+		geometry.setAttribute( 'ca', new THREE.Float32BufferAttribute( params.options.getColors
 			( tMin, params.arrayFuncs, params.options.scales.w,
 				{
 

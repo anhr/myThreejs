@@ -119,7 +119,7 @@ void main() {
 
 	//ступенчатая зависимость выходного значения от дистанции
 	//data = {1,0.5,0}
-	//дистанция выход
+	//distance	fDistance
 	//0			1
 	//0.25		1
 	//0.30		1
@@ -133,47 +133,8 @@ void main() {
 	debug(40.0 * texture2D( distanceTable, vec2( 0.7, 0. ) ).x);
 //	debug(10.0 * CP0_0.w);
 //	debug(1.0 * cloudPointsSize);
-/*
-	//palette
-	gl_PointSize =  10.;
-
-	//x coordinate of the palette texture in normalized range from 0.0 to 1.0. https://www.khronos.org/opengl/wiki/Sampler_(GLSL)#Texture_coordinates
-	//0.0 is red color,
-	//0.5 is dark gray,
-	//1.0 is green
-	//CPi_j.w have range from -1 to 1
-	float indexPalette = (CP0_0.w / 2.) + 0.5;
-
-	vColor = texture2D( palette, vec2( indexPalette, 0. ) );
-*/
-/*
-#ifdef quaternion_version 
-	vec3 p = vec3(1,0,0);
-	//////////////////////////////////////////////
-	//https://stackoverflow.com/questions/9037174/glsl-rotation-with-a-rotation-vector
-	quaternion = cameraQuaternion;
-
-	//rotate the quaternion vector to 180 degrees for subtract of the camera rotation from the current vector
-	quaternion.x = -quaternion.x;
-	quaternion.y = -quaternion.y;
-	quaternion.z = -quaternion.z;
-
-	p = p + 2.0*cross(quaternion.xyz, cross(quaternion.xyz, p) + quaternion.w * p);
-	//////////////////////////////////////////////
-	debug(10.0 * p.x);
-#else
-	vec3 p = rotate_vertex_position(vec3(1,0,0), vec3(1,0,0), + cameraRotation.x);//rotate around X
-//	cPosition = rotate_vertex_position(cPosition, vec3(0,1,0), + cameraRotation.y);//rotate around Y
-	debug(10.0 * p.x);
-#endif
-*/
 #endif
 	pointPosition = vec3( cPosition.x, cPosition.y, cPosition.z );
-/*
-#ifndef debug_version
-	vColor = vec4(1,1,1,1);
-#endif
-*/
 	//distance to cloud points. See frustumPoints.create.cloud.editShaderText function for details. Example: DTCP(CP0_0);
 //%DTCP
 	for ( float i = 0.; i < cloudPointsWidth; i++ ) {
@@ -199,31 +160,16 @@ void main() {
 		w = 1.;
 	}
 #ifndef debug_version
-/*
-//	vColor = vec4(1,1,1,w);
-	//x coordinate of the palette texture in normalized range from 0.0 to 1.0. https://www.khronos.org/opengl/wiki/Sampler_(GLSL)#Texture_coordinates
-	//0.0  is red color,
-	//0.5 is dark gray,
-	//1.0 is green
-	//CloudPoint.w have range from -1 to 1
-	float wCloudPoint = texture2D( cloudPoints, vec2( 0. / ( cloudPointsWidth - 1. ), 0. ) ).w;
-	//Convert CloudPoint's range [-1, 1] to range [0, 1]
-	float indexPalette = ( wCloudPoint / 2.) + 0.5;
-	//CPi_j.w have range from -1 to 1
-//	float indexPalette = (CP0_0.w / 2.) + 0.5;
-
-	vColor = texture2D( palette, vec2( indexPalette, 0. ) );
-*/
 	//Convert paletteIndex range [-1, 1] to range [0, 1]
 	float paletteIndex = ( paletteIndex / 2.) + 0.5;
 
+	//paletteIndex is x coordinate of the palette texture in normalized range from 0.0 to 1.0. https://www.khronos.org/opengl/wiki/Sampler_(GLSL)#Texture_coordinates
+	//0.0  is red color,
+	//0.5 is dark gray,
+	//1.0 is green
 	vColor = texture2D( palette, vec2( paletteIndex, 0. ) );
 	vColor.w = w;
 	gl_PointSize = 2. * w + pointSize;
-/*
-	vColor = vec4(1,1,1,1);
-	gl_PointSize = 4. * w;
-*/
 //	gl_PointSize = pointSize;
 #endif
 

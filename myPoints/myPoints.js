@@ -15,7 +15,8 @@
 */
 
 //import * as THREE from '../../../three.js/dev/build/three.module.js';
-import { THREE } from '../../../nodejs/three.js';
+//import { THREE } from '../../../nodejs/three.js';
+import { THREE } from '../three.js';
 
 /**
  * Creating the new points and adding it into group

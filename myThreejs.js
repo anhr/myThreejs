@@ -26,7 +26,8 @@ import * as THREE from '../../three.js/dev/build/three.module.js';
 //export var three = {THREE: THREE};
 import { WEBGL } from '../../three.js/dev/examples/jsm/WebGL.js';
 */
-import { THREE, WEBGL, ConvexBufferGeometry } from '../../nodejs/three.js';
+//import { THREE, WEBGL, ConvexBufferGeometry } from '../../nodejs/three.js';
+import { THREE, WEBGL, ConvexBufferGeometry } from './three.js';
 //var MYTHREEJS =
 var myThreejs =
 {

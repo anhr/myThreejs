@@ -50,7 +50,8 @@ import {
 */
 //import * as THREE from '../../three.js/dev/build/three.module.js';
 //import * as THREE from 'https://threejs.org/build/three.module.js';
-import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText } from '../../nodejs/three.js';
+//import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText } from '../../nodejs/three.js';
+import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText } from './three.js';
 
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 import cookie from '../../cookieNodeJS/master/cookie.js';

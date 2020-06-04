@@ -241,6 +241,7 @@ void main() {
 	float y = 0.;//range from 0. to 1.
 	debug(40.0 * texture2D( distanceTable, vec2( x, y ) ).x);
 */
+/*
 	//i is index of the width distanceTable
 	//x is index of the width distanceTable in the range from 0. to 1.
 	//iDistance distance from distanceTable for current i
@@ -257,6 +258,12 @@ void main() {
 	//0.75		0.5	0.5
 	//0.		0.	1.
 	debug(40.0 * texture2D( distanceTable, vec2( getDistanceIndex( 0. ), 0. ) ).x );
+*/
+/*
+	float i = 0.;
+	DTCP(texture2D( cloudPoints, vec2( i / ( cloudPointsWidth - 1. ), 0. ) ));
+	debug(40.0 * paletteIndex );
+*/	
 /*
 	float distance = 0.75;
 	float x = getDistanceIndex( distance );

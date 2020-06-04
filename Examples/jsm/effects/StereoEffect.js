@@ -7,7 +7,8 @@
 */
 
 //import * as THREE from "../../../build/three.module.js";
-import { THREE } from '../../../../../nodejs/three.js';
+//import { THREE } from '../../../../../nodejs/three.js';
+import { THREE } from '../../../three.js';
 import PositionController from '../../../../../commonNodeJS/master/PositionController.js';
 
 import cookie from '../../../../../cookieNodeJS/master/cookie.js';

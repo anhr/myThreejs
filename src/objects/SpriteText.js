@@ -40,7 +40,8 @@ npm ERR!     C: \Users\Andrej\AppData\Roaming\npm - cache\_logs\2019 - 08 - 04T1
 //в которые входит собственный экземляр THREE
 //import { Sprite, SpriteMaterial, Texture, LinearFilter, Vector3, Vector2 } from "../../../build/three.module.js";
 //import * as THREE from "../../../build/three.module.js";
-import { THREE } from '../../../../nodejs/three.js';
+//import { THREE } from '../../../../nodejs/three.js';
+import { THREE } from '../../three.js';
 /*
 import { Sprite } from './Sprite.js';
 import { SpriteMaterial } from '../materials/SpriteMaterial.js';

@@ -4,7 +4,8 @@
  * @authod anhr / https://github.com/anhr/
  */
 
-import { THREE, SpriteText } from '../../../../nodejs/three.js';
+//import { THREE, SpriteText } from '../../../../nodejs/three.js';
+import { THREE, SpriteText } from '../../three.js';
 /*
 import { LineSegments } from '../objects/LineSegments.js';
 import { VertexColors } from '../constants.js';

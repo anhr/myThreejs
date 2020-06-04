@@ -310,7 +310,7 @@ var SpriteText = function ( text, options ) {
 /**
  * Adds SpriteText folder into gui.
  * @param {GUI} gui see https://github.com/dataarts/dat.gui/blob/master/API.md for details
- * @param {Sprite|Sprite[]} sprite sprite with text component, returned by new THREE.SpriteText(...) or array of sprites
+ * @param {Sprite|Sprite[]} sprite sprite with text component, returned by new SpriteText(...) or array of sprites
  * If sprite is array of sprites, then you can add an options property into array of sprites.
  * Options property contains common properties for all items of array of sprites.
  * See options of the SpriteText for details.

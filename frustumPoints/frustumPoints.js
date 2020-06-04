@@ -162,6 +162,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 		cloud = function () {
 
 			var uniforms;
+			var distanceTableWidth;//distanceTable points count
 			this.create = function ( _uniforms ) {
 
 				uniforms = _uniforms;
@@ -170,38 +171,111 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 				this.cloudPoints = new this.addUniforms( THREE.RGBAFormat, options.arrayCloud.getCloudsCount(), 'cloudPoints' );
 
 				//function of distance between points. Use for creating of the cloud around point
-				//distanceTable is array of points
-				//Every point contains two coordinates:
-				//first coordinate is distance from cloud point to frustum point
-				//second  coordinate is function of distance
+				//distanceTable is THREE.DataTexture
+				//	width = distanceTableWidth( distanceTable points count )
+				//	height = 2
+				//THREE.DataTexture contains two lines:
+				//	Every line have x from 0 to width - 1
+				//	First line (y = 0) is function of distance
+				//	Second line (y = 1) is distance from cloud point to frustum point
 				//Такая структура distanceTable позволяет неравномерно распределять точки по дистанции
 				//Если function of distance меняется быстро, то надо наставить побольше точек
 				//Если function of distance почти не меняется, точек можно поставить поменьше
 				//Это позволит поставить последнюю точку на достаточно большой дистанции
 				//и таким образом можно учитывать малое влияние облака на большом расстоянии.
-				var distanceTableCount = 3,//256,//distanceTable pints count
-					pointLength = 2;//Every point contains two coordinates
+				distanceTableWidth = 256;//distanceTable points count
+				const pointLength = 2;//Every point contains two coordinates
 				new this.addUniforms( THREE.LuminanceFormat,//RGFormat,//RGBFormat,
-					distanceTableCount * pointLength, 'distanceTable', function ( data, itemSize, updateItem ) {
+					distanceTableWidth, 'distanceTable', {
 
-					for ( var i = 0; i < data.length / itemSize; i += pointLength ) {
+						height: pointLength,
+						onReady: function ( data, itemSize, updateItem ) {
 
-//						updateItem( i, itemSize === 3 ? new THREE.Vector3( i, 0, 0 ) : itemSize === 2 ? new THREE.Vector2( i, 0 ) : - i / ( data.length - 1 ) + 1 );
-						var x = i / pointLength;
-						updateItem( i, x );//first coordinate is distance from cloud point to frustum point
-						updateItem( i + 1, - x / ( data.length / pointLength - 1 ) + 1 );//second  coordinate is function of distance
+							//debug
+							//var linePoints = [];
+							////////////////////////////
+							var fDistancePrev, x = 0;
+							const dDistanceMax = 0.035;
+							var dx = 0.5 / ( distanceTableWidth - 1 ); const ddx = 1.001;
+							//dx = 0.00196078431372549
+							//ddx	xmax
+							//1.001	0.5686435272529023 y = 9.515363374066325e-8
+							//var dx = 1.5 / ( distanceTableWidth - 1 ); const ddx = 1.001;
+							//dx = 0.0058823529411764705
+							//ddx	xmax
+							//1.001	1.686899158126089 y = 1.614196454247848e-62
+							//1.01	5.688013140820184
+							//1.05	11783.008823594038
+							//1.1	285390429.9744771
+							//var dx = 2/ ( distanceTableWidth - 1 ); const ddx = 1.001;
+							//dx = 0.00784313725490196
+							//ddx	xmax
+							//1.001	2.2149519380160148 y = 2.932926014021469e-107
+							//1.01	7.0082200110085715
+							//1.05	12925.219146819716
+							//1.1	314479812.6420277
+							//var dx = 20/ ( distanceTableWidth - 1 ); const ddx = 1.1;
+							//dx = 0.0784313725490196
+							//ddx	xmax
+							//1.001	22.56677751344284 y = 0
+							//1.1	11942365647.747343 y = 0
+							for ( var i = 0; i < distanceTableWidth; i++ ) {
 
-					}
+								var fDistance = getStandardNormalDistribution( x );
+								//console.warn( 'dx = ' + dx );
+								x += dx;
+								if ( fDistancePrev !== undefined ) {
 
-				} );
+									if ( Math.abs( fDistancePrev - fDistance ) > dDistanceMax )
+										dx /= ddx;
+									else dx *= ddx;
+
+								}
+								fDistancePrev = fDistance;
+
+								updateItem( i, fDistance );//function of distance
+/*
+								x = ( i / ( distanceTableWidth - 1 ) ) * 0.5;
+								var fDistance = - i / ( distanceTableWidth - 1 ) + 1;
+								updateItem( i, itemSize === 3 ?
+									new THREE.Vector3( i, 0, 0 ) : itemSize === 2 ?
+										new THREE.Vector2( i, 0 ) : fDistance );//function of distance
+*/
+								updateItem( i + distanceTableWidth, x );//distance from cloud point to frustum point
+
+								//debug
+								//if ( linePoints !== undefined )
+								//	linePoints.push( new THREE.Vector3( x, fDistance, 0 ) );
+								////////////////////////////
+
+							}
+
+							//debug
+							/*
+							if ( linePoints !== undefined ) {
+
+								//group.add( new THREE.Line( new THREE.BufferGeometry().setFromPoints( linePoints ), new THREE.LineBasicMaterial( {
+								//	color: 0x0000ff
+								//} ) ) );
+								group.add( new THREE.Points( new THREE.BufferGeometry().setFromPoints( linePoints ),
+									new THREE.PointsMaterial( { color: 0xffffff, alphaTest: 0.5 } ) ) );
+
+							}
+							*/
+							////////////////////////////
+
+						}
+
+					} );
 
 			}
-			this.addUniforms = function ( format, width, key, onReady ) {
+			this.addUniforms = function ( format, width, key, options ) {
 
+				options = options || {};
 				//format = RGBAFormat,//LuminanceFormat,//Available formats https://threejs.org/docs/index.html#api/en/constants/Textures
 				//D:\My documents\MyProjects\webgl\three.js\GitHub\three.js\dev\src\constants.js
 				var itemSize = format === THREE.RGBAFormat ? 4 : format === THREE.RGBFormat ? 3 : format === THREE.LuminanceFormat ? 1 : NaN;
-				var height = 1,//format === THREE.LuminanceFormat ? 1 : 2,
+				var height = options.height || 1,//format === THREE.LuminanceFormat ? 1 : 2,
 					size = width * height,
 					type = THREE.FloatType,
 					data = type === THREE.FloatType ? new Float32Array( itemSize * size ) : new Uint8Array( itemSize * size );
@@ -232,12 +306,14 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 						x = vector.x;
 						y = vector.y;
 						z = vector.z;
+						if ( isNaN( vector.w ) )
+							console.error( 'frustumPoints.create.cloud.addUniforms.updateItem: vector.w = ' + vector.w );
 						w = vector.w;
 
 					}
 					var vectorSize = y === undefined ? 1 : z === undefined ? 2 : w === undefined ? 3 : 4;
 					if ( vectorSize !== itemSize )
-						console.error( 'frustumPoints.create.cloud.addUniforms.updateItem: vectorSize = ' + vectorSize + ' !== itemSize = ' + itemSize )
+						console.error( 'frustumPoints.create.cloud.addUniforms.updateItem: vectorSize = ' + vectorSize + ' !== itemSize = ' + itemSize );
 					var stride = i * itemSize;
 					data[stride] = x;
 					if ( itemSize > 1 ) {
@@ -255,8 +331,8 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 				}
 
-				if ( onReady !== undefined )
-					onReady( data, itemSize, this.updateItem );
+				if ( options.onReady !== undefined )
+					options.onReady( data, itemSize, this.updateItem );
 
 				uniforms[key] = {
 
@@ -279,6 +355,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 				}
 				shaderText.vertex = shaderText.vertex.replace( '%scloudPointsWidth', scloudPointsWidth + '.' );
+				shaderText.vertex = shaderText.vertex.replace( '%distanceTableWidth', distanceTableWidth + '.' );
 
 			}
 			this.updateMesh = function ( mesh ) {
@@ -755,7 +832,9 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 					var uniformKey = 'palette'//, size = 256,
 						itemSize = cloud.addUniforms( RGBFormat, 256, uniformKey, function ( data, itemSize, updateItem )
 */						
-					new cloud.addUniforms( THREE.RGBFormat, 256, 'palette', function ( data, itemSize, updateItem ) {
+					new cloud.addUniforms( THREE.RGBFormat, 256, 'palette', {
+
+						onReady: function ( data, itemSize, updateItem ) {
 
 							var min, max;
 							if ( options.scales.w !== undefined ) {
@@ -771,13 +850,15 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 							var size = data.length / itemSize;
 							for ( var i = 0; i < size; i++ )
-								updateItem ( i, options.palette.toColor( ( max - min ) * i / ( size - 1 ) + min, min, max ) );
-/*
-							for ( var i = 0; i < data.length / itemSize; i++ )
-								updateItem( i, itemSize === 3 ? new THREE.Vector3( i, 0, 0 ) : itemSize === 2 ? new THREE.Vector2( i, 0 ) : i );
-*/								
+								updateItem( i, options.palette.toColor( ( max - min ) * i / ( size - 1 ) + min, min, max ) );
+							/*
+														for ( var i = 0; i < data.length / itemSize; i++ )
+															updateItem( i, itemSize === 3 ? new THREE.Vector3( i, 0, 0 ) : itemSize === 2 ? new THREE.Vector2( i, 0 ) : i );
+							*/
 
-						} );
+						}
+
+					} );
 /*
 					function updateItem ( i, vector, data ) {
 
@@ -1266,13 +1347,19 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 */
 
 		} );
+		needsUpdate();
+
+	}
+	function needsUpdate(){
+
 		if ( points !== undefined )
 			points.material.uniforms.cloudPoints.value.needsUpdate = true;
 
 	}
-	this.updateCloudPoint = function ( points ) {
+	this.updateCloudPoint = function ( mesh ) {
 
-		cloud.updateMesh( points );
+		cloud.updateMesh( mesh );
+		needsUpdate();
 
 	}
 	this.updateCloudPointItem = function ( points, i ) {
@@ -1281,10 +1368,12 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 			return;
 		if ( points.geometry.attributes.position.itemSize !== 4 )
 			console.error( 'points.geometry.attributes.position.itemSize = ' + points.geometry.attributes.position.itemSize );
-		cloud.updateItem( points.userData.cloud.indexArray + '_' + i,
+//		cloud.updateItem( points.userData.cloud.indexArray + '_' + i,
+		cloud.cloudPoints.updateItem( points.userData.cloud.indexArray + i,
 			myThreejs.getWorldPosition( points,
 				new THREE.Vector4().fromArray( points.geometry.attributes.position.array, i * points.geometry.attributes.position.itemSize ) ),
 			true );
+		needsUpdate();
 
 	}
 
@@ -1451,5 +1540,15 @@ export function cFrustumPointsF( guiSelectPoint ) {
 		return cFrustumPointsX.domElement.parentElement.parentElement.style.display !== 'none';
 
 	}
+
+}
+//Standard normal distributionю. Нормальное распределение
+//https://en.wikipedia.org/wiki/Normal_distribution
+function getStandardNormalDistribution( x ) {
+
+	var standardDeviation = 0.1;//чем больше среднеквадратическое отклонение, тем шире пик нормального распределения
+	var res = Math.exp( -0.5 * x * x / ( standardDeviation * standardDeviation ) );// / Math.sqrt( 2 * Math.PI );
+	//console.warn( 'x = ' + x + ' y = ' + res );
+	return res;
 
 }

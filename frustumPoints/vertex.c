@@ -9,11 +9,96 @@ uniform sampler2D cloudPoints;
 //uniform float cloudPointsSize;
 
 //function of distance between points in range [0,1]
-//distance	function
-//0			1
-//1			0
-//10		0
+//	width = distanceTableWidth( distanceTable points count )
+//	height = 2
+//contains two lines:
+//	Every line have x from 0 to width - 1
+//	First line (y = 0) is function of distance
+//	Second line (y = 1) is distance from cloud point to frustum point
 uniform sampler2D distanceTable;
+float getDistanceIndex( float distance ){
+
+	const float distanceTableWidth = %distanceTableWidth;
+/*
+	//Example of distanceTable:
+	//distanceTableWidth = 3.
+	//distanceTable first line is function of distance or fDistance:
+	//1., 0.5, 0.
+	//distanceTable second line is distance from cloud point to frustum point or iDistance:
+	//0., 0.75, 1.5.
+
+	//i = 2. x = i / iMax = 2 / 2 = 1.
+	//i = 1. x = i / iMax = 1 / 2 = 0.5
+	//i = 0. x = i / iMax = 0 / 2 = 0.
+	//
+	//i		x	iDistance	fDistance
+	//--------
+	//2.	1.	1.5			0.
+	//1.	0.5	0.75		0.5
+	//0.	0.	0.			1.
+*/
+	//Example of distanceTable:
+	//distanceTableWidth = 5.
+	//distanceTable first line is function of distance or fDistance:
+	//0: 1
+	//1: 0.75
+	//2: 0.5
+	//3: 0.25
+	//4: 0
+
+	//distanceTable second line is distance from cloud point to frustum point or iDistance:
+	//5: 0
+	//6: 0.125
+	//7: 0.25
+	//8: 0.375
+	//9: 0.5
+
+	float x;//x coordinate in range [0., 1.]
+/*
+	//i		x		iDistance	fDistance
+	//--------
+	//4.	1.		0.5			0.
+	//3.	0.75	0.375		0.25
+	//2.	0.5		0.25		0.5
+	//1.	0.25	0.125		0.75
+	//0.	0.		0.			1.
+	const float iMax = distanceTableWidth - 1.;
+	for ( float i = iMax; i >= 0.; i -- ) {
+	
+		x = i / iMax;
+		float iDistance = texture2D( distanceTable, vec2( x, 1. ) ).x;
+		if( iDistance <= distance )
+			break;
+		
+	}
+*/
+	//поиск iDistance методом половинного деления
+	//distance = 0.3
+	//dx = 1/2 = 0.5 на эту величину надо увеличить или уменьшить x в зависимости от того, distance-iDistance больше или меньше нуля
+	//
+	//dx	x						iDistance	distance-iDistance
+	//-------------------
+	//0.5	1.						0.5			0.3-0.5=-0.2<0//Начнем с конца диапазона.
+	//0.5	x-dx=1-0.5=0.5			0.25		0.3-0.25=0.05>0
+	//0.25	x+dx=0.5+0.25=0.75		0.375		0.3-0.375=-0.075<0
+	//0.125	x-dx=0.75-0.125=0.625	0.375 //iDistance не изменилось. Кончаем поиск
+	x = 1.; float dx = 0.5;
+	float iDistance = -1.;
+	for ( float i = distanceTableWidth - 1.; i >= 0.; i -- ) {
+
+		float iDistanceCur = iDistance;
+		iDistance = texture2D( distanceTable, vec2( x, 1. ) ).x;
+		if ( iDistanceCur == iDistance )
+			break;
+		if ( distance - iDistance < 0. )
+			x -= dx;
+		else x += dx;
+		dx /= 2.;
+
+	}
+	return x;
+
+}
 
 //Cloud Points. See frustumPoints.create.cloud.editShaderText function for details. Example: uniform vec4 CP0_0;
 //%cloudPoints
@@ -22,8 +107,7 @@ uniform vec3 cameraPositionDefault;//Начальное положение ка�
 uniform vec4 cameraQuaternion;
 
 #ifdef debug_version
-void debug(float value)
-{
+void debug(float value){
 	int red = 1;//positive value is red square
 	int green = 0;
 	if(value < 0.)
@@ -62,14 +146,34 @@ float paletteIndex = 0.;
 
 //distance to cloud point
 void DTCP(vec4 cloudPoint){
-	float dmax = 0.3;
+	float dmax = 1.;//0.3;
 	float distance = distance( cloudPoint.xyz, pointPosition) / dmax;//https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/distance.xhtml
 
 	//distance	fDistance
 	//0			1
 	//1			0
 	//10		0
-	float fDistance = texture2D( distanceTable, vec2( distance, 0. ) ).x;
+//	float fDistance = texture2D( distanceTable, vec2( distance, 0. ) ).x;
+
+	//Example of distanceTable. See getDistanceIndex for details
+
+	//i is index of the width distanceTable
+	//x is index of the width distanceTable in the range from 0. to 1.
+	//iDistance distance from distanceTable for current i
+	//fDistance is function of distance from distanceTable for current i
+	//
+	//i		x	iDistance	fDistance
+	//--------
+	//2.	1.	1.5			0.
+	//1.	0.5	0.75		0.5
+	//0.	0.	0.			1.
+
+	//distance	x	fDistance
+	//10.		1.	0.
+	//1.5		1.	0.
+	//0.75		0.5	0.5
+	//0.		0.	1.
+	float fDistance = texture2D( distanceTable, vec2( getDistanceIndex( distance ), 0. ) ).x;
 	w += fDistance;
 /*
 	distance = - distance / dmax + 1.;
@@ -116,21 +220,52 @@ void main() {
 //	debug(100.0 * texture2D( palette, vec2( 0., 0. ) ).y);
 //	debug(20.0 * texture2D( cloudPoints, vec2( 9. / ( cloudPointsWidth - 1. ), 0. ) ).x);
 //	debug(20.0 * texture2D( cloudPoints, vec2( 1., 0. ) ).y);
-
+/*
 	//ступенчатая зависимость выходного значения от дистанции
-	//data = {1,0.5,0}
-	//distance	fDistance
-	//0			1
-	//0.25		1
-	//0.30		1
-	//0.4		0.5
-	//0.50		0.5
-	//0.6		0.5
-	//0.7		0
-	//0.75		0
-	//1			0
-	//10		0
-	debug(40.0 * texture2D( distanceTable, vec2( 0.7, 0. ) ).x);
+	//data = {
+	//------------------------
+	//x		0.	0.5		1.
+	//------------------------
+	//y=0.	1,	0.75,	0.5,//function of distance
+	//y=1.	0,	0.5,	1,//distance from cloud point to frustum point
+	//}
+	//x		y	fDistance	distance
+	//0.	0.	1.
+	//0.5	0.	0.75
+	//1.	0.	0.5
+	//3.	0.	0.5
+	//0.	1.				0.
+	//0.5	1.				0.5
+	//1.	1.				1.
+	float x = 3.;//range from 0. to 1.
+	float y = 0.;//range from 0. to 1.
+	debug(40.0 * texture2D( distanceTable, vec2( x, y ) ).x);
+*/
+	//i is index of the width distanceTable
+	//x is index of the width distanceTable in the range from 0. to 1.
+	//iDistance distance from distanceTable for current i
+	//
+	//i		x	iDistance	fDistance
+	//--------
+	//2.	1.	1.5			0.
+	//1.	0.5	0.75		0.5
+	//0.	0.	0.			1.
+
+	//distance	x	fDistance
+	//10.		1.	0.
+	//1.5		1.	0.
+	//0.75		0.5	0.5
+	//0.		0.	1.
+	debug(40.0 * texture2D( distanceTable, vec2( getDistanceIndex( 0. ), 0. ) ).x );
+/*
+	float distance = 0.75;
+	float x = getDistanceIndex( distance );
+	float y = 0.;//range from 0. to 1.
+	//	First line (y = 0) is function of distance
+	//	Second line (y = 1) is distance from cloud point to frustum point
+	float fDistance = texture2D( distanceTable, vec2( x, y ) ).x;
+	debug(80.0 * fDistance );
+*/
 //	debug(10.0 * CP0_0.w);
 //	debug(1.0 * cloudPointsSize);
 #endif

@@ -50,7 +50,7 @@ import {
 */
 //import * as THREE from '../../three.js/dev/build/three.module.js';
 //import * as THREE from 'https://threejs.org/build/three.module.js';
-import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions } from '../../nodejs/three.js';
+import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText } from '../../nodejs/three.js';
 
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 import cookie from '../../cookieNodeJS/master/cookie.js';
@@ -3035,7 +3035,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 		}
 		optionsColor.colors = optionsColor.colors || [];
 		var length = Array.isArray( arrayFuncs ) ? arrayFuncs.length : optionsColor.positions.count;
-
+/*
 		//Standard normal distribution
 		//https://en.wikipedia.org/wiki/Normal_distribution
 		function getStandardNormalDistribution( x ) {
@@ -3045,10 +3045,6 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 			return res;
 
 		}
-/*
-		var standardNormalDistributionZero;
-		if ( positions !== undefined )
-			standardNormalDistributionZero = getStandardNormalDistribution( 0 );
 */
 		for( var i = 0; i < length; i++ ) {
 
@@ -3187,7 +3183,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 			}
 			var screenPos = worldToScreen( pos );
 
-			spriteTextIntersection = new THREE.SpriteText(
+			spriteTextIntersection = new SpriteText(
 				( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
 				( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
 				options.scales.x.name + ': ' + position.x +

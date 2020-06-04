@@ -659,7 +659,7 @@ export function AxesHelper( size, options ) {
 		function createGroup() {
 
 			dotLines.remove();
-			groupDotLines = new Group();
+			groupDotLines = new THREE.Group();
 			scene.add( groupDotLines );
 
 		}
@@ -736,8 +736,8 @@ export function AxesHelper( size, options ) {
 				var size = getDashSize( axesId );
 				if ( options.colorsHelper === undefined )
 					options.colorsHelper = 0x80;
-				var line = new LineSegments( new BufferGeometry().setFromPoints( lineVertices ),
-					new LineDashedMaterial( {
+				var line = new THREE.LineSegments( new THREE.BufferGeometry().setFromPoints( lineVertices ),
+					new THREE.LineDashedMaterial( {
 					color: 'rgb(' + options.colorsHelper + ', ' + options.colorsHelper + ', ' + options.colorsHelper + ')',
 					dashSize: size, gapSize: size
 					} ) );

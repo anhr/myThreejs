@@ -42,7 +42,6 @@ Object.assign( THREE.BufferGeometry.prototype, {
 	},
 
 } );
-/*
 Object.assign( THREE.Vector4.prototype, {
 
 	multiply: function ( v ) {
@@ -59,7 +58,6 @@ Object.assign( THREE.Vector4.prototype, {
 	},
 
 } );
-*/
 Object.assign( THREE.Vector4.prototype, {
 
 	add: function ( v, w ) {

@@ -18,7 +18,7 @@
 //import { THREE } from '../../../nodejs/three.js';
 import { THREE } from '../three.js';
 //import loadScript from '../../../loadScriptNodeJS/master/loadScript.js';
-import loadFile from '../../../loadFileNodeJS/master/loadFile.js';
+//import loadFile from '../../../loadFileNodeJS/master/loadFile.js';
 
 /**
  * Creating the new points and adding it into group
@@ -474,7 +474,7 @@ function loadShaderText ( onload, path ) {
 	function ShaderLoader( vertex_url, fragment_url, onLoad, options ) {
 
 		options = options || {};
-		var vertex_text = loadFile.sync( vertex_url );
+//var vertex_text = loadFile.sync( vertex_url );
 		var vertex_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
 		vertex_loader.setResponseType( 'text' );
 		vertex_loader.load( vertex_url, function ( vertex_text ) {

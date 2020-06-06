@@ -18,7 +18,7 @@
 //import { THREE } from '../../../nodejs/three.js';
 import { THREE } from '../three.js';
 //import loadScript from '../../../loadScriptNodeJS/master/loadScript.js';
-import loadFile from '../../../loadFileNodeJS/master/loadFile.js';
+//import loadFile from '../../../loadFileNodeJS/master/loadFile.js';
 
 /**
  * Creating the new points and adding it into group
@@ -474,18 +474,42 @@ function loadShaderText ( onload, path ) {
 	function ShaderLoader( vertex_url, fragment_url, onLoad, options ) {
 
 		options = options || {};
-var vertex_text = loadFile.sync( vertex_url );
+//var vertex_text = loadFile.sync( vertex_url );
+		var vertex_text, fragment_text;
+		function loaded() {
+
+			if ( ( fragment_text === undefined ) || ( vertex_text === undefined ) )
+				return;
+			onLoad( vertex_text, fragment_text );
+
+		}
+
+		//load vertex.c file
 		var vertex_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
 		vertex_loader.setResponseType( 'text' );
-		vertex_loader.load( vertex_url, function ( vertex_text ) {
+		vertex_loader.load( vertex_url, function ( _vertex_text ) {
 
+			vertex_text = _vertex_text;
+			loaded();
+/*
+		//load fragment.c file
 			var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
 			fragment_loader.setResponseType( 'text' );
-			fragment_loader.load( fragment_url, function ( fragment_text ) {
+			fragment_loader.load( fragment_url, function ( _fragment_text ) {
 
 				onLoad( vertex_text, fragment_text );
 
 			}, options.onProgress, options.onError );
+*/
+		}, options.onProgress, options.onError );
+
+		//load fragment.c file
+		var fragment_loader = new THREE.FileLoader( THREE.DefaultLoadingManager );
+		fragment_loader.setResponseType( 'text' );
+		fragment_loader.load( fragment_url, function ( _fragment_text ) {
+
+			fragment_text = _fragment_text;
+			loaded();
 
 		}, options.onProgress, options.onError );
 

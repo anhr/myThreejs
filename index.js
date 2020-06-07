@@ -2334,12 +2334,13 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					options.scene = scene;
 				options.cookie = cookie;
 				if ( options.axesHelperGui === true )
-					AxesHelperGui( fOptions, options.guiSelectPoint, {
+					AxesHelperGui( fOptions, {
 
 						axesHelper: axesHelper,
 						options: options,
 						cookie: cookie,
 						getLanguageCode: getLanguageCode,
+						guiSelectPoint: options.guiSelectPoint,
 
 					} );//, options );
 

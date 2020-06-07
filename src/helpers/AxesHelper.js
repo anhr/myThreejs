@@ -871,6 +871,7 @@ function getAxis( axix, name ) {
 
 export function getScalesOptions( options, cookieName ) {
 
+	options = options || {};
 	options.cookie = options.cookie || new cookie.defaultCookie();
 
 	cookieName = cookieName || AxesHelperOptions.cookieName;

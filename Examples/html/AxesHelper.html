@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8" />
+	<title>AxesHelper</title>
+
+	<!--for mobile devices-->
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+	<meta name="author" content="Andrej Hristoliubov https://anhr.github.io/AboutMe/">
+
+	<script src="/anhr/dat.gui/CustomController/build/dat.gui.js"></script>
+
+	<script src="/anhr/commonNodeJS/master/dat.js"></script>
+
+	<!--for debugging
+	https://github.com/vorg/webgl-debug
+	https://searchcode.com/codesearch/view/85060658/
+	<script src="../../../webgl-debug/webgl-debug/build/webgl-debug.js"></script>
+	-->
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="main.css">
+<!--
+	<style>
+		#drawing-canvas {
+			position: absolute;
+			background-color: #000000;
+			top: 0px;
+			right: 0px;
+			z-index: 3000;
+			cursor: crosshair;
+		}
+	</style>
+-->
+
+</head>
+<body>
+	<script nomodule>alert( 'Fatal error: Your browser do not support modular JavaScript code.' );</script>
+	<div id="info">
+		<a href="https://github.com/anhr/myThreejs" target="_blank" rel="noopener">myThreejs</a> - AxesHelper - An axis object to visualize the 1, 2 or 3 axes in a simple way.
+	</div>
+<!--	<canvas id="drawing-canvas" height="128" width="128"></canvas> -->
+	<canvas id="canvas" height="128" width="128"></canvas>
+
+	<script type="module">
+
+		import {
+			THREE//, WEBGL, ConvexBufferGeometry
+		} from '../../three.js';
+		import {
+			AxesHelper//, AxesHelperOptions
+		} from '../../src/helpers/AxesHelper.js';
+		import { OrbitControls } from '../../../../three.js/dev/examples/jsm/controls/OrbitControls.js';
+		import AxesHelperGui from '../../../../commonNodeJS/master/AxesHelperGui.js';
+
+		var camera, scene, renderer,// mesh, material,
+			axesHelper, controls, gui;
+		//		var drawStartPos = new THREE.Vector2();
+
+		init();
+		//		setupCanvasDrawing();
+		animate();
+
+		function init() {
+
+			camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 2000 );
+			var defaultCameraPosition = new THREE.Vector3( 40, 40, 500 );
+			camera.position.copy( defaultCameraPosition );
+			//			camera.position.z = 500;
+
+			scene = new THREE.Scene();
+			/*
+						material = new THREE.MeshBasicMaterial();
+
+						mesh = new THREE.Mesh( new THREE.BoxBufferGeometry( 200, 200, 200 ), material );
+						scene.add( mesh );
+			*/
+
+			//AxesHelper
+
+			var scale = 180, colorsHelper = 0x80;
+			axesHelper = new AxesHelper
+				( 1 * scale, {
+
+					//cookie: cookie,
+					//cookieName: cookieName === '' ? '' : '_' + cookieName,
+					scene: scene,
+					negativeAxes: true,
+					colors: colorsHelper / 0xff, //gray axes
+					colorsHelper: colorsHelper,
+					//scales: options.scales,
+
+				} );
+			scene.add( axesHelper );
+
+			renderer = new THREE.WebGLRenderer( {
+
+				antialias: true,
+				canvas: document.getElementById( 'canvas' ),
+
+			} );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			window.addEventListener( 'resize', onWindowResize, false );
+
+			//
+
+			controls = new OrbitControls( camera, renderer.domElement );
+			controls.target.set( scene.position.x * 2, scene.position.y * 2, scene.position.z * 2 );
+			controls.update();
+
+			gui = new dat.GUI( {
+
+				//autoPlace: false,//Убрать скроллинг когда окно gui не влазит в окно браузера
+				//closed: true,//Icorrect "Open Controls" button name
+
+			} );
+			/*
+			gui.domElement.addEventListener( 'mouseenter', function ( event ) { mouseenter = true; } );
+			gui.domElement.addEventListener( 'mouseleave', function ( event ) { mouseenter = false; } );
+			*/
+			AxesHelperGui( gui, {
+
+				axesHelper: axesHelper,
+				//options: options,
+				//cookie: cookie,
+				//getLanguageCode: getLanguageCode,
+				//guiSelectPoint: options.guiSelectPoint,
+
+			} );
+		}
+		/*
+				// Sets up the drawing canvas and adds it as the material map
+
+				function setupCanvasDrawing() {
+
+					// get canvas and context
+
+					var drawingCanvas = document.getElementById( 'drawing-canvas' );
+					var drawingContext = drawingCanvas.getContext( '2d' );
+
+					// draw white background
+
+					drawingContext.fillStyle = '#FFFFFF';
+					drawingContext.fillRect( 0, 0, 128, 128 );
+
+					// set canvas as material.map (this could be done to any map, bump, displacement etc.)
+
+					material.map = new THREE.CanvasTexture( drawingCanvas );
+
+					// set the variable to keep track of when to draw
+
+					var paint = false;
+
+					// add canvas event listeners
+					drawingCanvas.addEventListener( 'mousedown', function ( e ) {
+
+						paint = true;
+						drawStartPos.set( e.offsetX, e.offsetY );
+
+					} );
+
+					drawingCanvas.addEventListener( 'mousemove', function ( e ) {
+
+						if ( paint ) draw( drawingContext, e.offsetX, e.offsetY );
+
+					} );
+
+					drawingCanvas.addEventListener( 'mouseup', function () {
+
+						paint = false;
+
+					} );
+
+					drawingCanvas.addEventListener( 'mouseleave', function () {
+
+						paint = false;
+
+					} );
+
+				}
+
+				function draw( drawContext, x, y ) {
+
+					drawContext.moveTo( drawStartPos.x, drawStartPos.y );
+					drawContext.strokeStyle = '#000000';
+					drawContext.lineTo( x, y );
+					drawContext.stroke();
+					// reset drawing start position to current position.
+					drawStartPos.set( x, y );
+					// need to flag the map as needing updating.
+					material.map.needsUpdate = true;
+
+				}
+		*/
+		function onWindowResize() {
+
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize( window.innerWidth, window.innerHeight );
+
+		}
+
+		function animate() {
+
+			requestAnimationFrame( animate );
+			/*
+						mesh.rotation.x += 0.01;
+						mesh.rotation.y += 0.01;
+			*/
+
+			renderer.render( scene, camera );
+
+		}
+
+	</script>
+</body>
+</html>

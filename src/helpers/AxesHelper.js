@@ -173,9 +173,9 @@ export function AxesHelper( size, options ) {
 
 	this.setSettings = function () {
 
-//		options.cookieObject.setObject( cookieName, options.scales );
+		//		options.cookieObject.setObject( cookieName, options.scales );
 		options.cookie.setObject( cookieName, options.scales );
-//		options.cookie.setObject( cookieName, scalesNew );
+		//		options.cookie.setObject( cookieName, scalesNew );
 
 	}
 
@@ -194,10 +194,10 @@ export function AxesHelper( size, options ) {
 
 		var scales = options.scales;
 		var scale = new THREE.Vector3(
-				Math.abs( scales.x.min - scales.x.max ) / 2,
-				Math.abs( scales.y.min - scales.y.max ) / 2,
-				Math.abs( scales.z.min - scales.z.max ) / 2
-			),
+			Math.abs( scales.x.min - scales.x.max ) / 2,
+			Math.abs( scales.y.min - scales.y.max ) / 2,
+			Math.abs( scales.z.min - scales.z.max ) / 2
+		),
 			position = new THREE.Vector3(
 				( scales.x.min + scales.x.max ) / 2,
 				( scales.y.min + scales.y.max ) / 2,
@@ -221,9 +221,9 @@ export function AxesHelper( size, options ) {
 			vertices = [
 				//begin	vertex									end vertex
 				//x				y				z				x		y		z
-				negativeSize,	0,				0,				size,	0,		0,	//Axes x
-				0,				negativeSize,	0,				0,		size,	0,	//Axes y
-				0,				0,				negativeSize,	0,		0,		size//Axes z
+				negativeSize, 0, 0, size, 0, 0,	//Axes x
+				0, negativeSize, 0, 0, size, 0,	//Axes y
+				0, 0, negativeSize, 0, 0, size//Axes z
 			];
 
 		if ( options.scene !== undefined ) {
@@ -242,7 +242,7 @@ export function AxesHelper( size, options ) {
 	if ( options.colors ) {
 
 		if ( ( typeof options.colors === 'string' ) || ( typeof options.colors === 'number' ) )
-			options.colors = [ options.colors, options.colors, options.colors ];
+			options.colors = [options.colors, options.colors, options.colors];
 		if ( Array.isArray( options.colors ) )
 			switch ( options.colors.length ) {
 
@@ -253,9 +253,9 @@ export function AxesHelper( size, options ) {
 					options.colors = [
 						//begin									end
 						//red		green			blue		red			green		blue
-						colors[ 0 ], colors[ 1 ], colors[ 2 ], colors[ 0 ], colors[ 1 ], colors[ 2 ], //x
-						colors[ 3 ], colors[ 4 ], colors[ 5 ], colors[ 3 ], colors[ 4 ], colors[ 5 ], //y
-						colors[ 6 ], colors[ 7 ], colors[ 8 ], colors[ 6 ], colors[ 7 ], colors[ 8 ], //z
+						colors[0], colors[1], colors[2], colors[0], colors[1], colors[2], //x
+						colors[3], colors[4], colors[5], colors[3], colors[4], colors[5], //y
+						colors[6], colors[7], colors[8], colors[6], colors[7], colors[8], //z
 					];
 					break;
 				case 3://Same color for all axis.
@@ -263,9 +263,9 @@ export function AxesHelper( size, options ) {
 					options.colors = [
 						//begin									end
 						//red		green			blue		red			green		blue
-						colors[ 0 ], colors[ 1 ], colors[ 2 ], colors[ 0 ], colors[ 1 ], colors[ 2 ], //x
-						colors[ 0 ], colors[ 1 ], colors[ 2 ], colors[ 0 ], colors[ 1 ], colors[ 2 ], //y
-						colors[ 0 ], colors[ 1 ], colors[ 2 ], colors[ 0 ], colors[ 1 ], colors[ 2 ], //z
+						colors[0], colors[1], colors[2], colors[0], colors[1], colors[2], //x
+						colors[0], colors[1], colors[2], colors[0], colors[1], colors[2], //y
+						colors[0], colors[1], colors[2], colors[0], colors[1], colors[2], //z
 					];
 					break;
 				default: console.error( 'THREE.AxesHelper: Invalid options.colors.length = ' + options.colors.length );
@@ -283,17 +283,17 @@ export function AxesHelper( size, options ) {
 	var colors = options.colors || [
 		//begin					end
 		//red	green	blue	red		green	blue
-		1,		0,		0,		1,		0.6,	0, //Axes x
-		0,		1,		0,		0.6,	1,		0, //Axes y
-		0,		0,		1,		0,		0.6,	1, //Axes z
+		1, 0, 0, 1, 0.6, 0, //Axes x
+		0, 1, 0, 0.6, 1, 0, //Axes y
+		0, 0, 1, 0, 0.6, 1, //Axes z
 	];
 	function getColor( colorIndex ) {
 
 		colorIndex *= 3;
-		return ( ( colors[ colorIndex ] * 0xff ) << 16 ) + ( ( colors[ colorIndex + 1 ] * 0xff ) << 8 ) + colors[ colorIndex + 2 ] * 0xff;
+		return ( ( colors[colorIndex] * 0xff ) << 16 ) + ( ( colors[colorIndex + 1] * 0xff ) << 8 ) + colors[colorIndex + 2] * 0xff;
 
 	}
-
+/*
 	var geometry = new THREE.BufferGeometry();
 	geometry.setAttribute( 'position', getVertices() );
 	geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
@@ -301,12 +301,48 @@ export function AxesHelper( size, options ) {
 	var material = new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors } );
 
 	THREE.LineSegments.call( this, geometry, material );
+*/
+	function drawAxis( scaleIndex ) {
+
+		var material = new THREE.LineBasicMaterial( { color: getColor( scaleIndex * 2 + 1 ) } ),
+			geometry = new THREE.Geometry();
+		geometry.vertices.push( getVerticePosition( scaleIndex * 2 + 0 ) );
+		geometry.vertices.push( getVerticePosition( scaleIndex * 2 + 1 ) );
+
+		//Если не делать эту проверку то получаю ошибку
+		//Uncaught TypeError: Cannot redefine property: id
+		//в
+		//function Object3D()
+		//Потому что пытаюсь несколько раз сделать axesHelper корнем для осей координат.
+		if ( axesHelper.children === undefined )
+			//Корнем всего axesHelper является линия по оси x
+			THREE.Line.call( axesHelper, geometry, material );
+		else {
+
+			if ( !groupAxes )
+				groupAxes = new THREE.Group();
+			//линии по остальным осям а также все метки и надписи являются дочерними от линии по оси x
+			groupAxes.add( new THREE.Line( geometry, material ) );
+			if ( !groupAxesScales ) {
+
+				groupAxesScales = new THREE.Group();
+				groupAxes.add( groupAxesScales );
+
+			}
+
+		}
+
+	}
+	drawAxis( axesHelper.axesEnum.x );
+	drawAxis( axesHelper.axesEnum.y );
+	drawAxis( axesHelper.axesEnum.z );
 
 	function getVerticePosition( verticeIndex ) {
 
 		verticeIndex *= 3;
-		var array = geometry.attributes.position.array;
-		return new THREE.Vector3( array[ verticeIndex ], array[ verticeIndex + 1 ], array[ verticeIndex + 2 ] );
+//		var array = geometry.attributes.position.array;
+		var array = getVertices().array;
+		return new THREE.Vector3( array[verticeIndex], array[verticeIndex + 1], array[verticeIndex + 2] );
 
 	}
 	this.getAxesPosition = function ( axesId ) {
@@ -316,12 +352,12 @@ export function AxesHelper( size, options ) {
 
 			min: {
 				position: getVerticePosition( axesId * 2 ),
-				scale: options.scales[ axes ].min,
+				scale: options.scales[axes].min,
 			},
 			max: {
 
 				position: getVerticePosition( axesId * 2 + 1 ),
-				scale: options.scales[ axes ].max,
+				scale: options.scales[axes].max,
 
 			}
 
@@ -331,19 +367,19 @@ export function AxesHelper( size, options ) {
 
 	//axes scales
 
-	var axesScales;
-	this.displayScales = function ( visible ) { axesScales.visible = visible; }
+	var groupAxesScales, groupAxes;
+	this.displayScales = function ( visible ) { groupAxesScales.visible = visible; }
 
 	//
 
-	this.restore = function ( ) {
+	this.restore = function () {
 
 		if ( typeof controllerNegativeAxes !== 'undefined' ) {
 
 			controllerNegativeAxes.setValue( optionsDefault.negativeAxes );
 
 		}
-//		controllerDisplayScales.setValue( optionsDefault.scales.display );
+		//		controllerDisplayScales.setValue( optionsDefault.scales.display );
 		function restore( scaleControllers, scale, windowRange ) {
 
 			scaleControllers.min.setValue( scale.min );
@@ -378,12 +414,12 @@ export function AxesHelper( size, options ) {
 
 		var groupMarksTextX = new THREE.Group(), groupMarksTextY = new THREE.Group(), groupMarksTextZ = new THREE.Group();
 
-		if ( ! axesScales )
-			axesScales = new THREE.Group();
+		if ( !groupAxesScales )
+			groupAxesScales = new THREE.Group();
 
-		axesScales.add( groupMarksTextX );
-		axesScales.add( groupMarksTextY );
-		axesScales.add( groupMarksTextZ );
+		groupAxesScales.add( groupMarksTextX );
+		groupAxesScales.add( groupMarksTextY );
+		groupAxesScales.add( groupMarksTextZ );
 
 		//////////////////////////////////////////
 		//The label keeps facing to you
@@ -474,7 +510,7 @@ export function AxesHelper( size, options ) {
 
 				var mesh = new THREE.Mesh( geometry, material );
 				if ( options.position !== undefined ) mesh.position.copy( options.position );
-				axesScales.add( mesh );
+				groupAxesScales.add( mesh );
 
 			}
 			drawCone( {
@@ -502,9 +538,9 @@ export function AxesHelper( size, options ) {
 				optionsCur.cookieName = options.cookieName;
 				var spriteText = new SpriteText( text, optionsCur );
 				axesHelper.arraySpriteText.push( spriteText );
-//console.warn('axesHelper.arraySpriteText.length = ' + axesHelper.arraySpriteText.length);
+				//console.warn('axesHelper.arraySpriteText.length = ' + axesHelper.arraySpriteText.length);
 				if ( optionsText.group === undefined )
-					axesScales.add( spriteText );
+					groupAxesScales.add( spriteText );
 				else optionsText.group.add( spriteText );
 
 			}
@@ -542,11 +578,11 @@ export function AxesHelper( size, options ) {
 				scalesNew = scalesNew || scales;
 
 				//remove all old mark's texts
-				for ( var i = groupMarksText.children.length - 1; i >= 0; i -- ) {
+				for ( var i = groupMarksText.children.length - 1; i >= 0; i-- ) {
 
-					var item = groupMarksText.children[ i ];
+					var item = groupMarksText.children[i];
 					groupMarksText.remove( item );
-					if( item instanceof THREE.Sprite )
+					if ( item instanceof THREE.Sprite )
 						for ( var i = 0; i < axesHelper.arraySpriteText.length; i++ ) {
 
 							var sprite = axesHelper.arraySpriteText[i];
@@ -576,7 +612,7 @@ export function AxesHelper( size, options ) {
 						distanceX = ( maxPosition.x - minPosition.x ) / marks,
 						distanceY = ( maxPosition.y - minPosition.y ) / marks,
 						distanceZ = ( maxPosition.z - minPosition.z ) / marks;
-					for ( var i = 1; i < marks; i ++ ) {
+					for ( var i = 1; i < marks; i++ ) {
 
 						scaleMark( new THREE.Vector3(
 							minPosition.x + distanceX * i,
@@ -586,7 +622,7 @@ export function AxesHelper( size, options ) {
 					}
 
 				}
-//				options.cookie.setObject( cookieName, options.scales );
+				//				options.cookie.setObject( cookieName, options.scales );
 				axesHelper.setSettings();
 
 			}
@@ -623,7 +659,8 @@ export function AxesHelper( size, options ) {
 
 		//
 
-		axesHelper.add( axesScales );
+//		axesHelper.add( groupAxesScales );
+		axesHelper.add( groupAxes );
 		if ( options.scene !== undefined ) {
 
 			axesHelper.scale.divide( options.scene.scale );
@@ -633,7 +670,7 @@ export function AxesHelper( size, options ) {
 
 	}
 	addAxesScales();
-	axesScales.visible = options.scales.display;
+	groupAxesScales.visible = options.scales.display;
 
 	//dotted lines
 	function dotLines( _scene ) {
@@ -753,8 +790,8 @@ export function AxesHelper( size, options ) {
 					options.colorsHelper = 0x80;
 				var line = new THREE.LineSegments( new THREE.BufferGeometry().setFromPoints( lineVertices ),
 					new THREE.LineDashedMaterial( {
-					color: 'rgb(' + options.colorsHelper + ', ' + options.colorsHelper + ', ' + options.colorsHelper + ')',
-					dashSize: size, gapSize: size
+						color: 'rgb(' + options.colorsHelper + ', ' + options.colorsHelper + ', ' + options.colorsHelper + ')',
+						dashSize: size, gapSize: size
 					} ) );
 				line.computeLineDistances();
 				groupDotLines.add( line );
@@ -801,21 +838,21 @@ export function AxesHelper( size, options ) {
 			var line;
 			switch ( axesId ) {
 
-			case mathBox.axesEnum.x:
-				line = lineX;
-				break;
-			case mathBox.axesEnum.y:
-				line = lineY;
-				break;
-			case mathBox.axesEnum.z:
-				line = lineZ;
-				break;
-			default: console.error( 'point.userData.movePointAxes: invalid axesId: ' + axesId );
-				return;
+				case mathBox.axesEnum.x:
+					line = lineX;
+					break;
+				case mathBox.axesEnum.y:
+					line = lineY;
+					break;
+				case mathBox.axesEnum.z:
+					line = lineZ;
+					break;
+				default: console.error( 'point.userData.movePointAxes: invalid axesId: ' + axesId );
+					return;
 
 			}
 			if ( line === undefined )
-			return;
+				return;
 			line.geometry.attributes.position.array[axesId + 3] = value;
 
 			lineX.geometry.attributes.position.array[axesId] = value;
@@ -854,7 +891,7 @@ export function AxesHelper( size, options ) {
 			( options.scales.z.min + options.scales.z.max ) / 2
 		);
 
-//		dotLines.remove();
+		//		dotLines.remove();
 
 	}
 
@@ -897,51 +934,48 @@ export function getScalesOptions( options, cookieName ) {
 	options.scales.x = getAxis( options.scales.x, 'X' );
 	options.scales.y = getAxis( options.scales.y, 'Y' );
 	options.scales.z = getAxis( options.scales.z, 'Z' );
-/*
-	options.scales.t = options.scales.t || {};
-	options.scales.t.zoomMultiplier = options.scales.t.zoomMultiplier || 2;
-	options.scales.t.offset = options.scales.t.offset || 1;
-	options.scales.t.name = options.scales.t.name || 'T';
-	options.scales.t.min = options.scales.t.min !== undefined ? options.scales.t.min : 0;
-	options.scales.t.max = options.scales.t.max !== undefined ? options.scales.t.max : 1;
-*/
+	/*
+		options.scales.t = options.scales.t || {};
+		options.scales.t.zoomMultiplier = options.scales.t.zoomMultiplier || 2;
+		options.scales.t.offset = options.scales.t.offset || 1;
+		options.scales.t.name = options.scales.t.name || 'T';
+		options.scales.t.min = options.scales.t.min !== undefined ? options.scales.t.min : 0;
+		options.scales.t.max = options.scales.t.max !== undefined ? options.scales.t.max : 1;
+	*/
 	const optionsDefault = {};
 	optionsDefault.scales = JSON.parse( JSON.stringify( options.scales ) );
 	Object.freeze( optionsDefault );
 
 	options.scales = cookie.copyObject( cookieName, optionsDefault.scales );
-/*
-	//Показать или скрыть ось времени
-	//Допустим сначала я не хотел показывать ось времени. тоесть установил options.scales.t = undefined
-	//В куках ось времени не сохранится
-	//Теперь я захотел показать ось времени options.scales.t = {}
-	//сейчас после чтения AxesHelper куков у меня будет options.scales.t = undefined
-	//потму что до этого оси времени в куках не было и ось времени не будет отображаться
-	//Для решения проблемы сохраняем в t состояние оси времени которое приходит из моей программы
-	var t = options.scales.t;
-
-	options.scales = cookie.copyObject( cookieName, optionsDefault.scales );
-
-	//Показать или скрыть ось времени
-	//
-	//Если в куках не было оси времени options.scales.t = undefined и t != undefined
-	//то устанавливаем options.scales.t равным значаеию из моей прогаммы. Другими словами надо отобразить ось времени
-	//
-	//Если в куках была ось времени options.scales.t != undefined но из программы не нужно отображать ось времни t = undefined
-	//То приравниваем options.scales.t = undefined
-	//
-	//Если в куках была ось времени options.scales.t != undefined и из программы нужно отображать ось времни t != undefined
-	//то оставляем значение оси времени options.scales.t из куков
-	//
-	//Если в куках не было ось времени options.scales.t = undefined и из программы не нужно отображать ось времни t = undefined
-	//то ничего не приравниваем и остается options.scales.t = undefined
-	if ( ( options.scales.t === undefined ) || ( t === undefined ) )
-		options.scales.t = t;
-	if ( options.onChangeScaleT !== undefined )
-		options.onChangeScaleT( options.scales.t );
-
-	return { t: t, optionsDefault: optionsDefault, }
-*/
+	/*
+		//Показать или скрыть ось времени
+		//Допустим сначала я не хотел показывать ось времени. тоесть установил options.scales.t = undefined
+		//В куках ось времени не сохранится
+		//Теперь я захотел показать ось времени options.scales.t = {}
+		//сейчас после чтения AxesHelper куков у меня будет options.scales.t = undefined
+		//потму что до этого оси времени в куках не было и ось времени не будет отображаться
+		//Для решения проблемы сохраняем в t состояние оси времени которое приходит из моей программы
+		var t = options.scales.t;
+		options.scales = cookie.copyObject( cookieName, optionsDefault.scales );
+		//Показать или скрыть ось времени
+		//
+		//Если в куках не было оси времени options.scales.t = undefined и t != undefined
+		//то устанавливаем options.scales.t равным значаеию из моей прогаммы. Другими словами надо отобразить ось времени
+		//
+		//Если в куках была ось времени options.scales.t != undefined но из программы не нужно отображать ось времни t = undefined
+		//То приравниваем options.scales.t = undefined
+		//
+		//Если в куках была ось времени options.scales.t != undefined и из программы нужно отображать ось времни t != undefined
+		//то оставляем значение оси времени options.scales.t из куков
+		//
+		//Если в куках не было ось времени options.scales.t = undefined и из программы не нужно отображать ось времни t = undefined
+		//то ничего не приравниваем и остается options.scales.t = undefined
+		if ( ( options.scales.t === undefined ) || ( t === undefined ) )
+			options.scales.t = t;
+		if ( options.onChangeScaleT !== undefined )
+			options.onChangeScaleT( options.scales.t );
+		return { t: t, optionsDefault: optionsDefault, }
+	*/
 	return { optionsDefault: optionsDefault, }
 
 }

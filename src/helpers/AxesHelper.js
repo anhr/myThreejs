@@ -502,6 +502,7 @@ export function AxesHelper( size, options ) {
 				optionsCur.cookieName = options.cookieName;
 				var spriteText = new SpriteText( text, optionsCur );
 				axesHelper.arraySpriteText.push( spriteText );
+//console.warn('axesHelper.arraySpriteText.length = ' + axesHelper.arraySpriteText.length);
 				if ( optionsText.group === undefined )
 					axesScales.add( spriteText );
 				else optionsText.group.add( spriteText );
@@ -543,7 +544,20 @@ export function AxesHelper( size, options ) {
 				//remove all old mark's texts
 				for ( var i = groupMarksText.children.length - 1; i >= 0; i -- ) {
 
-					groupMarksText.remove( groupMarksText.children[ i ] );
+					var item = groupMarksText.children[ i ];
+					groupMarksText.remove( item );
+					if( item instanceof THREE.Sprite )
+						for ( var i = 0; i < axesHelper.arraySpriteText.length; i++ ) {
+
+							var sprite = axesHelper.arraySpriteText[i];
+							if ( sprite.uuid === item.uuid ) {
+
+								axesHelper.arraySpriteText.splice( i, 1 );
+								break;
+
+							}
+
+						};
 
 				}
 

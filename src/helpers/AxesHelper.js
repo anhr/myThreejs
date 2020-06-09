@@ -66,12 +66,16 @@ export var AxesHelperOptions = {
  */
 
 /**
- * An axis object to visualize the 3 axes. Extention of https://threejs.org/docs/index.html#api/en/helpers/AxesHelper
+ * An axis object to . Extention of https://threejs.org/docs/index.html#api/en/helpers/AxesHelper
  * @param {number} size size of the lines representing the axes. Default is 1.
  * @param {object} [options] followed options is available
  * @param {boolean} [options.negativeAxes] true - draw negative axes. Default is false.
  * @param {cookie} [options.cookie] Your custom cookie function for saving and loading of the AxesHelper settings. Default cookie is not saving settings.
  * @param {cookie} [options.cookieName] Name of the cookie is "AxesHelper" + options.cookieName. Default is undefined.
+ * @param {number} [options.dimensions] 1 - visualize the X axes
+ * 2 - visualize the X and Y axes
+ * 3 - visualize the X, Y and Z axes
+ * Default is 3.
  * @param {string|number|number[]} [options.colors] axes colors string or number or array
 //Each string or number or array color item defines the intensity of color as an value between 0 and 1.
 //      0 is dark
@@ -170,6 +174,13 @@ export function AxesHelper( size, options ) {
 	this.options = options;
 
 	options.negativeAxes = options.negativeAxes || false;
+	if ( typeof options.dimensions !== "number" ) {
+
+		if ( options.dimensions !== undefined )
+			console.warn( 'AxesHelper: options.dimensions = ' + options.dimensions );
+		options.dimensions = 3;
+
+	}
 
 	this.setSettings = function () {
 
@@ -195,13 +206,13 @@ export function AxesHelper( size, options ) {
 		var scales = options.scales;
 		var scale = new THREE.Vector3(
 			Math.abs( scales.x.min - scales.x.max ) / 2,
-			Math.abs( scales.y.min - scales.y.max ) / 2,
-			Math.abs( scales.z.min - scales.z.max ) / 2
+			scales.y === undefined ? 1 : Math.abs( scales.y.min - scales.y.max ) / 2,
+			scales.z === undefined ? 1 : Math.abs( scales.z.min - scales.z.max ) / 2
 		),
 			position = new THREE.Vector3(
 				( scales.x.min + scales.x.max ) / 2,
-				( scales.y.min + scales.y.max ) / 2,
-				( scales.z.min + scales.z.max ) / 2,
+				scales.y === undefined ? 0 : ( scales.y.min + scales.y.max ) / 2,
+				scales.z === undefined ? 0 : ( scales.z.min + scales.z.max ) / 2,
 			);
 		return {
 
@@ -302,6 +313,10 @@ export function AxesHelper( size, options ) {
 
 	THREE.LineSegments.call( this, geometry, material );
 */
+
+	var groupAxesScales = new THREE.Group(), groupAxes = new THREE.Group();
+	groupAxes.add( groupAxesScales );
+
 	function drawAxis( scaleIndex ) {
 
 		var material = new THREE.LineBasicMaterial( { color: getColor( scaleIndex * 2 + 1 ) } ),
@@ -319,24 +334,40 @@ export function AxesHelper( size, options ) {
 			THREE.Line.call( axesHelper, geometry, material );
 		else {
 
+/*
 			if ( !groupAxes )
 				groupAxes = new THREE.Group();
+*/
 			//линии по остальным осям а также все метки и надписи являются дочерними от линии по оси x
 			groupAxes.add( new THREE.Line( geometry, material ) );
+/*
 			if ( !groupAxesScales ) {
 
 				groupAxesScales = new THREE.Group();
 				groupAxes.add( groupAxesScales );
 
 			}
+*/
 
 		}
 
 	}
-	drawAxis( axesHelper.axesEnum.x );
-	drawAxis( axesHelper.axesEnum.y );
-	drawAxis( axesHelper.axesEnum.z );
+	if ( ( typeof options.dimensions !== "number" ) || (options.dimensions < 1 ) ) {
 
+		console.warn( 'AxesHelper: options.dimensions = ' + options.dimensions );
+		options.dimensions = 1;
+
+	}
+	drawAxis( axesHelper.axesEnum.x );
+	if ( options.dimensions > 1 )
+		drawAxis( axesHelper.axesEnum.y );
+	if ( options.dimensions > 2 ) {
+		
+		drawAxis( axesHelper.axesEnum.z );
+		if ( options.dimensions !== 3 )
+			console.warn( 'AxesHelper: options.dimensions = ' + options.dimensions );
+
+	}
 	function getVerticePosition( verticeIndex ) {
 
 		verticeIndex *= 3;
@@ -367,7 +398,6 @@ export function AxesHelper( size, options ) {
 
 	//axes scales
 
-	var groupAxesScales, groupAxes;
 	this.displayScales = function ( visible ) { groupAxesScales.visible = visible; }
 
 	//
@@ -412,14 +442,29 @@ export function AxesHelper( size, options ) {
 	};
 	function addAxesScales() {
 
-		var groupMarksTextX = new THREE.Group(), groupMarksTextY = new THREE.Group(), groupMarksTextZ = new THREE.Group();
+		var groupMarksTextX, groupMarksTextY, groupMarksTextZ;
 
 		if ( !groupAxesScales )
 			groupAxesScales = new THREE.Group();
 
-		groupAxesScales.add( groupMarksTextX );
-		groupAxesScales.add( groupMarksTextY );
-		groupAxesScales.add( groupMarksTextZ );
+		if ( options.dimensions > 0 ) {
+
+			groupMarksTextX = new THREE.Group();
+			groupAxesScales.add( groupMarksTextX );
+
+		}
+		if ( options.dimensions > 1 ) {
+
+			groupMarksTextY = new THREE.Group();
+			groupAxesScales.add( groupMarksTextY );
+
+		}
+		if ( options.dimensions > 2 ) {
+
+			groupMarksTextZ = new THREE.Group();
+			groupAxesScales.add( groupMarksTextZ );
+
+		}
 
 		//////////////////////////////////////////
 		//The label keeps facing to you
@@ -513,6 +558,10 @@ export function AxesHelper( size, options ) {
 				groupAxesScales.add( mesh );
 
 			}
+
+			if ( groupMarksText === undefined )
+				return;
+				
 			drawCone( {
 
 				position: position,
@@ -660,11 +709,15 @@ export function AxesHelper( size, options ) {
 		//
 
 //		axesHelper.add( groupAxesScales );
-		axesHelper.add( groupAxes );
-		if ( options.scene !== undefined ) {
+		if ( axesHelper.children !== undefined ) {
 
-			axesHelper.scale.divide( options.scene.scale );
-			axesHelper.position.sub( options.scene.position ).multiply( axesHelper.scale );
+			axesHelper.add( groupAxes );
+			if ( options.scene !== undefined ) {
+
+				axesHelper.scale.divide( options.scene.scale );
+				axesHelper.position.sub( options.scene.position ).multiply( axesHelper.scale );
+
+			}
 
 		}
 
@@ -887,8 +940,8 @@ export function AxesHelper( size, options ) {
 
 		axesHelper.position.set(
 			( options.scales.x.min + options.scales.x.max ) / 2,
-			( options.scales.y.min + options.scales.y.max ) / 2,
-			( options.scales.z.min + options.scales.z.max ) / 2
+			options.scales.y === undefined ? 0 : ( options.scales.y.min + options.scales.y.max ) / 2,
+			options.scales.z === undefined ? 0 : ( options.scales.z.min + options.scales.z.max ) / 2
 		);
 
 		//		dotLines.remove();
@@ -932,16 +985,10 @@ export function getScalesOptions( options, cookieName ) {
 	options.scales.precision = options.scales.precision || 4;
 
 	options.scales.x = getAxis( options.scales.x, 'X' );
-	options.scales.y = getAxis( options.scales.y, 'Y' );
-	options.scales.z = getAxis( options.scales.z, 'Z' );
-	/*
-		options.scales.t = options.scales.t || {};
-		options.scales.t.zoomMultiplier = options.scales.t.zoomMultiplier || 2;
-		options.scales.t.offset = options.scales.t.offset || 1;
-		options.scales.t.name = options.scales.t.name || 'T';
-		options.scales.t.min = options.scales.t.min !== undefined ? options.scales.t.min : 0;
-		options.scales.t.max = options.scales.t.max !== undefined ? options.scales.t.max : 1;
-	*/
+	if ( options.dimensions > 1 )
+		options.scales.y = getAxis( options.scales.y, 'Y' );
+	if ( options.dimensions > 2 )
+		options.scales.z = getAxis( options.scales.z, 'Z' );
 	const optionsDefault = {};
 	optionsDefault.scales = JSON.parse( JSON.stringify( options.scales ) );
 	Object.freeze( optionsDefault );

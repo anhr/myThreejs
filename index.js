@@ -51,7 +51,10 @@ import {
 //import * as THREE from '../../three.js/dev/build/three.module.js';
 //import * as THREE from 'https://threejs.org/build/three.module.js';
 //import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText } from '../../nodejs/three.js';
-import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText } from './three.js';
+import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText, SpriteTextGui } from './three.js';
+
+//import { GUI } from '../../three.js/dev/examples/jsm/libs/dat.gui.module.js';
+import { dat } from '../../commonNodeJS/master/dat.module.js';
 
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 import cookie from '../../cookieNodeJS/master/cookie.js';
@@ -70,7 +73,7 @@ import Player from './player.js';
 //import OrbitControlsGui from 'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js';
 import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';
 
-import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
+//import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
 import clearThree from '../../commonNodeJS/master/clearThree.js';
 import ColorPicker from '../../colorpicker/master/colorpicker.js';
 import PositionController from '../../commonNodeJS/master/PositionController.js';
@@ -79,6 +82,7 @@ import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 //import { StereoEffect, spatialMultiplexsIndexs } from '../../three.js/dev/examples/jsm/effects/StereoEffect.js';
 //import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
 import { myPoints } from './myPoints/myPoints.js';
+import { MoveGroup } from './MoveGroup.js';
 
 //https://github.com/mrdoob/stats.js/
 //import Stats from '../../three.js/dev/examples/jsm/libs/stats.module.js';
@@ -93,7 +97,8 @@ var debug = true,
 	url = 'localhost/threejs',//'192.168.1.2'//ATTENTION!!! localhost is not available for debugging of the mobile devices
 	min = '';//min.
 */
-var palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
+//var palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
+/*
 palette.toColor = function ( value, min, max ) {
 
 	if ( value instanceof THREE.Color )
@@ -104,6 +109,7 @@ palette.toColor = function ( value, min, max ) {
 	return new THREE.Color( "rgb(" + c.r + ", " + c.g + ", " + c.b + ")" );
 
 }
+*/
 function arrayContainersF(){
 
 	var array = [];
@@ -147,10 +153,21 @@ var arrayCreates = [];
  * @param {HTMLElement|string} [options.elContainer] If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui.
  * If a string, then is id of the HTMLElement.
  * Default is document.getElementById( "containerDSE" ) or a div element, child of body.
+ * @param {object} [options.camera] camera
+ * @param {THREE.Vector3} [options.camera.position] camera position. Default is new THREE.Vector3( 0.4, 0.4, 2 ).
+ * @param {THREE.Vector3} [options.camera.scale] camera scale. Default is new THREE.Vector3( 1, 1, 1 ).
+ * @param {object} [options.scene] scene
+ * @param {THREE.Vector3} [options.scene.position] scene position. Default is new THREE.Vector3( 0, 0, 0 )
  * @param {object} [options.orbitControls] use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
  * @param {boolean} [options.orbitControls.gui] true - displays the orbit controls gui. Default is false.
- * @param {boolean} [options.axesHelper] true - displays the AxesHelper. Default the axes is not visible.
+ * @param {object} [options.axesHelper] add the AxesHelper. Default the axes is not visible.
+ * @param {number} [options.axesHelper.dimensions] 1 - visualize the X axes
+ * 2 - visualize the X and Y axes
+ * 3 - visualize the X, Y and Z axes
+ * Default is 3.
+ * @param {number} [options.axesHelper.position] axesHelper position. Default is new THREE.Vector3( 0, 0, 0 )
  * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.
+ * @param {object} [options.spriteText] spriteText options. See SpriteText options for details. Default undefined.
  * @param {boolean} [options.stereoEffect] true - use stereoEffect https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js. Default is false.
  * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui Default is false.
  * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui](https://github.com/anhr/dat.gui) for playing of 3D objects in my projects.
@@ -164,6 +181,10 @@ var arrayCreates = [];
  * arrayCloud: options.arrayCloud
  * on the pointsOptions of the myThreejs.points function.
  * Default is undefined
+ * @param {ColorPicker.palette|object} [options.palette] Color of points.
+ * ColorPicker.palette - custom palette
+ * object - palette is new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } )
+ * Default is undefined - White color of all points.
  * @param {object} [options.player] 3D objects animation.
  * @param {number} [options.player.min] Animation start time. Default is 0.
  * @param {number} [options.player.max] Animation end time. Default is 1.
@@ -173,13 +194,13 @@ var arrayCreates = [];
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
  * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
  * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
+ * @param {boolean} [options.cookie] true - save settings to cookie
  *
  * @param {object} [options.point] point settings. Applies to points with ShaderMaterial.
  * See https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial for details.
  * The size of the point seems constant and does not depend on the distance to the camera.
  * @param {number} [options.point.size] The apparent angular size of a point in radians. Default is 0.02.
  * @param {object} [options.stats] Use JavaScript Performance Monitor. https://github.com/mrdoob/stats.js/ . Dafault is not defined.
- * 
  * @param {object} [options.scales] axes scales. Default is {}
  * @param {boolean} [options.scales.display] true - displays the label and scale of the axes. Default is false.
  * @param {number} [options.scales.precision] Formats a scale marks into a specified length. Default is 4
@@ -277,6 +298,42 @@ export function create( createXDobjects, options ) {
 		return;
 
 	options = options || {};
+/*	
+	options.axesHelper = options.axesHelper || {};
+	options.axesHelper.dimensions = options.axesHelper.dimensions || 3;
+	options.axesHelper.position = options.axesHelper.position || new THREE.Vector3();
+*/
+	options.camera = options.camera || {};
+	options.camera.position = options.camera.position || new THREE.Vector3( 0.4, 0.4, 2 );
+	options.camera.scale = options.camera.scale || new THREE.Vector3( 1, 1, 1 );
+
+/*
+	options.scene = options.scene || {};
+options.scene.position = new THREE.Vector3();//Пока что не сдвигаю сцену потому что не разобрался почему сцена неправильно сдвигается когда нажимаю 'Restore Orbit controls settings.'
+	//options.scene.position = options.scene.position || new THREE.Vector3();
+*/	
+
+	if ( options.cookie === undefined )
+		options.cookie = new cookie.defaultCookie();
+	else options.cookie = cookie;
+
+	if ( options.palette !== undefined )
+	{
+
+		if ( options.palette instanceof ColorPicker.palette === false )
+			options.palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
+		options.palette.toColor = function ( value, min, max ) {
+
+			if ( value instanceof THREE.Color )
+				return value;
+			var c = this.hsv2rgb( value, min, max );
+			if ( c === undefined )
+				c = { r: 255, g: 255, b: 255 }
+			return new THREE.Color( "rgb(" + c.r + ", " + c.g + ", " + c.b + ")" );
+
+		}
+
+	} else options.palette = { toColor: function () { return new THREE.Color( 0xffffff ) } }//white
 
 	if ( options.arrayCloud !== undefined ) {
 
@@ -305,16 +362,22 @@ export function create( createXDobjects, options ) {
 	options.scales = options.scales || {};
 	function getAxis( axix, name, min, max ) {
 
-		axix = axix || {};
-		axix.name = axix.name || name;
-		axix.min = axix.min !== undefined ? axix.min : min === undefined ? - 1 : min;
-		axix.max = axix.max !== undefined ? axix.max : max === undefined ?   1 : max;
+		//axix = axix || {};
+		if ( axix ) {
+
+			axix.name = axix.name || name;
+			axix.min = axix.min !== undefined ? axix.min : min === undefined ? - 1 : min;
+			axix.max = axix.max !== undefined ? axix.max : max === undefined ?   1 : max;
+
+		}
 		return axix;
 
 	}
 	options.scales.x = getAxis( options.scales.x, 'X' );
 	options.scales.y = getAxis( options.scales.y, 'Y' );
 	options.scales.z = getAxis( options.scales.z, 'Z' );
+	if ( !options.scales.x && !options.scales.y && !options.scales.z )
+		console.warn( 'myThreejs.create: scales is undefined.' );
 	if ( options.scales.w === undefined )
 		options.scales.w = { name: 'W', min: -1, max: 1 };
 	options.scales.w = getAxis( options.scales.w, 'W', options.scales.w.min, options.scales.w.max );
@@ -422,7 +485,8 @@ export function create( createXDobjects, options ) {
 		elContainer.innerHTML = loadFile.sync( '/anhr/myThreejs/master/canvasContainer.html' );
 		elContainer = elContainer.querySelector( '.container' );
 
-		var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 ),
+		//var defaultCameraPosition = new THREE.Vector3( 0.4, 0.4, 2 );
+		//var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 );
 
 		//ось z смотрит точно на камеру
 		//camera.rotation = 0
@@ -430,7 +494,7 @@ export function create( createXDobjects, options ) {
 		//camera.position.x = 0;
 		//camera.position.y = 0;
 		//camera.position.z = 2;
-		//var defaultCameraPosition = new THREE.Vector3( 0, 0, 2 ),
+		//options.camera.position = new THREE.Vector3( 0, 0, 2 );
 
 		//ось x смотрит точно на камеру
 		//camera.rotation.x = 0
@@ -440,10 +504,9 @@ export function create( createXDobjects, options ) {
 		//camera.position.x = 2;
 		//camera.position.y = 0;
 		//camera.position.z = 0;
-//		var defaultCameraPosition = new THREE.Vector3( 2, 0, 0 ),
+//		options.camera.position = new THREE.Vector3( 2, 0, 0 );
 																	
-//		var defaultCameraPosition = new THREE.Vector3( 0, 0.4, 2 ),
-			renderer,
+		var renderer,
 
 			cursor,//default
 
@@ -549,10 +612,13 @@ export function create( createXDobjects, options ) {
 
 		function init() {
 
+			var optionsScene = { position: new THREE.Vector3() }
+
 			// CAMERA
 
 			camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 );
-			camera.position.copy( defaultCameraPosition );
+			camera.position.copy( options.camera.position );
+			camera.scale.copy( options.camera.scale );
 			options.point.sizePointsMaterial = 100;//size of points with material is not ShaderMaterial is options.point.size / options.point.sizePointsMaterial
 
 			// SCENE
@@ -560,6 +626,7 @@ export function create( createXDobjects, options ) {
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x000000 );
 			scene.fog = new THREE.Fog( 0x000000, 250, 1400 );
+//			scene.position.copy( options.scene.position );
 
 			//
 
@@ -607,7 +674,7 @@ export function create( createXDobjects, options ) {
 						far: camera.far,
 						camera: camera,
 						stereoAspect: 1,
-						cookie: cookie,
+						cookie: options.cookie,
 						cookieName: cookieName === '' ? '' : '_' + cookieName,
 						elParent: canvas.parentElement,
 
@@ -702,9 +769,12 @@ export function create( createXDobjects, options ) {
 					//move light
 					function guiLightAxis( axesId ) {
 
-						var axesName = axesEnum.getName( axesId );
+						let axesName = axesEnum.getName( axesId ),
+							scale = scales[axesName];
+						if ( !scale )
+							return;
 						controllers[axesId] =
-							fLight.add( light.position, axesName, scales[axesName].min * multiplier, scales[axesName].max * multiplier )
+							fLight.add( light.position, axesName, scale.min * multiplier, scale.max * multiplier )
 								.onChange( function ( value ) {
 
 									if ( lightSource === undefined )
@@ -714,7 +784,8 @@ export function create( createXDobjects, options ) {
 									lightSource.geometry.attributes.position.needsUpdate = true;
 
 								} );
-						dat.controllerNameAndTitle( controllers[axesId], options.scales[axesName].name );
+//						dat.controllerNameAndTitle( controllers[axesId], options.scales[axesName].name );
+						dat.controllerNameAndTitle( controllers[axesId], scale.name );
 
 					}
 					guiLightAxis( axesEnum.x );
@@ -757,7 +828,7 @@ export function create( createXDobjects, options ) {
 
 			//item.material.size is NaN if item.material is ShaderMaterial
 			//Влияет только на точки без ShaderMaterial
-			raycaster.params.Points.threshold = 0.01;
+			raycaster.params.Points.threshold = 0.02;//0.01;
 			if ( raycaster.setStereoEffect !== undefined )
 				raycaster.setStereoEffect( {
 
@@ -879,13 +950,15 @@ export function create( createXDobjects, options ) {
 
 						axesHelper.exposePosition( position );
 
-					controllerWorld.x.setValue( position.x );
-					controllerWorld.y.setValue( position.y );
-					controllerWorld.z.setValue( position.z );
+					if ( controllerWorld.x ) controllerWorld.x.setValue( position.x );
+					if ( controllerWorld.y ) controllerWorld.y.setValue( position.y );
+					if ( controllerWorld.z ) controllerWorld.z.setValue( position.z );
 
 				}
 				function setValue( controller, v ) {
 
+					if ( !controller )
+						return;
 					var input = controller.domElement.querySelector( 'input' ),
 						readOnly = input.readOnly;
 					input.readOnly = false;
@@ -992,10 +1065,10 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					dislayEl( controllerOpacity, displayControllerOpacity );
 
 					var boReadOnly = intersectionSelected.object.userData.boFrustumPoints === true ? true : false;
-					controllerX.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					controllerY.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					controllerZ.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					controllerW.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					if ( controllerX ) controllerX.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					if ( controllerY ) controllerY.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					if ( controllerZ ) controllerZ.domElement.querySelector( 'input' ).readOnly = boReadOnly;
+					if ( controllerW ) controllerW.domElement.querySelector( 'input' ).readOnly = boReadOnly;
 					controllerColor.domElement.querySelector( 'input' ).readOnly = boReadOnly;
 					controllerOpacity.domElement.querySelector( 'input' ).readOnly = boReadOnly;
 					
@@ -1226,9 +1299,9 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					if ( isNotSetControllers() )
 						return;
 					var mesh = getMesh();
-					cScaleX.setValue( mesh.scale.x );
-					cScaleY.setValue( mesh.scale.y );
-					cScaleZ.setValue( mesh.scale.z );
+					if ( cScaleX ) cScaleX.setValue( mesh.scale.x );
+					if ( cScaleY ) cScaleY.setValue( mesh.scale.y );
+					if ( cScaleZ ) cScaleZ.setValue( mesh.scale.z );
 
 				}
 				function setPositionControllers() {
@@ -1236,9 +1309,9 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					if ( isNotSetControllers() )
 						return;
 					var mesh = getMesh();
-					cPosition.x.setValue( mesh.position.x );
-					cPosition.y.setValue( mesh.position.y );
-					cPosition.z.setValue( mesh.position.z );
+					if ( cPosition.x ) cPosition.x.setValue( mesh.position.x );
+					if ( cPosition.y ) cPosition.y.setValue( mesh.position.y );
+					if ( cPosition.z ) cPosition.z.setValue( mesh.position.z );
 
 				}
 				function setRotationControllers() {
@@ -1246,9 +1319,9 @@ if( typeof intersection.object.userData.arrayFuncs === "function" )
 					if ( isNotSetControllers() )
 						return;
 					var mesh = getMesh();
-					cRotations.x.setValue( mesh.rotation.x );
-					cRotations.y.setValue( mesh.rotation.y );
-					cRotations.z.setValue( mesh.rotation.z );
+					if ( cRotations.x ) cRotations.x.setValue( mesh.rotation.x );
+					if ( cRotations.y ) cRotations.y.setValue( mesh.rotation.y );
+					if ( cRotations.z ) cRotations.z.setValue( mesh.rotation.z );
 
 				}
 				this.add = function ( folder ) {
@@ -1440,12 +1513,24 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 							frustumPoints.updateCloudPoint( mesh );
 
 					}
-					cScaleX = dat.controllerZeroStep( fScale, scale, 'x', function ( value ) { setScale( 'x', value ); } );
-					dat.controllerNameAndTitle( cScaleX, options.scales.x.name );
-					cScaleY = dat.controllerZeroStep( fScale, scale, 'y', function ( value ) { setScale( 'y', value ); } );
-					dat.controllerNameAndTitle( cScaleY, options.scales.y.name );
-					cScaleZ = dat.controllerZeroStep( fScale, scale, 'z', function ( value ) { setScale( 'z', value ); } );
-					dat.controllerNameAndTitle( cScaleZ, options.scales.z.name );
+					if ( options.scales.x ) {
+
+						cScaleX = dat.controllerZeroStep( fScale, scale, 'x', function ( value ) { setScale( 'x', value ); } );
+						dat.controllerNameAndTitle( cScaleX, options.scales.x.name );
+
+					}
+					if ( options.scales.y ) {
+
+						cScaleY = dat.controllerZeroStep( fScale, scale, 'y', function ( value ) { setScale( 'y', value ); } );
+						dat.controllerNameAndTitle( cScaleY, options.scales.y.name );
+
+					}
+					if ( options.scales.z ) {
+
+						cScaleZ = dat.controllerZeroStep( fScale, scale, 'z', function ( value ) { setScale( 'z', value ); } );
+						dat.controllerNameAndTitle( cScaleZ, options.scales.z.name );
+
+					}
 
 					//Default scale button
 					buttonScaleDefault = fScale.add( {
@@ -1469,7 +1554,10 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 					function addAxisControllers( name ) {
 
-						var axesName = options.scales[name].name,
+						let scale = options.scales[name];
+						if ( !scale )
+							return;
+						var axesName = scale.name,
 							f = fPosition.addFolder( axesName );
 						f.add( new PositionController( function ( shift ) {
 
@@ -1521,6 +1609,9 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					var fRotation = fMesh.addFolder( lang.rotation );
 					function addRotationControllers( name ) {
 
+						let scale = options.scales[name];
+						if ( !scale )
+							return;
 						cRotations[name] = fRotation.add( new THREE.Vector3(), name, 0, Math.PI * 2, 1 / 360 ).
 							onChange( function ( value ) {
 
@@ -1538,7 +1629,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 									frustumPoints.updateCloudPoint( mesh );
 
 							} );
-						dat.controllerNameAndTitle( cRotations.x, options.scales.x.name );
+//						dat.controllerNameAndTitle( cRotations.x, options.scales.x.name );
+						dat.controllerNameAndTitle( cRotations[name], scale.name );
 
 					}
 					addRotationControllers( 'x' );
@@ -1705,7 +1797,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 								( scale.max - scale.min ) / 100 ).
 								onChange( function ( value ) {
 
-									var color = palette.toColor( value, controller.__min, controller.__max ),
+									var color = options.palette.toColor( value, controller.__min, controller.__max ),
 										attributes = intersection.object.geometry.attributes,
 										i = intersection.index;
 									setColorAttribute( attributes, i, color );
@@ -1715,53 +1807,63 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 										frustumPoints.updateCloudPointItem( intersection.object, intersection.index );
 
 								} );
-							controller.domElement.querySelector( '.slider-fg' ).style.height = '40%';
-							var elSlider = controller.domElement.querySelector( '.slider' );
-							ColorPicker.create( elSlider, {
+							if ( options.palette instanceof ColorPicker.palette ) {
 
-								palette: palette,
-								style: {
+								controller.domElement.querySelector( '.slider-fg' ).style.height = '40%';
+								var elSlider = controller.domElement.querySelector( '.slider' );
+								ColorPicker.create( elSlider, {
 
-									//border: '2px solid #303030',
-									//width: '65%',
-									//height: elSlider.offsetHeight / 2,//'50%',
+									palette: options.palette,
+									style: {
 
-								},
-								onError: function ( message ) { alert( 'Colorpicker error: ' + message ); }
+										//border: '2px solid #303030',
+										//width: '65%',
+										//height: elSlider.offsetHeight / 2,//'50%',
 
-							} );
-						} else {
-
-							axesName = axesEnum.getName( axesId );
-
-							scale = axesHelper === undefined ? options.scales[axesName] : //если я буду использовать эту строку то экстремумы шкал буду устанавливатся по умолчанию а не текущие
-								axesHelper.options.scales[axesName];
-							controller = fPoint.add( {
-
-								value: scale.min,
-
-							}, 'value',
-								scale.min,
-								scale.max,
-								( scale.max - scale.min ) / 100 ).
-								onChange( function ( value ) {
-
-									if ( isReadOnlyController( controller ) )
-										return;
-									var points = intersection.object;
-									points.geometry.attributes.position.array
-									[axesId + intersection.index * points.geometry.attributes.position.itemSize] = value;
-									points.geometry.attributes.position.needsUpdate = true;
-
-									exposePosition( intersection.index );
-
-									if ( frustumPoints !== undefined )
-										frustumPoints.updateCloudPointItem( points, intersection.index );
+									},
+									//onError: function ( message ) { alert( 'Colorpicker error: ' + message ); }
 
 								} );
 
+							}
+
+						} else {
+
+							axesName = axesEnum.getName( axesId );
+/*							
+if ( !axesHelper.options )
+	console.warn( 'axesGui: axesHelper.options = ' + axesHelper.options );
+*/	
+							scale = axesHelper === undefined ? options.scales[axesName] : //если я буду использовать эту строку то экстремумы шкал буду устанавливатся по умолчанию а не текущие
+								axesHelper.options ? axesHelper.options.scales[axesName] : undefined;
+							if ( scale )
+								controller = fPoint.add( {
+
+									value: scale.min,
+
+								}, 'value',
+									scale.min,
+									scale.max,
+									( scale.max - scale.min ) / 100 ).
+									onChange( function ( value ) {
+
+										if ( isReadOnlyController( controller ) )
+											return;
+										var points = intersection.object;
+										points.geometry.attributes.position.array
+										[axesId + intersection.index * points.geometry.attributes.position.itemSize] = value;
+										points.geometry.attributes.position.needsUpdate = true;
+
+										exposePosition( intersection.index );
+
+										if ( frustumPoints !== undefined )
+											frustumPoints.updateCloudPointItem( points, intersection.index );
+
+									} );
+
 						}
-						dat.controllerNameAndTitle( controller, scale.name );
+						if ( scale )
+							dat.controllerNameAndTitle( controller, scale.name );
 						return controller;
 
 					}
@@ -1818,10 +1920,16 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					//Point's world position axes controllers
 
 					function axesWorldGui( axesId, onChange ) {
-
+/*
+if ( !axesHelper.options )
+	console.warn( 'axesWorldGui: axesHelper.options = ' + axesHelper.options );
+*/	
 						var axesName = axesEnum.getName( axesId ),
-							scale = axesHelper === undefined ? options.scales[axesName] : axesHelper.options.scales[axesName],
-							controller = dat.controllerZeroStep( fPointWorld, { value: scale.min, }, 'value' );
+							scale = axesHelper === undefined ? options.scales[axesName] :
+								axesHelper.options ? axesHelper.options.scales[axesName] : undefined;
+						if ( !scale )
+							return;
+						let controller = dat.controllerZeroStep( fPointWorld, { value: scale.min, }, 'value' );
 						controller.domElement.querySelector( 'input' ).readOnly = true;
 						dat.controllerNameAndTitle( controller, scale.name );
 						return controller;
@@ -1956,7 +2064,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 				player = new Player( {
 
 					settings: options.player,
-					cookie: cookie,
+					cookie: options.cookie,
 					cookieName: '_' + getCanvasName(),
 					onChangeScaleT: function ( scale ) {
 
@@ -2107,6 +2215,16 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 			}
 
+			let moveGroup;
+			if ( options.moveScene )
+				moveGroup = new MoveGroup( scene, {
+
+					scales: options.scales,
+					cookie: options.cookie,
+					cookieName: getCanvasName(),
+
+				} );
+
 			// helper
 
 			if ( options.axesHelper ) {
@@ -2114,18 +2232,23 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 				var cookieName = getCanvasName();
 //				axesHelper = new THREE.AxesHelper
 				axesHelper = new AxesHelper
-					( 1 * scale, {
+					( scene, {
 
-					cookie: cookie,
+					cookie: options.cookie,
 					cookieName: cookieName === '' ? '' : '_' + cookieName,
 					scene: scene,
+					position: options.axesHelper.position,
+					scale: options.axesHelper.scale,
 					negativeAxes: true,
 					colors: colorsHelper / 0xff, //gray axes
 					colorsHelper: colorsHelper,
 					scales: options.scales,
+					dimensions: options.axesHelper.dimensions,
 
 				} );
-				scene.add( axesHelper );
+//				scene.add( axesHelper );
+
+				optionsScene.position = scene.position;
 
 				if ( controls !== undefined )
 					controls.update();//if scale != 1 and position != 0 of the screen, то после открытия canvas положение картинки смещено. Положение восстанавливается только если подвигать мышью
@@ -2134,12 +2257,24 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 			defaultPoint.size = options.point.size;
 
 			var pointName = 'Point_' + getCanvasName();
-			cookie.getObject( pointName, options.point, options.point );
+			options.cookie.getObject( pointName, options.point, options.point );
+
+			options.spriteText = options.spriteText || {};
+//options.spriteText.sizeDefault = new THREE.Sprite().setSize( camera.position, new THREE.Vector3( 0, 0, 1 ) );//1 / new THREE.Vector3().distanceTo( camera.position );
+//options.spriteText.sizeDefault = 1;//1 / new THREE.Vector3().distanceTo( camera.position );
+			//options.spriteText.sizeDefault = new THREE.Sprite().setSize( camera.position );//1 / new THREE.Vector3().distanceTo( camera.position );
+/*
+			if ( options.spriteText.size === true )
+				options.spriteText.size = options.spriteText.sizeDefault;
+			else if ( options.spriteText.size === false )
+				options.spriteText.size = 0;
+*/
+
 			createXDobjects( group, options );
 
 			if ( options.arrayCloud ) {//Array of points with cloud
 
-				frustumPoints = new FrustumPoints.create( camera, controls//, guiSelectPoint
+				frustumPoints = FrustumPoints.create( camera, controls//, guiSelectPoint
 					, group, 'FrustumPoints_' + getCanvasName(), stereoEffect.options.spatialMultiplex, renderer, options,
 					{//points and lines options.Default is { }
 
@@ -2181,7 +2316,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 						// Default is 100
 						square: true,// true - Square base of the frustum points.Default is false
 					},
-					cFrustumPoints, palette
+					cFrustumPoints, options.palette
 				);
 				cFrustumPoints.setFrustumPoints( frustumPoints );
 				options.arrayCloud.frustumPoints = frustumPoints;
@@ -2261,7 +2396,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 								else color = palette.toColor( execFunc( funcs, 'w', t, a, b ), min, max );
 
 							} else if ( typeof funcs.w === "number" )
-								color = palette.toColor( funcs.w, min, max );
+								color = options.palette.toColor( funcs.w, min, max );
 							else {
 
 								boSetColorAttribute = false;
@@ -2332,17 +2467,63 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 				//THREE.AxesHelper gui
 				if ( ( options.scene === undefined ) && ( typeof scene !== 'undefined' ) )
 					options.scene = scene;
-				options.cookie = cookie;
-				if ( options.axesHelperGui === true )
+//				options.cookie = cookie;
+				if ( options.axesHelperGui === true ) {
+
+					axesHelper.gui( fOptions );
+					/*
 					AxesHelperGui( fOptions, {
 
 						axesHelper: axesHelper,
 						options: options,
-						cookie: cookie,
+						cookie: options.cookie,
 						getLanguageCode: getLanguageCode,
 						guiSelectPoint: options.guiSelectPoint,
 
 					} );//, options );
+					*/
+				}
+				if ( options.spriteText && options.spriteText.gui ) {
+
+					SpriteTextGui( gui, group, {
+
+							parentFolder: fOptions,
+							getLanguageCode: getLanguageCode,
+//							cookie: { cookie: options.cookie },
+							cookie: options.cookie,
+							options: options.spriteText,
+/*							
+							options: {
+
+								textHeight: options.spriteText.textHeight,
+								sizeAttenuation: options.spriteText.sizeAttenuation,
+*/
+/*for AxesHelper
+								rect: {
+									displayRect: true,
+									borderThickness: 3,
+									borderRadius: 10,
+									backgroundColor: 'rgba( 0, 0, 0, 1 )',
+								},
+								precision: options.scales.precision,
+*/
+/*
+								cookie: { cookie: options.cookie },
+
+							}
+*/							
+
+						} );
+
+				}
+				if ( moveGroup )
+					moveGroup.gui( fOptions, {
+
+						//cookie: options.cookie,
+						getLanguageCode: getLanguageCode,
+						lang: { moveGroup: lang.moveGroup, }
+
+					} );
 
 				options.guiSelectPoint.addControllers();
 				
@@ -2423,7 +2604,7 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					} );
 					//					options.point.size = value;
 					folderPoint.size.setValue( value );
-					cookie.setObject( pointName, options.point );
+					options.cookie.setObject( pointName, options.point );
 
 				} )
 
@@ -2436,7 +2617,11 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					defaultF: function ( value ) {
 
 						controls.target = new THREE.Vector3();
-						camera.position.copy( defaultCameraPosition );
+						camera.position.copy( options.camera.position );
+						scene.position.copy( optionsScene.position );
+						//scene.position.add( options.axesHelper.position );
+						scene.position.add( options.scene.position );
+						//scene.position.copy( options.scene.position );
 						controls.object.position.copy( camera.position );
 						controls.update();
 
@@ -2690,10 +2875,14 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 				} );
 
 				//set size of the SpriteText
+if ( !axesHelper.arraySpriteText  )
+	console.warn( 'render: axesHelper.arraySpriteText = ' + axesHelper.arraySpriteText );
 				if (
 					( axesHelper !== undefined )
 					&& ( defaultPoint.size !== undefined )
+					&& axesHelper.options
 					&& axesHelper.options.scales.display
+					&& axesHelper.arraySpriteText
 				)
 					axesHelper.arraySpriteText.forEach( function ( spriteItem ) {
 
@@ -2725,10 +2914,10 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 	if ( options.dat !== undefined ) {
 
-		loadScript.sync( '../../../../dropdownMenu/master/styles/gui.css', optionsStyle );
+		loadScript.sync( '/anhr/dropdownMenu/master/styles/gui.css', optionsStyle );
 
 		//for .container class
-		loadScript.sync( '../../../../dropdownMenu/master/styles/menu.css', optionsStyle );
+		loadScript.sync( '/anhr/dropdownMenu/master/styles/menu.css', optionsStyle );
 
 	}
 
@@ -2950,6 +3139,8 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 			var funcs = arrayFuncs[i];
 			function getAxis(axisName) {
 
+				if ( typeof funcs === "number" )
+					funcs = new THREE.Vector4( funcs, 0, 0, 0 );
 				if ( ( funcs instanceof THREE.Vector2 ) || ( funcs instanceof THREE.Vector3 ) || ( funcs instanceof THREE.Vector4 ) ) {
 
 					return execFunc( funcs, axisName, t, a, b );
@@ -3068,7 +3259,11 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 					min = max - 1;
 
 				}
-				var color = palette.toColor( funcs === undefined ? new THREE.Vector4().fromBufferAttribute( optionsColor.positions, i ).w : funcs.w, min, max );
+/*
+				var color = options.palette ? options.palette.toColor( funcs === undefined ? new THREE.Vector4().fromBufferAttribute( optionsColor.positions, i ).w : funcs.w, min, max )
+					: new THREE.Color( "rgb(255, 255, 255)" );
+*/
+				var color = options.palette.toColor( funcs === undefined ? new THREE.Vector4().fromBufferAttribute( optionsColor.positions, i ).w : funcs.w, min, max );
 				optionsColor.colors.push( color.r, color.g, color.b );
 
 			} else if ( optionsColor.colors instanceof THREE.Float32BufferAttribute )
@@ -3185,12 +3380,15 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 			}
 			var screenPos = worldToScreen( pos );
 
+			var rect = options.spriteText.rect ? JSON.parse( JSON.stringify( options.spriteText.rect ) ) : {};
+			rect.displayRect = true;
+			rect.backgroundColor = 'rgba(0, 0, 0, 1)';
 			spriteTextIntersection = new SpriteText(
 				( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
 				( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
-				options.scales.x.name + ': ' + position.x +
-				'\n' + options.scales.y.name + ': ' + position.y +
-				'\n' + options.scales.z.name + ': ' + position.z +
+				( !options.scales.x ? '' : options.scales.x.name + ': ' + position.x ) +
+				( !options.scales.y ? '' : '\n' + options.scales.y.name + ': ' + position.y ) +
+				( !options.scales.z ? '' : '\n' + options.scales.z.name + ': ' + position.z ) +
 				(//w
 					!isArrayFuncs ?
 						'' :
@@ -3214,7 +3412,26 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 
 						).w
 				)
-				, {
+				, pos, {
+
+					textHeight: options.spriteText.textHeight,// || 0.2,
+					fontColor: options.spriteText.fontColor,// || textColor,
+					rect: rect,/*{
+
+						displayRect: true,
+						borderThickness: rect.borderThickness,//3,
+						borderRadius: rect.borderRadius,//10,
+						borderColor: rect.borderColor,//textColor,
+						//backgroundColor: options.spriteText.rect.backgroundColor,,
+						backgroundColor: 'rgba( 0, 0, 0, 1 )',
+
+					},
+					*/
+//					position: pos,
+					center: new THREE.Vector2( screenPos.x < ( canvas.width / 2 ) ? 0 : 1, screenPos.y < ( canvas.height / 2 ) ? 1 : 0 ),
+
+				}
+				/*{
 
 					textHeight: 0.2,
 					fontColor: textColor,
@@ -3227,11 +3444,11 @@ console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
 						backgroundColor: 'rgba( 0, 0, 0, 1 )',
 
 					},
-					position: pos,
+//					position: pos,
 					center: new THREE.Vector2( screenPos.x < ( canvas.width / 2 ) ? 0 : 1, screenPos.y < ( canvas.height / 2 ) ? 1 : 0 ),
 					cookieName: cookieName === '' ? '' : '_' + cookieName,
 
-				} );
+				}*/ );
 			spriteTextIntersection.name = spriteTextIntersectionName;
 			spriteTextIntersection.scale.divide( scene.scale );
 			scene.add( spriteTextIntersection );
@@ -3329,6 +3546,8 @@ var lang = {
 	traceTitle: 'Display the trace of the point movement.',
 	traceAllTitle: 'Display the trace of the movement of all points of the mesh.',
 
+	moveGroup: 'Move Scene',
+
 };
 
 switch ( getLanguageCode() ) {
@@ -3377,6 +3596,8 @@ switch ( getLanguageCode() ) {
 		lang.trace = 'Трек';
 		lang.traceTitle = 'Показать трек перемещения точки.';
 		lang.traceAllTitle = 'Показать трек перемещения всех точек выбранного 3D объекта.';
+
+		lang.moveGroup = 'Переместить сцену';
 
 		break;
 
@@ -3504,7 +3725,7 @@ function getObjectPosition( object, index ) {
  */
 export function points( arrayFuncs, group, options, pointsOptions ) {
 
-	options.palette = palette;
+//	options.palette = palette;
 	myPoints.create( arrayFuncs, group, options, pointsOptions);
 
 }

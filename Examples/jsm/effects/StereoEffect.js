@@ -6,13 +6,14 @@
  * @authod anhr / https://github.com/anhr/
 */
 
-//import * as THREE from "../../../build/three.module.js";
-//import { THREE } from '../../../../../nodejs/three.js';
-import { THREE } from '../../../three.js';
+import * as THREE from '../../../../../three.js/dev/build/three.module.js';
+//import { THREE } from '../../../three.js';
 import PositionController from '../../../../../commonNodeJS/master/PositionController.js';
 
 import cookie from '../../../../../cookieNodeJS/master/cookie.js';
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
+
+import { dat } from '../../../../../commonNodeJS/master/dat.module.js';
 
 //Attenttion!!! Save this file as UTF-8 for localization.
 

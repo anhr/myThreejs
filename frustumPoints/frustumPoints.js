@@ -28,7 +28,7 @@
  * 		indexArray: myThreejs.pushArrayCloud( options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
  *
  * 	}
-*
+ *
  *
  * @author Andrej Hristoliubov https://anhr.github.io/AboutMe/
  *
@@ -115,8 +115,8 @@ var debug = {
  */
 function create( camera, controls, group, cookieName, spatialMultiplex, renderer, options, shaderMaterialDefault, cFrustumPoints, palette ) {
 
-	if ( options.arrayCloud === undefined )
-		return;//нет точек с облаком. Поэтому нет смысла создавать frustumPoints
+	if ( ( options.arrayCloud === undefined ) || ( options.arrayCloud.length === 0 ) )
+		return undefined;//нет точек с облаком. Поэтому нет смысла создавать frustumPoints
 	shaderMaterialDefault = shaderMaterialDefault || {};
 	shaderMaterialDefault.point = shaderMaterialDefault.point || {};
 	shaderMaterialDefault.point.size = shaderMaterialDefault.point.size || 0;//0.01;//Size of each frustum point
@@ -851,10 +851,6 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 							var size = data.length / itemSize;
 							for ( var i = 0; i < size; i++ )
 								updateItem( i, options.palette.toColor( ( max - min ) * i / ( size - 1 ) + min, min, max ) );
-							/*
-														for ( var i = 0; i < data.length / itemSize; i++ )
-															updateItem( i, itemSize === 3 ? new THREE.Vector3( i, 0, 0 ) : itemSize === 2 ? new THREE.Vector2( i, 0 ) : i );
-							*/
 
 						}
 
@@ -1381,6 +1377,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 	// i.e. calculate scales, positions and rotation of the points.
 	//Converting of all points with cloud and shaderMaterial see getShaderMaterialPoints function in the myPoints.js file
 	this.updateCloudPoints();
+	return this;
 
 }
 

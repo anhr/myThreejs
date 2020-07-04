@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -604,6 +604,8 @@
 		{
 
 			elContainer: "canvasContainer1",//document.getElementById("canvasContainer1"),//id of the HTMLElement for canvas and HTMLElement with id="iframe-goes-in-here" for gui.
+			moveScene: {},
+			cookie: true,
 			orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
 			axesHelper: true,
 			axesHelperGui: true,
@@ -645,6 +647,7 @@
 
 			},
 			stats: {},//JavaScript Performance Monitor. https://github.com/mrdoob/stats.js/ .
+			palette: true,//new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } ),
 			scales: {
 
 				display: true,
@@ -660,23 +663,22 @@
 					//marks: 11,
 
 				},
-				/*
 				y: {
-
+					/*
 					//name: 'Temperature(degrees Celsius)',
 					min: -4,
 					max: 2,
+					*/
 
 				},
 				z: {
-
+					/*
 					name: 'Radius(m.)',
 					min: -110,
 					max: -100,
 					marks: 11,
-
+					*/
 				},
-				*/
 				w: {
 					name: 'energy',
 					min: -1,

@@ -12,7 +12,7 @@ import { ConvexBufferGeometry } from '../../three.js/dev/examples/jsm/geometries
 //import { ConvexBufferGeometry } from 'https://raw.githack.com/anhr/three.js/dev/examples/jsm/geometries/ConvexGeometry.js';
 
 import { StereoEffect, spatialMultiplexsIndexs } from '../../commonNodeJS/master/StereoEffect/StereoEffect.js';//https://github.com/anhr/commonNodeJS
-//import { StereoEffect, spatialMultiplexsIndexs } from 'https://raw.githack.com/anhr/commonNodeJS/master/StereoEffect.js';
+//import { StereoEffect, spatialMultiplexsIndexs } from 'https://raw.githack.com/anhr/commonNodeJS/master/StereoEffect/StereoEffect.js';
 
 import { SpriteText } from '../../SpriteText/master/SpriteText.js';//https://github.com/anhr/SpriteText
 //import { SpriteText } from 'https://raw.githack.com/anhr/SpriteText/master/SpriteText.js';

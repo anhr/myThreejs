@@ -15,11 +15,9 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-//Please download https://github.com/anhr/loadScriptNodeJS into ../loadScriptNodeJS folder
-import loadScript from '../../loadScriptNodeJS/master/loadScript.js';
+import loadScript from '../../loadScriptNodeJS/master/loadScript.js';//https://github.com/anhr/loadScriptNodeJS
 
-//Please download https://github.com/anhr/loadFileNodeJS into ../loadFileNodeJS folder
-import loadFile from '../../loadFileNodeJS/master/loadFile.js';
+import loadFile from '../../loadFileNodeJS/master/loadFile.js';//https://github.com/anhr/loadFileNodeJS
 
 //https://threejs.org/docs/#manual/en/introduction/Import-via-modules
 /*
@@ -50,17 +48,17 @@ import {
 */
 //import * as THREE from '../../three.js/dev/build/three.module.js';
 //import * as THREE from 'https://threejs.org/build/three.module.js';
-//import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText } from '../../nodejs/three.js';
-import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText, SpriteTextGui } from './three.js';
+//import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText, SpriteTextGui } from './three.js';
+import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperGui, SpriteText, SpriteTextGui } from './three.js';
 
 //import { GUI } from '../../three.js/dev/examples/jsm/libs/dat.gui.module.js';
-import { dat } from '../../commonNodeJS/master/dat.module.js';
+import { dat } from '../../commonNodeJS/master/dat/dat.module.js';//https://github.com/anhr/commonNodeJS
 
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 import cookie from '../../cookieNodeJS/master/cookie.js';
 
+import { getLanguageCode } from '../../commonNodeJS/master/lang.js';//https://github.com/anhr/commonNodeJS
 //import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
-import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 
 //import menuPlay from 'https://raw.githack.com/anhr/menuPlay/master/menuPlay.js';
 import menuPlay from '../../menuPlay/master/menuPlay.js';
@@ -71,18 +69,23 @@ import Player from './player.js';
 //import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';
 //import OrbitControlsGui from 'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js';
 //import OrbitControlsGui from 'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js';
-import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';
+import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';//https://github.com/anhr/commonNodeJS
 
 //import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
-import clearThree from '../../commonNodeJS/master/clearThree.js';
+import clearThree from '../../commonNodeJS/master/clearThree.js';//https://github.com/anhr/commonNodeJS
 import ColorPicker from '../../colorpicker/master/colorpicker.js';
-import PositionController from '../../commonNodeJS/master/PositionController.js';
+import PositionController from '../../commonNodeJS/master/PositionController.js';//https://github.com/anhr/commonNodeJS
 import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
-import ScaleController from '../../commonNodeJS/master/ScaleController.js';
+//import ScaleController from '../../commonNodeJS/master/ScaleController.js';
+
+import { GuiSelectPoint, getWorldPosition, getObjectLocalPosition, getObjectPosition } from '../../commonNodeJS/master/guiSelectPoint.js';//https://github.com/anhr/commonNodeJS
+//import { GuiSelectPoint, getWorldPosition } from 'https://raw.githack.com/anhr/commonNodeJS/master/guiSelectPoint.js';
+
 //import { StereoEffect, spatialMultiplexsIndexs } from '../../three.js/dev/examples/jsm/effects/StereoEffect.js';
 //import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
 import { myPoints } from './myPoints/myPoints.js';
-import { MoveGroup } from './MoveGroup.js';
+
+import { MoveGroup } from '../../commonNodeJS/master/MoveGroup.js';
 
 //https://github.com/mrdoob/stats.js/
 //import Stats from '../../three.js/dev/examples/jsm/libs/stats.module.js';
@@ -349,6 +352,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 			return count;
 
 		}
+		options.arrayCloud.cFrustumPointsF = cFrustumPointsF;
 
 	}
 	options.a = options.a || 1;
@@ -668,12 +672,12 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 				if ( StereoEffect !== undefined ) {
 
 					var cookieName = getCanvasName();
-					stereoEffect = new StereoEffect( renderer, {
+					stereoEffect = new StereoEffect( THREE, renderer, {
 
 						spatialMultiplex: spatialMultiplexsIndexs.Mono, //.SbS,
 						far: camera.far,
 						camera: camera,
-						stereoAspect: 1,
+						//stereoAspect: 1,
 						cookie: options.cookie,
 						cookieName: cookieName === '' ? '' : '_' + cookieName,
 						elParent: canvas.parentElement,
@@ -693,7 +697,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 				var strLight = 'mathBoxLight',
 					light,// = scene.getObjectByName( strLight ),
 					position = new THREE.Vector3( 0.5 * options.scale, 0.5 * options.scale, 0.5 * options.scale ), controllers = {},
-					axesEnum = AxesHelperOptions === undefined ? undefined : AxesHelperOptions.axesEnum,
+//					axesEnum = AxesHelperOptions === undefined ? undefined : AxesHelperOptions.axesEnum,
 					multiplier = 2 * options.scale;
 
 				function isLight() {
@@ -767,13 +771,13 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 					} ), lang.displayLight, lang.displayLightTitle );
 
 					//move light
-					function guiLightAxis( axesId ) {
+					function guiLightAxis( axesName ) {
 
-						let axesName = axesEnum.getName( axesId ),
-							scale = scales[axesName];
+//						let axesName = axesEnum.getName( axesId ),
+						const scale = scales[axesName];
 						if ( !scale )
 							return;
-						controllers[axesId] =
+						controllers[axesName] =
 							fLight.add( light.position, axesName, scale.min * multiplier, scale.max * multiplier )
 								.onChange( function ( value ) {
 
@@ -784,13 +788,12 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 									lightSource.geometry.attributes.position.needsUpdate = true;
 
 								} );
-//						dat.controllerNameAndTitle( controllers[axesId], options.scales[axesName].name );
-						dat.controllerNameAndTitle( controllers[axesId], scale.name );
+						dat.controllerNameAndTitle( controllers[axesName], scale.name );
 
 					}
-					guiLightAxis( axesEnum.x );
-					guiLightAxis( axesEnum.y );
-					guiLightAxis( axesEnum.z );
+					guiLightAxis( 'x' );
+					guiLightAxis( 'y' );
+					guiLightAxis( 'z' );
 
 					var restore = {
 
@@ -851,7 +854,8 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 							return;//No display information about frustum point
 						options.guiSelectPoint.select( intersection );
 						if ( ( intersection.object.type === "Points" ) && ( axesHelper !== undefined ) )
-							axesHelper.exposePosition( getPosition( intersection ) );
+							axesHelper.exposePosition( intersection );
+//							axesHelper.exposePosition( getPosition( intersection ) );
 
 					}
 
@@ -873,1139 +877,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 
 			group = new THREE.Group();
 			scene.add( group );
-			function guiSelectPointF() {
-
-				var f3DObjects, fPoint, cRestoreDefaultLocalPosition, fPointWorld, fPoints, cMeshs, fMesh,// mesh,
-					intersection, _this = this,
-					cScaleX, cScaleY, cScaleZ, cPosition = new THREE.Vector3(), cRotations = new THREE.Vector3(),
-					cPoints, selectedPointIndex = -1,
-					controllerX, controllerY, controllerZ, controllerW, cTrace, cTraceAll, controllerColor, controllerOpacity,
-					controllerWorld = new THREE.Vector3(),
-					boSetMesh = false;//Для предотвращения лишних вызовов exposePosition если выбрать точку и передвинуть камеру с помошью OrbitControls,
-				if ( options.arrayCloud )//Array of points with cloud
-					cFrustumPoints = new cFrustumPointsF( _this );
-				//сейчас exposePosition вызывается только один раз из this.setMesh
-				function dislayEl( controller, displayController ) {
-
-					if ( controller === undefined )
-						return;
-					if ( typeof displayController == "boolean" )
-						displayController = displayController ? 'block' : 'none';
-					var el = controller.domElement;
-					while ( el.tagName.toUpperCase() !== "LI" ) el = el.parentElement;
-					el.style.display = displayController;
-
-				}
-
-				function visibleTraceLine( intersection, value ) {
-
-					if ( intersection.object.userData.arrayFuncs === undefined )
-						return;
-					var index = intersection.index || 0,
-						point = intersection.object.userData.arrayFuncs[index],
-						line = point === undefined ? undefined : point.line;
-					if ( line !== undefined )
-						line.visible( value );
-					if ( !value )
-						return;
-					if ( point.line !== undefined )
-						return;
-					point.line = new traceLine();
-
-					//color
-					var color = intersection.object.geometry.attributes.color;
-					if ( color === undefined )
-						color = new THREE.Color( 0xffffff );//white
-					else {
-						var vector = new THREE.Vector3().fromArray( color.array, index * color.itemSize )
-						color = new THREE.Color( vector.x, vector.y, vector.z );
-					}
-
-					point.line.addPoint(
-
-						getObjectPosition( getMesh(), index ),
-						player.getSelectSceneIndex(),
-						color
-
-					);
-
-				}
-				function exposePosition( selectedPointIndex ) {
-
-					if ( selectedPointIndex === undefined )
-						selectedPointIndex = options.guiSelectPoint.getSelectedPointIndex();//Эта строка слишком медленно выполняется если число точек frustumPoints велико
-					//Поэтому selectedPointIndex беру из intersection.index индекс точки, над которй щелнул мышью
-					if ( selectedPointIndex === -1 )
-						return;
-
-					var position = getObjectPosition( cMeshs.__select.options[cMeshs.__select.options.selectedIndex].mesh, selectedPointIndex );
-
-					if ( ( axesHelper !== undefined ) )
-
-						// && ( ( mesh.userData.isInfo === undefined ) || ( mesh.userData.isInfo() ) ) )
-						//если делать эту проверку, то будут неправильно отображаться пунктирные линии для frustumPoints точки
-						//когда в настройках frustumPoints не стоит галочка info
-						//когда в gui пользователь выбрал точку frustumPoints из списка '3D objects'(этот пункт будет недоступен когда я уберу frustumPoints из списка '3D objects' когда в настройках frustumPoints не стоит галочка info)
-						//и когда пользователь передвигает камеру с помощью orbitControls
-
-						axesHelper.exposePosition( position );
-
-					if ( controllerWorld.x ) controllerWorld.x.setValue( position.x );
-					if ( controllerWorld.y ) controllerWorld.y.setValue( position.y );
-					if ( controllerWorld.z ) controllerWorld.z.setValue( position.z );
-
-				}
-				function setValue( controller, v ) {
-
-					if ( !controller )
-						return;
-					var input = controller.domElement.querySelector( 'input' ),
-						readOnly = input.readOnly;
-					input.readOnly = false;
-					controller.object[controller.property] = v;
-					if ( controller.__onChange )
-						controller.__onChange.call( controller, v );
-					controller.initialValue = v;
-					controller.updateDisplay();
-					input.readOnly = readOnly;
-					return controller;
-
-				}
-				function setPosition( intersectionSelected ) {
-
-					var positionLocal = getObjectLocalPosition( intersectionSelected.object, intersectionSelected.index );
-					setValue( controllerX, positionLocal.x );
-					setValue( controllerY, positionLocal.y );
-					setValue( controllerZ, positionLocal.z );
-
-					var position = getObjectPosition( intersectionSelected.object, intersectionSelected.index );
-					setValue( controllerWorld.x, position.x );
-					setValue( controllerWorld.y, position.y );
-					setValue( controllerWorld.z, position.z );
-
-					var displayControllerW, displayControllerColor, displayControllerOpacity, none = 'none', block = 'block';
-if( typeof intersection.object.userData.arrayFuncs === "function" )
-	console.error( 'arrayFuncs === "function" under constraction' );
-					var func = intersectionSelected.object.userData.arrayFuncs[intersectionSelected.index],
-						opasity,
-						color = func === undefined ?
-							undefined :
-							Array.isArray( func.w ) || ( typeof func.w === "function" ) ?
-								execFunc( func, 'w', group.userData.t, options.a, options.b ) :
-								func.w;
-
-					if ( color === undefined ) {
-
-						if ( intersectionSelected.object.geometry.attributes.ca === undefined )
-							console.error( 'Under constraction. цвет frustumPoints не известен потому что он вычисляется в шейдере D:\My documents\MyProjects\webgl\three.js\GitHub\myThreejs\master\frustumPoints\vertex.c' )
-						else {
-
-							var vColor = new THREE.Vector4().fromArray(
-								intersectionSelected.object.geometry.attributes.ca.array,
-								intersectionSelected.index * intersectionSelected.object.geometry.attributes.ca.itemSize );
-							color = new THREE.Color( vColor.x, vColor.y, vColor.z );
-							opasity = vColor.w;
-
-						}
-
-					}
-
-					if ( color instanceof THREE.Color ) {
-
-						displayControllerW = none;
-						displayControllerColor = block;
-						displayControllerOpacity = block;
-
-						//color
-						if ( intersectionSelected.object.userData.arrayFuncs === undefined ) {
-
-							displayControllerColor = none;
-							displayControllerOpacity = none;
-
-						} else {
-
-							var strColor = '#' + color.getHexString();
-							//Сначала надо установить initialValue потому что для FrustumPoints я устанвил readOnly для controllerColor.
-							//В этом случае я не могу отобразить цвет следующей точки FrustumPoints потому что в режиме readOnly
-							//при изменении цвета восстанвливается старый цвет из initialValue.
-							controllerColor.initialValue = strColor;
-							controllerColor.setValue( strColor );
-							controllerColor.userData = { intersection: intersectionSelected, };
-							if ( opasity !== undefined ) {
-
-								setValue( controllerOpacity, opasity );
-
-							} else displayControllerOpacity = none;
-							controllerOpacity.userData = { intersection: intersectionSelected, };
-
-						}
-
-					} else {
-
-						if ( controllerW === undefined )
-							displayControllerW = none;
-						else {
-
-							if ( color === undefined )
-								displayControllerW = none;
-							else {
-
-								setValue( controllerW, color );
-								displayControllerW = block;
-
-							}
-
-						}
-						displayControllerColor = none;
-						displayControllerOpacity = none;
-
-					}
-					dislayEl( controllerW, displayControllerW );
-					dislayEl( controllerColor, displayControllerColor );
-					dislayEl( controllerOpacity, displayControllerOpacity );
-
-					var boReadOnly = intersectionSelected.object.userData.boFrustumPoints === true ? true : false;
-					if ( controllerX ) controllerX.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					if ( controllerY ) controllerY.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					if ( controllerZ ) controllerZ.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					if ( controllerW ) controllerW.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					controllerColor.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					controllerOpacity.domElement.querySelector( 'input' ).readOnly = boReadOnly;
-					
-				}
-				this.setMesh = function () {
-
-					boSetMesh = true;
-					setScaleControllers();
-					setPositionControllers();
-					setRotationControllers();
-					exposePosition();
-					boSetMesh = false;
-
-				}
-				this.setPosition = function ( position, intersectionSelected ) {
-
-					for ( var i = 0; i < cMeshs.__select.length; i++ ) {
-
-						var option = cMeshs.__select[i];
-						//						if ( option.selected && ( parseInt( option.getAttribute( 'value' ) ) === intersectionSelected.object.userData.index - 1 ) )
-						if ( option.selected && Object.is( option.mesh, intersectionSelected.object ) ) {
-
-							setPosition( intersectionSelected );
-
-						}
-
-					}
-
-				}
-				this.getMeshIndex = function ( mesh ) {
-
-					if ( mesh === undefined )
-						return mesh;
-					var index;// = intersectionSelected.object.userData.index;
-					for ( index = 0; index < cMeshs.__select.options.length; index++ ) {
-
-						var option = cMeshs.__select.options[index];
-						if ( Object.is( option.mesh, mesh ) )
-							return index;
-
-					}
-					console.error( 'Invalid mesh "' + mesh.name + '" index' );
-
-				}
-				this.setIndexMesh = function ( index, mesh ) {
-
-					if ( index === undefined )
-						return;
-					cMeshs.__select.options[index].mesh = mesh;
-					this.selectPoint( -1 );
-
-				}
-				this.selectPoint = function ( index ) {
-
-					cPoints.__onChange( index );
-					cPoints.__select[index + 1].selected = true;
-
-				}
-				/**
-				 * removes a mesh from the select point GUI
-				 * @param {THREE.Mesh} mesh mesh for removing.
-				 */
-				this.removeMesh = function ( mesh ) {
-
-					var index = this.getMeshIndex( mesh ),
-						selectedIndex = cMeshs.__select.selectedIndex;
-					cMeshs.__select.remove( index );
-					if ( selectedIndex === index ) {
-
-						cPoints.__onChange( -1 );
-						_this.removePoints();
-
-					}
-
-				}
-				/**
-				 * adds new mesh into select point GUI
-				 * @param {THREE.Mesh} mesh new mesh.
-				 */
-				this.addMesh = function ( mesh ) {
-
-					if ( !options.dat )
-						return;
-/*
-					if ( mesh.userData.boFrustumPoints ) {
-
-						for ( var i = 0; i < cMeshs.__select.options.length; i++ ) {
-
-							var option = cMeshs.__select.options[i];
-							if ( ( option.mesh !== undefined ) && option.mesh.userData.boFrustumPoints )
-								return;//duplicate FrustumPoints. Сюда попадает когда пользователь меняет количество слоев или Y точек в FrustumPoints. 
-
-						}
-
-					}
-*/
-					//Test for duplicate item
-					for ( var i = 0; i < cMeshs.__select.options.length; i++ ) {
-
-						var option = cMeshs.__select.options[i];
-						if ( mesh.userData.boFrustumPoints && ( option.mesh !== undefined ) && option.mesh.userData.boFrustumPoints )
-							return;//duplicate FrustumPoints. Сюда попадает когда пользователь меняет количество слоев или Y точек в FrustumPoints. 
-						if ( option.mesh !== undefined && ( option.mesh.name === mesh.name ) ) {
-
-//							console.error('guiSelectPointF.addMesh: Duplicate item ' + mesh.name );
-							return;//сюда попадает когда создаются точки без shaderMaterial
-							//Сначала вызывается из myPoints create.Points function
-							//Потом из guiSelectPointF.addControllers
-
-						}
-
-					}
-					var opt = document.createElement( 'option' );
-					opt.innerHTML = cMeshs.__select.length + ' ' + ( mesh.name === '' ? mesh.constructor.name : mesh.name );
-					opt.mesh = mesh;
-					cMeshs.__select.appendChild( opt );
-
-				}
-				this.select = function ( intersectionSelected ) {
-
-					if ( !options.dat )
-						return;
-					var position = getObjectLocalPosition( intersectionSelected.object, intersectionSelected.index );
-					if ( f3DObjects === undefined ) {
-
-						console.error( 'Не знаю как сюда попасть' );
-
-					}
-
-					//f3DObjects.close();//если тут не закрывать папку, то ингода прорпадает скроллинг окна dat.GUI
-					//for testing:
-					//Open https://raw.githack.com/anhr/myThreejs/master/Examples/html/
-					//Set browser window height about 500 pixels.
-					//Click Full Screen button.
-					//Open Controls
-					//Click a point.The "Meshs" folder opens and you can see the scrolling of the dat.gui window.
-
-					//select mesh
-					var index = this.getMeshIndex( intersectionSelected.object );
-					if ( cMeshs.__select[index].selected === false ) {
-
-						cMeshs.__select[index].selected = true;
-						cMeshs.__onChange( index - 1 );
-
-					}
-
-					this.selectPoint2 = function ( selectedMesh ) {
-
-						if ( ( options.guiSelectPoint.renderPhase !== undefined ) && ( options.guiSelectPoint.renderPhase !== options.guiSelectPoint.renderPhaseEnum.ready ) )
-							return;
-						if ( ( intersectionSelected.index === undefined ) || isNaN( intersectionSelected.index ) )
-							return;
-
-						//сделал эту проверку потому что не могу придумать как удалить intersectionSelected.index когда пользователь врусную сменил mesh
-						if ( ( selectedMesh !== undefined ) && !Object.is( intersectionSelected.object, selectedMesh ) )
-							return;//Сначала пользователь выбрал точку с помошщью мыши
-						//Потом сменил Meshs/Select
-
-						if ( !intersectionSelected.object.userData.boFrustumPoints ) {
-
-							//fPoints.open();много времени на открытие когда много точек
-							cPoints.__select[intersectionSelected.index + 1].selected = true;
-
-						} else {//FrustumPoints
-						
-							cFrustumPoints.pointIndexes( intersectionSelected.object.userData.pointIndexes( intersectionSelected.index ) );
-							
-						}
-						var block = 'block';
-						fPoint.domElement.style.display = block;
-						fPointWorld.domElement.style.display = block;
-						intersection = intersectionSelected;
-						setPosition( intersectionSelected );
-
-						var mesh = getMesh();
-						var line = ( mesh.userData.arrayFuncs === undefined ) || (typeof intersection.object.userData.arrayFuncs === "function" ) ?
-							undefined :
-							mesh.userData.arrayFuncs[intersectionSelected.index].line;//You can not trace points if you do not defined the mesh.userData.arrayFuncs
-						cTrace.setValue( line === undefined ? false : line.isVisible() )
-
-						cRestoreDefaultLocalPosition.domElement.parentElement.parentElement.style.display =
-							intersection.object.userData.arrayFuncs === undefined ? 'none' : block;
-
-					}
-					this.selectPoint2();
-
-				}
-				this.isSelectedMesh = function ( meshCur ) { return getMesh() === meshCur }
-				this.getSelectedPointIndex = function () {
-
-					if ( ( cFrustumPoints !== undefined ) &&
-						cFrustumPoints.isDisplay() &&//FrustumPoints folder id not visible
-						frustumPoints.isDisplay()//The cDisplay checkbox of the frustumPoints' is checked
-					) {
-
-						var selectedIndex = cFrustumPoints.getSelectedIndex();
-						return selectedIndex === null ? - 1 : selectedIndex;
-
-					}
-					if ( cPoints === undefined ) {
-
-						if ( selectedPointIndex === undefined )
-							console.error( 'myThreejs.create.onloadScripts.init.guiSelectPoint.getSelectedPointIndex:  selectedPointIndex = ' + selectedPointIndex );
-						return selectedPointIndex;//options.dat !== true and gui === undefined. Do not use dat.gui
-
-					}
-					var index = cPoints.__select.selectedOptions[0].index;
-					return index - 1;
-
-				}
-				function getMesh() {
-
-					var selectedIndex = cMeshs.__select.options.selectedIndex;
-					if ( selectedIndex !== -1 )
-						return cMeshs.__select.options[cMeshs.__select.options.selectedIndex].mesh;
-					return undefined;
-
-				}
-				function isNotSetControllers() {
-
-					return ( getMesh() === undefined )
-						|| ( gui === undefined )
-						//					|| !mesh.userData.boFrustumPoints//не помню зачем это поставил
-						;
-				}
-				function setScaleControllers() {
-
-					if ( isNotSetControllers() )
-						return;
-					var mesh = getMesh();
-					if ( cScaleX ) cScaleX.setValue( mesh.scale.x );
-					if ( cScaleY ) cScaleY.setValue( mesh.scale.y );
-					if ( cScaleZ ) cScaleZ.setValue( mesh.scale.z );
-
-				}
-				function setPositionControllers() {
-
-					if ( isNotSetControllers() )
-						return;
-					var mesh = getMesh();
-					if ( cPosition.x ) cPosition.x.setValue( mesh.position.x );
-					if ( cPosition.y ) cPosition.y.setValue( mesh.position.y );
-					if ( cPosition.z ) cPosition.z.setValue( mesh.position.z );
-
-				}
-				function setRotationControllers() {
-
-					if ( isNotSetControllers() )
-						return;
-					var mesh = getMesh();
-					if ( cRotations.x ) cRotations.x.setValue( mesh.rotation.x );
-					if ( cRotations.y ) cRotations.y.setValue( mesh.rotation.y );
-					if ( cRotations.z ) cRotations.z.setValue( mesh.rotation.z );
-
-				}
-				this.add = function ( folder ) {
-
-					f3DObjects = folder.addFolder( lang.meshs );
-					var mesh,
-						buttonScaleDefault, buttonPositionDefault, buttonRotationDefault;
-
-					cMeshs = f3DObjects.add( { Meshs: lang.notSelected }, 'Meshs', { [lang.notSelected]: -1 } ).onChange( function ( value ) {
-
-						value = parseInt( value );
-						mesh = getMesh();
-
-						var display;
-						if ( mesh === undefined ) {
-
-							display = 'none';
-							mesh = undefined;
-							if ( axesHelper !== undefined )
-								axesHelper.exposePosition( getObjectPosition( getMesh(), value ) );
-
-						} else {
-
-
-							var displayDefaultButtons = mesh.userData.default === undefined ? 'none' : 'block';
-							buttonScaleDefault.domElement.parentElement.parentElement.style.display = displayDefaultButtons;
-							buttonPositionDefault.domElement.parentElement.parentElement.style.display = displayDefaultButtons;
-							buttonRotationDefault.domElement.parentElement.parentElement.style.display = displayDefaultButtons;
-
-							display = 'block';
-							var displayPoints = 'none', displayFrustumPoints = 'block';
-
-							cPoints.__onChange( -1 );
-							_this.removePoints();
-
-							if ( mesh.userData.controllers !== undefined ) {
-
-								//FrustumPoints
-								mesh.userData.controllers();// cFrustumPoints );
-
-							} else {
-
-								displayPoints = 'block';
-								displayFrustumPoints = 'none';
-
-								//заполеение списка точек может занять много времени. Например когда пользователь выбрал frustumPoint.
-								//Что бы веб страница не замирала на это время я разбиваю долгий процесс на фазы
-								//которые могут меняться во время вызова options.guiSelectPoint.render(); из myThreejs render()
-								//Во время фазы renderPhaseEnum.start курсор мыши меняется на 'progress'
-								options.guiSelectPoint.renderPhaseEnum = { start: 0, progress: 1, ready: 3 };
-								options.guiSelectPoint.renderPhase = options.guiSelectPoint.renderPhaseEnum.start;
-
-								var iPosition;
-
-								options.guiSelectPoint.render = function () {
-
-									switch ( options.guiSelectPoint.renderPhase ) {
-
-										case options.guiSelectPoint.renderPhaseEnum.start:
-
-											cursor = renderer.domElement.style.cursor;
-											renderer.domElement.style.cursor = 'progress';
-											renderer.cursor = renderer.domElement.style.cursor;//эта строка нужна что бы новый курсор оставался при движении мыши
-											options.guiSelectPoint.renderPhase = options.guiSelectPoint.renderPhaseEnum.progress;
-											iPosition = 0;
-											break;
-
-										case options.guiSelectPoint.renderPhaseEnum.progress:
-
-											var i = iPosition + 10000;
-											//console.warn( 'iPosition = ' + iPosition );
-											//Если после каждого входа на эту линию добавлять только один option
-											//то время запонения cPoints будет очень большим.
-											//Если добавлять все option сразу, то курсор не всегда будет меняться на 'progress'.
-											//В этом случае, что бы курсор поменялся на 'progress',
-											//надо будет быстро подвинуть курсор мыши сразу после щелчка на точке.
-											while ( iPosition < i ) {
-
-												if ( iPosition < mesh.geometry.attributes.position.count ) {
-
-													var opt = document.createElement( 'option' ),
-														name = mesh.userData.arrayFuncs === undefined ?
-															undefined :
-															mesh.userData.pointName === undefined ?
-																typeof mesh.userData.arrayFuncs === "function" ?
-																	undefined :
-																	mesh.userData.arrayFuncs[iPosition].name :
-																mesh.userData.pointName( iPosition );
-													opt.innerHTML = iPosition + ( name === undefined ? '' : ' ' + name );
-													opt.setAttribute( 'value', iPosition );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
-													cPoints.__select.appendChild( opt );
-													iPosition++;
-
-												} else {
-
-													renderer.domElement.style.cursor = cursor;
-													renderer.cursor = undefined;
-													options.guiSelectPoint.renderPhase = options.guiSelectPoint.renderPhaseEnum.ready;
-													options.guiSelectPoint.render = undefined;
-
-													if ( options.guiSelectPoint.selectPoint2 !== undefined )
-														options.guiSelectPoint.selectPoint2( mesh );
-													break;
-
-												}
-
-											}
-/*											
-console.warn( 'addPoints start. cursor: ' + renderer.domElement.style.cursor );
-											for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ ) {
-										
-												var opt = document.createElement( 'option' ),
-													name = mesh.userData.arrayFuncs === undefined ? undefined : mesh.userData.arrayFuncs[i].name;
-												opt.innerHTML = i + ( name === undefined ? '' : ' ' + name );
-												opt.setAttribute( 'value', i );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
-												cPoints.__select.appendChild( opt );
-										
-											}
-										
-console.warn( 'addPoints end. cursor: ' + renderer.domElement.style.cursor );
-											renderer.domElement.style.cursor = cursor;
-											renderer.cursor = undefined;
-											options.guiSelectPoint.renderPhase = options.guiSelectPoint.renderPhaseEnum.ready;
-											options.guiSelectPoint.render = undefined;
-										
-											options.guiSelectPoint.selectPoint2( mesh );
-*/
-											break;
-
-										default: console.error( 'Invalid renderPhase = ' + options.guiSelectPoint.renderPhase );
-
-									}
-
-								}
-
-							}
-							cPoints.domElement.parentElement.parentElement.style.display = displayPoints;
-							cTraceAll.domElement.parentElement.parentElement.style.display = displayPoints;
-							if ( cFrustumPoints !== undefined )
-								cFrustumPoints.display( displayFrustumPoints );
-
-							setScaleControllers();
-							setPositionControllers();
-							setRotationControllers();
-
-						}
-						fMesh.domElement.style.display = display;
-
-						if ( ( mesh !== undefined ) && ( mesh.userData.traceAll !== undefined ) )
-							cTraceAll.setValue( mesh.userData.traceAll );
-
-					} );
-					dat.controllerNameAndTitle( cMeshs, lang.select );
-
-					fMesh = f3DObjects.addFolder( lang.mesh );
-					fMesh.domElement.style.display = 'none';
-					fMesh.open();
-
-					//Scale
-
-					var fScale = fMesh.addFolder( lang.scale );
-					fScale.add( new ScaleController( function ( customController, action ) {
-
-						var zoom = customController.controller.getValue();
-						mesh.scale.x = action( mesh.scale.x, zoom );
-						mesh.scale.y = action( mesh.scale.y, zoom );
-						mesh.scale.z = action( mesh.scale.z, zoom );
-						mesh.needsUpdate = true;
-
-						setScaleControllers();
-						exposePosition();
-						if ( frustumPoints !== undefined )
-							frustumPoints.updateCloudPoint( mesh );
-
-					},
-						{
-
-							settings: { zoomMultiplier: 1.1, },
-							getLanguageCode: getLanguageCode,
-
-						} ) );
-					var scale = new THREE.Vector3();
-					function setScale( axesName, value ) {
-
-						mesh.scale[axesName] = value;
-						mesh.needsUpdate = true;
-						exposePosition();
-						if ( frustumPoints !== undefined )
-							frustumPoints.updateCloudPoint( mesh );
-
-					}
-					if ( options.scales.x ) {
-
-						cScaleX = dat.controllerZeroStep( fScale, scale, 'x', function ( value ) { setScale( 'x', value ); } );
-						dat.controllerNameAndTitle( cScaleX, options.scales.x.name );
-
-					}
-					if ( options.scales.y ) {
-
-						cScaleY = dat.controllerZeroStep( fScale, scale, 'y', function ( value ) { setScale( 'y', value ); } );
-						dat.controllerNameAndTitle( cScaleY, options.scales.y.name );
-
-					}
-					if ( options.scales.z ) {
-
-						cScaleZ = dat.controllerZeroStep( fScale, scale, 'z', function ( value ) { setScale( 'z', value ); } );
-						dat.controllerNameAndTitle( cScaleZ, options.scales.z.name );
-
-					}
-
-					//Default scale button
-					buttonScaleDefault = fScale.add( {
-
-						defaultF: function ( value ) {
-
-							mesh.scale.copy( mesh.userData.default.scale );
-							mesh.needsUpdate = true;
-
-							setScaleControllers();
-							exposePosition();
-
-						},
-
-					}, 'defaultF' );
-					dat.controllerNameAndTitle( buttonScaleDefault, lang.defaultButton, lang.defaultScaleTitle );
-
-					//Position
-
-					var fPosition = fMesh.addFolder( lang.position );
-
-					function addAxisControllers( name ) {
-
-						let scale = options.scales[name];
-						if ( !scale )
-							return;
-						var axesName = scale.name,
-							f = fPosition.addFolder( axesName );
-						f.add( new PositionController( function ( shift ) {
-
-							mesh.position[name] += shift;
-							mesh.needsUpdate = true;
-
-							setPositionControllers();
-							exposePosition();
-							if ( frustumPoints !== undefined )
-								frustumPoints.updateCloudPoint( mesh );
-
-						}, { getLanguageCode: getLanguageCode, } ) );
-
-						function setPosition( value ) {
-
-							mesh.position[name] = value;
-							mesh.needsUpdate = true;
-							exposePosition();
-
-						}
-						var position = new THREE.Vector3();
-
-						cPosition[name] = dat.controllerZeroStep( f, position, name, function ( value ) { setPosition( value ); } );
-						dat.controllerNameAndTitle( cPosition[name], axesName );
-
-					}
-					addAxisControllers( 'x' );
-					addAxisControllers( 'y' );
-					addAxisControllers( 'z' );
-
-					//Restore default position.
-					buttonPositionDefault = fPosition.add( {
-
-						defaultF: function ( value ) {
-
-							mesh.position.copy( mesh.userData.default.position );
-							mesh.needsUpdate = true;
-
-							setPositionControllers();
-							exposePosition();
-
-						},
-
-					}, 'defaultF' );
-					dat.controllerNameAndTitle( buttonPositionDefault, lang.defaultButton, lang.defaultPositionTitle );
-
-					//rotation
-
-					var fRotation = fMesh.addFolder( lang.rotation );
-					function addRotationControllers( name ) {
-
-						let scale = options.scales[name];
-						if ( !scale )
-							return;
-						cRotations[name] = fRotation.add( new THREE.Vector3(), name, 0, Math.PI * 2, 1 / 360 ).
-							onChange( function ( value ) {
-
-								var mesh = getMesh();
-								if ( !mesh.userData.boFrustumPoints ) {
-
-									mesh.rotation[name] = value;
-									mesh.needsUpdate = true;
-
-								}
-
-								if ( !boSetMesh )
-									exposePosition();
-								if ( frustumPoints !== undefined )
-									frustumPoints.updateCloudPoint( mesh );
-
-							} );
-//						dat.controllerNameAndTitle( cRotations.x, options.scales.x.name );
-						dat.controllerNameAndTitle( cRotations[name], scale.name );
-
-					}
-					addRotationControllers( 'x' );
-					addRotationControllers( 'y' );
-					addRotationControllers( 'z' );
-
-					//Default rotation button
-					buttonRotationDefault = fRotation.add( {
-
-						defaultF: function ( value ) {
-
-							mesh.rotation.copy( mesh.userData.default.rotation );
-							mesh.needsUpdate = true;
-
-							setRotationControllers();
-							exposePosition();
-
-						},
-
-					}, 'defaultF' );
-					dat.controllerNameAndTitle( buttonRotationDefault, lang.defaultButton, lang.defaultRotationTitle );
-
-					//Points
-
-					fPoints = fMesh.addFolder( lang.points );
-
-					cPoints = fPoints.add( { Points: lang.notSelected }, 'Points', { [lang.notSelected]: -1 } ).onChange( function ( value ) {
-
-						value = parseInt( value );
-						var display, position;
-						if ( value === -1 ) {
-
-							display = 'none';
-
-						} else {
-
-							display = 'block';
-							_this.select( { object: getMesh(), index: value } );
-
-						}
-						if ( axesHelper !== undefined )
-							axesHelper.exposePosition( getObjectPosition( getMesh(), value ) );
-						fPoint.domElement.style.display = display;
-						fPointWorld.domElement.style.display = display;
-
-					} );
-					cPoints.__select[0].selected = true;
-					dat.controllerNameAndTitle( cPoints, lang.select );
-					if ( cFrustumPoints !== undefined )
-						cFrustumPoints.create( fPoints, getLanguageCode() );
-					myThreejs.cFrustumPoints = cFrustumPoints;
-
-					//Points attribute position
-					fPoint = fPoints.addFolder( lang.point );
-					dat.folderNameAndTitle( fPoint, lang.point, lang.pointTitle );
-					fPoint.domElement.style.display = 'none';
-					//					fPoint.open();
-
-					//Points world position
-					fPointWorld = fPoints.addFolder( lang.pointWorld );
-					dat.folderNameAndTitle( fPointWorld, lang.pointWorld, lang.pointWorldTitle );
-					fPointWorld.domElement.style.display = 'none';
-					fPointWorld.open();
-
-					//displays the trace of the movement of all points of the mesh
-					cTraceAll = fPoints.add( { trace: false }, 'trace' ).onChange( function ( value ) {
-
-						var mesh = getMesh();
-						mesh.userData.traceAll = value;
-						for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
-							visibleTraceLine( { object: mesh, index: i }, value );
-						cTrace.setValue( value );
-
-					} );
-					dat.controllerNameAndTitle( cTraceAll, lang.trace, lang.traceAllTitle );
-					dislayEl( cTraceAll, options.player === undefined ? false : true );
-
-					//Restore default settings of all 3d objects button.
-					dat.controllerNameAndTitle( f3DObjects.add( {
-
-						defaultF: function ( value ) {
-
-							group.children.forEach( function ( mesh ) {
-
-								mesh.scale.copy( mesh.userData.default.scale );
-								mesh.position.copy( mesh.userData.default.position );
-								mesh.rotation.copy( mesh.userData.default.rotation );
-								mesh.needsUpdate = true;
-
-							} );
-							setScaleControllers();
-							setPositionControllers();
-							setRotationControllers();
-							exposePosition();
-
-						},
-
-					}, 'defaultF' ), lang.defaultButton, lang.default3DObjectTitle );
-
-				}
-				this.removePoints = function () {
-
-					//thanks to https://stackoverflow.com/a/48780352/5175935
-					cPoints.domElement.querySelectorAll( 'select option' ).forEach( option => option.remove() );
-					var opt = document.createElement( 'option' );
-					opt.innerHTML = lang.notSelected;
-					opt.setAttribute( 'value', -1 );//Эта строка нужна в случае когда пользователь отменил выбор точки. Иначе при движении камеры будут появляться пунктирные линии, указвающие на несуществующую точку
-					cPoints.__select.appendChild( opt );
-
-				}
-				this.addControllers = function () {
-
-					for ( var i = 0; i < group.children.length; i++ ) {
-
-						var mesh = group.children[i];
-						if ( mesh instanceof THREE.Group )
-							continue;
-						this.addMesh( mesh );
-
-					}
-
-					function isReadOnlyController( controller ) {
-
-						if ( controller.domElement.querySelector( 'input' ).readOnly ) {
-
-							if ( controller.getValue() !== controller.initialValue ) {
-
-								if ( controller.boSetValue === undefined ) {
-
-									controller.boSetValue = true;
-									setValue( controller, controller.initialValue );
-									controller.boSetValue = undefined;
-									controller.initialValue = controller.getValue();//Эта строка нужна в случае когда новое зачения невозможно установиь точно таким же, как initialValue
-													//Иначе перепонится стек
-
-								}
-
-							}
-							return true;
-
-						}
-						return false;
-
-					}
-
-					//Point's attribute position axes controllers
-
-					function axesGui( axesId, onChange ) {
-
-						var axesName, scale, controller;
-						if ( axesId > axesEnum.z ) {
-
-							//W axis
-							if ( options.scales.w === undefined )
-								return;
-							scale = options.scales.w;
-							controller = fPoint.add( {
-
-								value: scale.min,
-
-							}, 'value',
-								scale.min,
-								scale.max,
-								( scale.max - scale.min ) / 100 ).
-								onChange( function ( value ) {
-
-									var color = options.palette.toColor( value, controller.__min, controller.__max ),
-										attributes = intersection.object.geometry.attributes,
-										i = intersection.index;
-									setColorAttribute( attributes, i, color );
-									attributes.position.setW( i, value );
-
-									if ( frustumPoints !== undefined )
-										frustumPoints.updateCloudPointItem( intersection.object, intersection.index );
-
-								} );
-							if ( options.palette instanceof ColorPicker.palette ) {
-
-								controller.domElement.querySelector( '.slider-fg' ).style.height = '40%';
-								var elSlider = controller.domElement.querySelector( '.slider' );
-								ColorPicker.create( elSlider, {
-
-									palette: options.palette,
-									style: {
-
-										//border: '2px solid #303030',
-										//width: '65%',
-										//height: elSlider.offsetHeight / 2,//'50%',
-
-									},
-									//onError: function ( message ) { alert( 'Colorpicker error: ' + message ); }
-
-								} );
-
-							}
-
-						} else {
-
-							axesName = axesEnum.getName( axesId );
-/*							
-if ( !axesHelper.options )
-	console.warn( 'axesGui: axesHelper.options = ' + axesHelper.options );
-*/	
-							scale = axesHelper === undefined ? options.scales[axesName] : //если я буду использовать эту строку то экстремумы шкал буду устанавливатся по умолчанию а не текущие
-								axesHelper.options ? axesHelper.options.scales[axesName] : undefined;
-							if ( scale )
-								controller = fPoint.add( {
-
-									value: scale.min,
-
-								}, 'value',
-									scale.min,
-									scale.max,
-									( scale.max - scale.min ) / 100 ).
-									onChange( function ( value ) {
-
-										if ( isReadOnlyController( controller ) )
-											return;
-										var points = intersection.object;
-										points.geometry.attributes.position.array
-										[axesId + intersection.index * points.geometry.attributes.position.itemSize] = value;
-										points.geometry.attributes.position.needsUpdate = true;
-
-										exposePosition( intersection.index );
-
-										if ( frustumPoints !== undefined )
-											frustumPoints.updateCloudPointItem( points, intersection.index );
-
-									} );
-
-						}
-						if ( scale )
-							dat.controllerNameAndTitle( controller, scale.name );
-						return controller;
-
-					}
-					var axesEnum = AxesHelperOptions.axesEnum;
-					controllerX = axesGui( axesEnum.x );
-					controllerY = axesGui( axesEnum.y );
-					controllerZ = axesGui( axesEnum.z );
-					controllerW = axesGui( axesEnum.w );
-					controllerColor = fPoint.addColor( {
-
-						color: '#FFFFFF',
-
-					}, 'color' ).
-						onChange( function ( value ) {
-
-							if ( isReadOnlyController( controllerColor ) )
-								return;
-							if ( controllerColor.userData === undefined )
-								return;
-							var intersection = controllerColor.userData.intersection;
-							setColorAttribute( intersection.object.geometry.attributes, intersection.index, value );
-
-						} );
-					dat.controllerNameAndTitle( controllerColor, lang.color );
-					controllerOpacity = fPoint.add( {
-
-						opasity: 1,
-
-					}, 'opasity', 0, 1, 0.01 ).
-						onChange( function ( opasity ) {
-
-							if ( isReadOnlyController( controllerOpacity ) )
-								return;
-							var intersection = controllerColor.userData.intersection;
-							var points = intersection.object;
-							if ( points.geometry.attributes.ca === undefined )
-								return;//no opasity
-							points.geometry.attributes.ca.array
-							[3 + intersection.index * points.geometry.attributes.ca.itemSize] = opasity;
-							points.geometry.attributes.ca.needsUpdate = true;
-
-						} );
-					dat.controllerNameAndTitle( controllerOpacity, lang.opacity, lang.opacityTitle );
-
-					//displays the trace of the point movement
-					cTrace = fPoint.add( { trace: false }, 'trace' ).onChange( function ( value ) {
-
-						visibleTraceLine( intersection, value );
-
-					} );
-					dat.controllerNameAndTitle( cTrace, lang.trace, lang.traceTitle );
-					dislayEl( cTrace, options.player === undefined ? false : true );
-
-					//Point's world position axes controllers
-
-					function axesWorldGui( axesId, onChange ) {
-/*
-if ( !axesHelper.options )
-	console.warn( 'axesWorldGui: axesHelper.options = ' + axesHelper.options );
-*/	
-						var axesName = axesEnum.getName( axesId ),
-							scale = axesHelper === undefined ? options.scales[axesName] :
-								axesHelper.options ? axesHelper.options.scales[axesName] : undefined;
-						if ( !scale )
-							return;
-						let controller = dat.controllerZeroStep( fPointWorld, { value: scale.min, }, 'value' );
-						controller.domElement.querySelector( 'input' ).readOnly = true;
-						dat.controllerNameAndTitle( controller, scale.name );
-						return controller;
-
-					}
-					controllerWorld.x = axesWorldGui( axesEnum.x );
-					controllerWorld.y = axesWorldGui( axesEnum.y );
-					controllerWorld.z = axesWorldGui( axesEnum.z );
-
-					//Restore default local position.
-					cRestoreDefaultLocalPosition = fPoint.add( {
-
-						defaultF: function () {
-
-							var positionDefault = intersection.object.userData.arrayFuncs[intersection.index];
-							controllerX.setValue( typeof positionDefault.x === "function" ?
-								positionDefault.x( group.userData.t, options.a, options.b ) : positionDefault.x );
-							controllerY.setValue( typeof positionDefault.y === "function" ?
-								positionDefault.y( group.userData.t, options.a, options.b ) : positionDefault.y );
-							controllerZ.setValue( typeof positionDefault.z === "function" ?
-								positionDefault.z( group.userData.t, options.a, options.b ) :
-								positionDefault.z === undefined ? 0 ://default Z axis of 2D point is 0
-									positionDefault.z );
-
-							if ( positionDefault.w !== undefined ) {
-
-								if ( positionDefault.w.r !== undefined )
-									controllerColor.setValue( '#' +
-										new THREE.Color( positionDefault.w.r, positionDefault.w.g, positionDefault.w.b ).getHexString() );
-								else if ( typeof positionDefault.w === "function" )
-									setValue( controllerW, positionDefault.w( group.userData.t ) );
-								else console.error( 'Restore default local position: Invalid W axis.' );
-
-							} else {
-
-								controllerColor.setValue( controllerColor.initialValue );
-								controllerOpacity.setValue( controllerOpacity.initialValue );
-
-							}
-
-
-						},
-
-					}, 'defaultF' );
-					dat.controllerNameAndTitle( cRestoreDefaultLocalPosition, lang.defaultButton, lang.defaultLocalPositionTitle );
-
-				}
-				this.windowRange = function ( options ) {
-
-					pointLight1.windowRange( options.scales );
-					pointLight2.windowRange( options.scales );
-
-					controllerX.min( options.scales.x.min );
-					controllerX.max( options.scales.x.max );
-					controllerX.updateDisplay();
-
-					controllerY.min( options.scales.y.min );
-					controllerY.max( options.scales.y.max );
-					controllerY.updateDisplay();
-
-					controllerZ.min( options.scales.z.min );
-					controllerZ.max( options.scales.z.max );
-					controllerZ.updateDisplay();
-
-					if ( controllerW !== undefined ) {
-
-						controllerW.min( options.scales.w.min );
-						controllerW.max( options.scales.w.max );
-						controllerW.updateDisplay();
-
-					}
-
-				}
-
-			}
-			options.guiSelectPoint = new guiSelectPointF();
+//			options.guiSelectPoint = new GuiSelectPoint();
 
 			//dat-gui JavaScript Controller Library
 			//https://github.com/dataarts/dat.gui
@@ -2053,7 +925,7 @@ if ( !axesHelper.options )
 				//Thanks to https://stackoverflow.com/questions/41404643/place-dat-gui-strictly-inside-three-js-scene-without-iframe
 				elContainer.querySelector( '#my-gui-container' ).appendChild( gui.domElement );
 
-				options.guiSelectPoint.add( gui );
+//				options.guiSelectPoint.add( gui );
 
 			}
 
@@ -2113,6 +985,33 @@ if ( !axesHelper.options )
 					player.gui( fOptions, getLanguageCode );
 
 			}
+
+			//Settings for all SpriteText added to scene and child groups
+			if ( typeof SpriteTextGui !== "undefined" )
+				SpriteTextGui( fOptions, scene, {
+
+					getLanguageCode: getLanguageCode,
+					//settings: { zoomMultiplier: 1.5, },
+					cookie: cookie,
+					options: {
+
+						//rotation: 0,
+						//textHeight: 0.1 * scale,//0.05,
+						textHeight: 0.05,
+
+						//Camera frustum vertical field of view, from bottom to top of view, in degrees. Default is 50.
+						//Вертикальное поле обзора камеры, снизу вверх, в градусах.
+						//Если добавить эту настройку, то видимый размер текста не будет зависить от изменения camera.fov.
+						//Тогда textHeight будет вычисляться как options.fov * textHeight / 50
+						//Если не определить поле textHeight (см. выше) то textHeight = 0.04,
+						fov: camera.fov,
+
+						//sizeAttenuation: false,//true,//Whether the size of the sprite is attenuated by the camera depth. (Perspective camera only.) Default is false.
+
+					}
+
+				} );
+
 			if ( stereoEffect !== undefined ) {
 
 				stereoEffect.gui( fOptions, {
@@ -2215,7 +1114,7 @@ if ( !axesHelper.options )
 
 			}
 
-			let moveGroup;
+			var moveGroup;
 			if ( options.moveScene )
 				moveGroup = new MoveGroup( scene, {
 
@@ -2231,17 +1130,19 @@ if ( !axesHelper.options )
 
 				var cookieName = getCanvasName();
 //				axesHelper = new THREE.AxesHelper
-				axesHelper = new AxesHelper
-					( scene, {
+				axesHelper = new AxesHelper ( THREE, scene, {
 
 					cookie: options.cookie,
 					cookieName: cookieName === '' ? '' : '_' + cookieName,
 					scene: scene,
 					position: options.axesHelper.position,
 					scale: options.axesHelper.scale,
+					color: 'rgba(255, 255, 255, 0.5)',
+/*
 					negativeAxes: true,
 					colors: colorsHelper / 0xff, //gray axes
 					colorsHelper: colorsHelper,
+*/					
 					scales: options.scales,
 					dimensions: options.axesHelper.dimensions,
 
@@ -2252,6 +1153,83 @@ if ( !axesHelper.options )
 
 				if ( controls !== undefined )
 					controls.update();//if scale != 1 and position != 0 of the screen, то после открытия canvas положение картинки смещено. Положение восстанавливается только если подвигать мышью
+			}
+			if ( gui ) {
+
+				function visibleTraceLine( intersection, value, getMesh ) {
+
+					if ( intersection.object.userData.arrayFuncs === undefined )
+						return;
+					var index = intersection.index || 0,
+						point = intersection.object.userData.arrayFuncs[index],
+						line = point === undefined ? undefined : point.line;
+					if ( line !== undefined )
+						line.visible( value );
+					if ( !value )
+						return;
+					if ( point.line !== undefined )
+						return;
+					point.line = new traceLine();
+
+					//color
+					var color = intersection.object.geometry.attributes.color;
+					if ( color === undefined )
+						color = new THREE.Color( 0xffffff );//white
+					else {
+						var vector = new THREE.Vector3().fromArray( color.array, index * color.itemSize )
+						color = new THREE.Color( vector.x, vector.y, vector.z );
+					}
+
+					point.line.addPoint(
+
+						getObjectPosition( getMesh(), index ),
+						player.getSelectSceneIndex(),
+						color
+
+					);
+
+				}
+				var cTrace, intersection;
+				options.guiSelectPoint = new GuiSelectPoint( THREE, {
+
+					axesHelper: axesHelper,
+					options: options,
+					getLanguageCode: getLanguageCode,
+					setIntersection: function( _intersection ){ intersection = _intersection; },
+					//displays the trace of the movement of all points of the mesh
+					pointsControls: function( fPoints, dislayEl, getMesh ){
+
+						const cTraceAll = fPoints.add( { trace: false }, 'trace' ).onChange( function ( value ) {
+
+							var mesh = getMesh();
+							mesh.userData.traceAll = value;
+							for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
+								visibleTraceLine( { object: mesh, index: i }, value, getMesh );
+							cTrace.setValue( value );
+
+						} );
+						dat.controllerNameAndTitle( cTraceAll, lang.trace, lang.traceAllTitle );
+						dislayEl( cTraceAll, options.player === undefined ? false : true );
+						return cTraceAll;
+
+					},
+					//displays the trace of the point movement
+					pointControls: function( fPoint, dislayEl, getMesh ){
+
+						cTrace = fPoint.add( { trace: false }, 'trace' ).onChange( function ( value ) {
+
+							visibleTraceLine( intersection, value, getMesh );
+
+						} );
+						dat.controllerNameAndTitle( cTrace, lang.trace, lang.traceTitle );
+						dislayEl( cTrace, options.player === undefined ? false : true );
+						return cTrace;
+
+					},
+
+				} );
+				options.guiSelectPoint.add( gui );
+
 			}
 
 			defaultPoint.size = options.point.size;
@@ -2316,9 +1294,12 @@ if ( !axesHelper.options )
 						// Default is 100
 						square: true,// true - Square base of the frustum points.Default is false
 					},
-					cFrustumPoints, options.palette
+//					cFrustumPoints,
+					options.guiSelectPoint.getFrustumPoints(),
+					options.palette
 				);
-				cFrustumPoints.setFrustumPoints( frustumPoints );
+//				cFrustumPoints.setFrustumPoints( frustumPoints );
+				options.guiSelectPoint.getFrustumPoints().setFrustumPoints( frustumPoints );
 				options.arrayCloud.frustumPoints = frustumPoints;
 
 			}
@@ -2470,8 +1451,14 @@ if ( !axesHelper.options )
 //				options.cookie = cookie;
 				if ( options.axesHelperGui === true ) {
 
-					axesHelper.gui( fOptions );
-					/*
+					AxesHelperGui( axesHelper, fOptions, {
+
+						cookie: options.cookie,
+						//cookieName: 'mySettings',
+						getLanguageCode: getLanguageCode,
+
+					} );
+/*
 					AxesHelperGui( fOptions, {
 
 						axesHelper: axesHelper,
@@ -2481,7 +1468,8 @@ if ( !axesHelper.options )
 						guiSelectPoint: options.guiSelectPoint,
 
 					} );//, options );
-					*/
+*/
+//					axesHelper.gui( fOptions );
 				}
 				if ( options.spriteText && options.spriteText.gui ) {
 
@@ -2525,7 +1513,7 @@ if ( !axesHelper.options )
 
 					} );
 
-				options.guiSelectPoint.addControllers();
+//				options.guiSelectPoint.addControllers( group );
 				
 				//OrbitControls gui
 
@@ -2873,7 +1861,7 @@ if ( !axesHelper.options )
 
 
 				} );
-
+/*
 				//set size of the SpriteText
 if ( !axesHelper.arraySpriteText  )
 	console.warn( 'render: axesHelper.arraySpriteText = ' + axesHelper.arraySpriteText );
@@ -2889,6 +1877,7 @@ if ( !axesHelper.arraySpriteText  )
 						spriteItem.userData.setSize( cameraPosition, Math.tan( 0.025 ) * scale );
 
 					} );
+*/					
 
 			}
 			if ( options.guiSelectPoint.render !== undefined )
@@ -3506,29 +2495,37 @@ var lang = {
 
 	defaultButton: 'Default',
 	defaultTitle: 'Restore Orbit controls settings.',
-	point: 'Point Local Position',
-	pointTitle: 'The position attribute of the selected point',
+/*
 	pointWorld: 'Point World Position',
 	pointWorldTitle: 'The position of the selected point after scaling, moving and rotation of the mesh',
-	points: 'Points',
-	mesh: 'Mesh',
 	meshs: 'Meshs',
-	pointName: 'Point Name',
-	select: 'Select',
 	notSelected: 'Not selected',
-	scale: 'Scale',
-	rotation: 'Rotation',
+	select: 'Select',
 	position: 'Position',
-	color: 'Сolor',
-	settings: 'Settings',
-	webglcontextlost: 'The user agent has detected that the drawing buffer associated with a WebGLRenderingContext object has been lost.',
+	rotation: 'Rotation',
+	points: 'Points',
 
-	defaultButton: 'Default',
+	point: 'Point Local Position',
+	pointTitle: 'The position attribute of the selected point',
+
+	mesh: 'Mesh',
+	scale: 'Scale',
+	color: 'Сolor',
+
+	opacity: 'Opacity',
+	opacityTitle: 'Float in the range of 0.0 - 1.0 indicating how transparent the material is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque.',
+
 	defaultScaleTitle: 'Restore default 3d object scale.',
 	defaultPositionTitle: 'Restore default 3d object position.',
 	default3DObjectTitle: 'Restore default settings of all 3d objects.',
 	defaultRotationTitle: 'Restore default 3d object rotation.',
 	defaultLocalPositionTitle: 'Restore default local position.',
+
+	moveGroup: 'Move Scene',
+*/
+	pointName: 'Point Name',
+	settings: 'Settings',
+	webglcontextlost: 'The user agent has detected that the drawing buffer associated with a WebGLRenderingContext object has been lost.',
 
 	light: 'Light',
 	displayLight: 'Display',
@@ -3538,15 +2535,11 @@ var lang = {
 	pointSettings: 'Point',
 	size: 'Size',
 	sizeTitle: 'Size of the point with "ShaderMaterial" material',
-	opacity: 'Opacity',
-	opacityTitle: 'Float in the range of 0.0 - 1.0 indicating how transparent the material is. A value of 0.0 indicates fully transparent, 1.0 is fully opaque.',
 	defaultPointTitle: 'Restore point.',
 	
 	trace: 'Trace',
 	traceTitle: 'Display the trace of the point movement.',
 	traceAllTitle: 'Display the trace of the movement of all points of the mesh.',
-
-	moveGroup: 'Move Scene',
 
 };
 
@@ -3555,31 +2548,40 @@ switch ( getLanguageCode() ) {
 	case 'ru'://Russian language
 		lang.defaultButton = 'Восстановить';
 		lang.defaultTitle = 'Восстановить положение осей координат по умолчанию.';
-		lang.point = 'Локальная позиция точки';
-		lang.pointTitle = 'Position attribute of the selected point';
-		lang.pointWorld = 'Абсолютная позиция точки';
-		lang.pointWorldTitle = 'Позиция выбранной точки после масштабирования, перемещения и вращения 3D объекта';
-		lang.points = 'Точки';
-		lang.mesh = '3D объект';
+/*
 		lang.meshs = '3D объекты';
-		lang.pointName = 'Имя точки';
-		lang.select = 'Выбрать';
 		lang.notSelected = 'Не выбран';
-		lang.scale = 'Масштаб';
 		lang.rotation = 'Вращение';
 		lang.position = 'Позиция';
-		lang.name = 'Имя';
-		lang.color = 'Цвет';
-//		lang.opacity = 'Непрозрачность',
-		lang.settings = 'Настройки';
-		lang.webglcontextlost = 'Пользовательский агент обнаружил, что буфер рисунка, связанный с объектом WebGLRenderingContext, потерян.';
+		lang.points = 'Точки';
 
-		lang.defaultButton = 'Восстановить';
+		lang.pointWorld = 'Абсолютная позиция точки';
+		lang.pointWorldTitle = 'Позиция выбранной точки после масштабирования, перемещения и вращения 3D объекта';
+
+		lang.select = 'Выбрать';
+
+		lang.point = 'Локальная позиция точки';
+		lang.pointTitle = 'Position attribute выбранной точки';
+
+		lang.mesh = '3D объект';
+		lang.scale = 'Масштаб';
+		lang.color = 'Цвет';
+
+		lang.opacity = 'Непрозрачность';
+		lang.opacityTitle = 'Число в диапазоне 0,0 - 1,0, указывающий, насколько прозрачен материал. Значение 0.0 означает полностью прозрачный, 1.0 - полностью непрозрачный.';
+
 		lang.defaultScaleTitle = 'Восстановить масштаб 3D объекта по умолчанию.';
 		lang.defaultPositionTitle = 'Восстановить позицию 3D объекта по умолчанию.';
 		lang.default3DObjectTitle = 'Восстановить настройки всех 3D объектов по умолчанию.';
 		lang.defaultRotationTitle = 'Восстановить поворот 3D объекта по умолчанию.';
 		lang.defaultLocalPositionTitle = 'Восстановить локальную позицию точки по умолчанию.';
+
+		lang.moveGroup = 'Переместить сцену';
+*/
+		lang.pointName = 'Имя точки';
+		lang.name = 'Имя';
+		lang.settings = 'Настройки';
+		lang.webglcontextlost = 'Пользовательский агент обнаружил, что буфер рисунка, связанный с объектом WebGLRenderingContext, потерян.';
 
 		lang.light = 'Свет';
 		lang.displayLight = 'Показать';
@@ -3589,15 +2591,11 @@ switch ( getLanguageCode() ) {
 		lang.pointSettings = 'Точка';
 		lang.size = 'Размер';
 		lang.sizeTitle = 'Размер точки с материалом типа "ShaderMaterial"';
-		lang.opacity = 'Непрозрачность';
-		lang.opacityTitle = 'Число в диапазоне 0,0 - 1,0, указывающий, насколько прозрачен материал. Значение 0.0 означает полностью прозрачный, 1.0 - полностью непрозрачный.';
 		lang.defaultPointTitle = 'Восстановить точку';
 
 		lang.trace = 'Трек';
 		lang.traceTitle = 'Показать трек перемещения точки.';
 		lang.traceAllTitle = 'Показать трек перемещения всех точек выбранного 3D объекта.';
-
-		lang.moveGroup = 'Переместить сцену';
 
 		break;
 
@@ -3609,6 +2607,7 @@ function getPosition( intersection ) {
 	return getObjectPosition( intersection.object, intersection.index );
 
 }
+/*See guiSelectPoint.js getObjectLocalPosition
 function getObjectLocalPosition( object, index ) {
 
 	var attributesPosition = object.geometry.attributes.position,
@@ -3617,13 +2616,15 @@ function getObjectLocalPosition( object, index ) {
 	return position;
 
 }
-
+*/
+export { getWorldPosition }
 /**
  * gets position of the vector in world coordinates, taking into account the position, scale and rotation of the 3D object
  * @param {THREE.Object3D} object
  * @param {THREE.Vector3} pos local position
  * @returns world position 
  */
+/*See guiSelectPoint.js getWorldPosition
 export function getWorldPosition( object, pos ) {
 
 	var position = new THREE.Vector3(),
@@ -3643,6 +2644,8 @@ export function getWorldPosition( object, pos ) {
 	return position;
 
 }
+*/
+/*See guiSelectPoint.js getObjectPosition
 function getObjectPosition( object, index ) {
 
 	if ( index === -1 )
@@ -3652,7 +2655,7 @@ function getObjectPosition( object, index ) {
 	return getWorldPosition( object, getObjectLocalPosition( object, index ) )
 
 }
-
+*/
 /**
  * Displaying points
  * @param {THREE.Vector4|THREE.Vector3|THREE.Vector2|object|array} arrayFuncs points.geometry.attributes.position array

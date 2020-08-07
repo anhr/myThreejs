@@ -1,197 +1,33 @@
-//import * as THREE from 'https://threejs.org/build/three.module.js';
+import { THREE } from '../../commonNodeJS/master/three.js';//https://github.com/anhr/commonNodeJS
+//import { THREE } from 'https://raw.githack.com/anhr/commonNodeJS/master/three.js';
+//import * as THREE from '../../three.js/dev/build/three.module.js';//https://github.com/anhr/three.js
 
-/*
-import * as THREE from '../three.js.r116/build/three.module.js';
-import { WEBGL } from '../three.js.r116/examples/jsm/WebGL.js';
-import { OrbitControls } from '../three.js.r116/examples/jsm/controls/OrbitControls.js';
-import { ConvexBufferGeometry } from '../three.js.r116/examples/jsm/geometries/ConvexGeometry.js';
-*/
-import * as THREE from '../../three.js/dev/build/three.module.js';
-import { WEBGL } from '../../three.js/dev/examples/jsm/WebGL.js';
-import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
-import { ConvexBufferGeometry } from '../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js';
-/*
-import { StereoEffect, spatialMultiplexsIndexs } from '../myThreejs/master/Examples/jsm/effects/StereoEffect.js';
-import { SpriteTextGui, SpriteText } from '../myThreejs/master/src/objects/SpriteText.js';
-import { AxesHelper, AxesHelperOptions } from '../myThreejs/master/src/helpers/AxesHelper.js';
-*/
-import { StereoEffect, spatialMultiplexsIndexs } from './Examples/jsm/effects/StereoEffect.js';
-import { SpriteTextGui, SpriteText } from '../../SpriteText/master/SpriteText.js';
-import { AxesHelper, AxesHelperOptions } from '../../AxesHelper/master/AxesHelper.js';
+import { WEBGL } from '../../three.js/dev/examples/jsm/WebGL.js';//https://github.com/anhr/three.js
+//import { WEBGL } from 'https://raw.githack.com/anhr/three.js/dev/examples/jsm/WebGL.js';
 
-Object.assign( THREE.BufferGeometry.prototype, {
+import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';//https://github.com/anhr/three.js
+//import { OrbitControls } from 'https://raw.githack.com/anhr/three.js/dev/examples/jsm/controls/OrbitControls.js';
 
-	setFromPoints: function ( points, itemSize ) {
+import { ConvexBufferGeometry } from '../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js';//https://github.com/anhr/three.js
+//import { ConvexBufferGeometry } from 'https://raw.githack.com/anhr/three.js/dev/examples/jsm/geometries/ConvexGeometry.js';
 
-		itemSize = itemSize || 3;
-		var position = [];
+import { StereoEffect, spatialMultiplexsIndexs } from '../../commonNodeJS/master/StereoEffect/StereoEffect.js';//https://github.com/anhr/commonNodeJS
+//import { StereoEffect, spatialMultiplexsIndexs } from 'https://raw.githack.com/anhr/commonNodeJS/master/StereoEffect.js';
 
-		for ( var i = 0, l = points.length; i < l; i++ ) {
+import { SpriteText } from '../../SpriteText/master/SpriteText.js';//https://github.com/anhr/SpriteText
+//import { SpriteText } from 'https://raw.githack.com/anhr/SpriteText/master/SpriteText.js';
+SpriteText.setTHREE( THREE );
 
-			var point = points[i];
-			position.push( point.x, point.y, point.z || 0 );
-			if ( itemSize >= 4 )
-				position.push( point.w || 0 );
+import { SpriteTextGui } from '../../SpriteText/master/SpriteTextGui.js';//https://github.com/anhr/SpriteText
+//import { SpriteTextGui } from 'https://raw.githack.com/anhr/SpriteText/master/SpriteTextGui.js';
 
-		}
+//import { AxesHelper, AxesHelperOptions } from '../../AxesHelper/master/AxesHelper.js';//https://github.com/anhr/AxesHelper
+import { AxesHelper } from '../../AxesHelper/master/AxesHelper.js';//https://github.com/anhr/AxesHelper
+//import { AxesHelper, AxesHelperOptions } from 'https://raw.githack.com/anhr/AxesHelper/master/AxesHelper.js';
 
-		this.setAttribute( 'position', new THREE.Float32BufferAttribute( position, itemSize ) );
+import { AxesHelperGui } from '../../AxesHelper/master/AxesHelperGui.js';//https://github.com/anhr/AxesHelper
+//import { AxesHelperGui } from 'https://raw.githack.com/anhr/AxesHelper/master/AxesHelperGui.js';
 
-		return this;
-
-	},
-
-} );
-
-//three.js\dev\src\math\Vector4.js
-Object.assign( THREE.Vector4.prototype, {
-
-	multiply: function ( v ) {
-
-		this.x *= v.x;
-		this.y *= v.y;
-		this.z *= v.z;
-//		this.w *= v.w || 1;
-		if ( v.w !== undefined )
-			this.w *= v.w;
-
-		return this;
-
-	},
-
-} );
-//three.js\dev\src\math\Vector4.js
-Object.assign( THREE.Vector4.prototype, {
-
-	add: function ( v, w ) {
-
-		if ( w !== undefined ) {
-
-			console.warn( 'THREE.Vector4: .add() now only accepts one argument. Use .addVectors( a, b ) instead.' );
-			return this.addVectors( v, w );
-
-		}
-
-		this.x += v.x;
-		this.y += v.y;
-		this.z += v.z;
-		if ( v.w !== undefined )
-			this.w += v.w;
-
-		return this;
-
-	},
-
-} );
-//three.js\dev\src\objects\Points.js
-Object.assign( THREE.Points.prototype, {
-
-	raycast: function ( raycaster, intersects ) {
-
-		const _inverseMatrix = new THREE.Matrix4();
-		const _ray = new THREE.Ray();
-		const _sphere = new THREE.Sphere();
-		const _position = new THREE.Vector3();
-		function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, intersects, object ) {
-
-			const rayPointDistanceSq = _ray.distanceSqToPoint( point );
-
-			if ( rayPointDistanceSq < localThresholdSq ) {
-
-				const intersectPoint = new THREE.Vector3();
-
-				_ray.closestPointToPoint( point, intersectPoint );
-				intersectPoint.applyMatrix4( matrixWorld );
-
-				const distance = raycaster.ray.origin.distanceTo( intersectPoint );
-
-				if ( distance < raycaster.near || distance > raycaster.far ) return;
-
-				intersects.push( {
-
-					distance: distance,
-					distanceToRay: Math.sqrt( rayPointDistanceSq ),
-					point: intersectPoint,
-					index: index,
-					face: null,
-					object: object
-
-				} );
-
-			}
-
-		}
-
-		const geometry = this.geometry;
-		const matrixWorld = this.matrixWorld;
-		const threshold = raycaster.params.Points.threshold;
-
-		// Checking boundingSphere distance to ray
-
-		if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
-
-		_sphere.copy( geometry.boundingSphere );
-		_sphere.applyMatrix4( matrixWorld );
-		_sphere.radius += threshold;
-
-		if ( raycaster.ray.intersectsSphere( _sphere ) === false ) return;
-
-		//
-
-		_inverseMatrix.getInverse( matrixWorld );
-		_ray.copy( raycaster.ray ).applyMatrix4( _inverseMatrix );
-
-		const localThreshold = threshold / ( ( this.scale.x + this.scale.y + this.scale.z ) / 3 );
-		const localThresholdSq = localThreshold * localThreshold;
-
-		if ( geometry.isBufferGeometry ) {
-
-			const index = geometry.index;
-			const attributes = geometry.attributes;
-			const positions = attributes.position.array;
-			const itemSize = attributes.position.itemSize;
-
-			if ( index !== null ) {
-
-				const indices = index.array;
-
-				for ( let i = 0, il = indices.length; i < il; i++ ) {
-
-					const a = indices[i];
-
-					_position.fromArray( positions, a * itemSize );
-
-					testPoint( _position, a, localThresholdSq, matrixWorld, raycaster, intersects, this );
-
-				}
-
-			} else {
-
-				for ( let i = 0, l = positions.length / itemSize; i < l; i++ ) {
-
-					_position.fromArray( positions, i * itemSize );
-
-					testPoint( _position, i, localThresholdSq, matrixWorld, raycaster, intersects, this );
-
-				}
-
-			}
-
-		} else {
-
-			const vertices = geometry.vertices;
-
-			for ( let i = 0, l = vertices.length; i < l; i++ ) {
-
-				testPoint( vertices[i], i, localThresholdSq, matrixWorld, raycaster, intersects, this );
-
-			}
-
-		}
-
-	},
-
-} );
 export {
 
 	THREE,
@@ -200,6 +36,8 @@ export {
 	ConvexBufferGeometry,
 	StereoEffect, spatialMultiplexsIndexs,
 	SpriteText, SpriteTextGui,
-	AxesHelper, AxesHelperOptions,
+	AxesHelper,
+	AxesHelperGui,
+//	AxesHelperOptions,
 
 }

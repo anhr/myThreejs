@@ -229,6 +229,10 @@
 
 				},
 				*/
+				/*
+				new THREE.Vector4( 0.5, 0.5 ,0.5 ,0.5 ),
+				new THREE.Vector4( -0.5, -0.5, -0.5, 0.5 ),
+				*/
 				new THREE.Vector4( 0, 0, 0, 1 ),//4D point.
 				[ new Function( 't', 'a', 'b', 'return Math.cos(t*a*2*Math.PI)*0.5-0.25' ),0.5, 0, 1 ],//4D point.
 				[ -0.5, 0.5, 0.0, -1 ],//4D point.
@@ -285,7 +289,7 @@
 				tMin: tMin,
 //				pointSize: 5.0,
 				//position: new THREE.Vector3( 0.4, 0.4, 2 ),//same as camera position
-				position: new THREE.Vector3( 0.5, 0, 0 ),
+				position: new THREE.Vector3( 0.1, 0, 0 ),
 				//position: new THREE.Vector3( new Function( 't', 'return -1.5 + t' ), 0.2, 0 ),
 				//scale: new THREE.Vector3( new Function( 't', 'return 1.1 + t' ), 1.2, 1 ),
 				//scale: new THREE.Vector3( 2, 2, 2 ),
@@ -651,6 +655,14 @@
 			scales: {
 
 				display: true,
+				text: {
+
+					//textHeight: 0.03,
+					//fov: camera.fov,
+					precision: 4,
+//					rect: { displayRect: true },
+
+				},
 				//precision: 4,
 //				t: playerOptions,
 				x: {
@@ -749,7 +761,7 @@
 				axesHelper: true,
 				scales: { display: true, },
 				menuPlay: true,
-				axesHelperGui: true,
+				//axesHelperGui: true,
 				/*
 				player: {},//3D objects animation.
 				orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls

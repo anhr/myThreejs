@@ -17,7 +17,7 @@ import cookie from '../../cookieNodeJS/master/cookie.js';
 
 import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 import PositionController from '../../commonNodeJS/master/PositionController.js';
-import { dat } from '../../commonNodeJS/master/dat.module.js';
+import { dat } from '../../commonNodeJS/master/dat/dat.module.js';
 
 /**
  * @callback onSelectScene

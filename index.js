@@ -2,7 +2,7 @@
  * @module myThreejs
  * @see myPoints
  * 
- * I use myThreejs in my projects for displaying of my 3D objects in the canvas.
+ * @description I use myThreejs in my projects for displaying of my 3D objects in the canvas.
  * 
  * @author Andrej Hristoliubov https://anhr.github.io/AboutMe/
  *

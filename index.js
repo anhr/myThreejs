@@ -64,6 +64,7 @@ import { getLanguageCode } from '../../commonNodeJS/master/lang.js';//https://gi
 import menuPlay from '../../menuPlay/master/menuPlay.js';
 
 import { FrustumPoints, cFrustumPointsF } from './frustumPoints/frustumPoints.js';
+
 import Player from './player.js';
 
 //import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';
@@ -75,11 +76,14 @@ import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';//h
 import clearThree from '../../commonNodeJS/master/clearThree.js';//https://github.com/anhr/commonNodeJS
 import ColorPicker from '../../colorpicker/master/colorpicker.js';
 import PositionController from '../../commonNodeJS/master/PositionController.js';//https://github.com/anhr/commonNodeJS
-import controllerPlay from '../../controllerPlay/master/controllerPlay.js';
+
+import controllerPlay from '../../controllerPlay/master/controllerPlay.js';//https://github.com/anhr/controllerPlay
+//import controllerPlay from 'https://raw.githack.com/anhr/controllerPlay/master/controllerPlay.js';
+
 //import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 
-import { GuiSelectPoint, getWorldPosition, getObjectLocalPosition, getObjectPosition } from '../../commonNodeJS/master/guiSelectPoint.js';//https://github.com/anhr/commonNodeJS
-//import { GuiSelectPoint, getWorldPosition } from 'https://raw.githack.com/anhr/commonNodeJS/master/guiSelectPoint.js';
+import { GuiSelectPoint, getWorldPosition, getObjectLocalPosition, getObjectPosition } from '../../commonNodeJS/master/guiSelectPoint/guiSelectPoint.js';//https://github.com/anhr/commonNodeJS
+//import { GuiSelectPoint, getWorldPosition } from 'https://raw.githack.com/anhr/commonNodeJS/master/guiSelectPoint/guiSelectPoint.js';
 
 //import { StereoEffect, spatialMultiplexsIndexs } from '../../three.js/dev/examples/jsm/effects/StereoEffect.js';
 //import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
@@ -970,7 +974,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 						frustumPoints.updateCloudPoints();
 
 				} );
-				if ( gui !== undefined ) {
+				if ( ( gui !== undefined ) && ( typeof controllerPlay !== 'undefined' ) ) {
 
 					var playController = controllerPlay.create( player );
 					gui.add( playController );
@@ -988,7 +992,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 
 			//Settings for all SpriteText added to scene and child groups
 			if ( typeof SpriteTextGui !== "undefined" )
-				SpriteTextGui( fOptions, scene, {
+				SpriteTextGui( SpriteText, fOptions, scene, {
 
 					getLanguageCode: getLanguageCode,
 					//settings: { zoomMultiplier: 1.5, },
@@ -1134,15 +1138,11 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 
 					cookie: options.cookie,
 					cookieName: cookieName === '' ? '' : '_' + cookieName,
-					scene: scene,
+					//scene: scene,//сцену не вставляю что бы она не записывалась в cookie а то будет переполняться стек.
+					scene: { position: scene.position, },
 					position: options.axesHelper.position,
 					scale: options.axesHelper.scale,
 					color: 'rgba(255, 255, 255, 0.5)',
-/*
-					negativeAxes: true,
-					colors: colorsHelper / 0xff, //gray axes
-					colorsHelper: colorsHelper,
-*/					
 					scales: options.scales,
 					dimensions: options.axesHelper.dimensions,
 

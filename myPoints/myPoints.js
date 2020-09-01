@@ -147,7 +147,7 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 		var points = new THREE.Points(
 
 			typeof arrayFuncs === 'function' ? arrayFuncs() :
-				new THREE.BufferGeometry().setFromPoints( options.getPoints( pointsOptions.tMin, arrayFuncs, options.a, options.b ), 4 ),
+				new THREE.BufferGeometry().setFromPoints( options.getPoints( THREE, group, pointsOptions.tMin, arrayFuncs, options ), 4 ),
 			new THREE.PointsMaterial( { size: options.point.size / options.point.sizePointsMaterial, vertexColors: THREE.VertexColors } )
 
 		);
@@ -157,7 +157,7 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 				indexArray: pushArrayCloud( pointsOptions.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
 
 			}
-		points.geometry.addAttribute( 'color',
+		points.geometry.setAttribute( 'color',
 			new THREE.Float32BufferAttribute( options.getColors( pointsOptions.tMin, arrayFuncs, options.scales.w,
 				{ positions: points.geometry.attributes.position }), 4 ) );
 		Points( points );
@@ -179,16 +179,37 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 		}
 		points.userData.raycaster = {
 
-			onIntersection: function ( raycaster, intersection, scene, mouse ) {
+			onIntersection: function ( intersection, mouse ) {
 
-				options.addSpriteTextIntersection( intersection, scene, mouse );
-
-			},
-			onIntersectionOut: function ( scene ) {
-
-				options.removeSpriteTextIntersection( scene );
+				options.addSpriteTextIntersection( intersection, mouse );
 
 			},
+			onIntersectionOut: function () {
+
+				options.removeSpriteTextIntersection();
+
+			},
+			onMouseDown: function ( intersection/*intersects*/ ) {
+
+//				var intersection = intersects[0];
+/*
+				if (
+					( intersection.object.userData.raycaster !== undefined )
+					&& ( intersection.object.userData.raycaster.onMouseDown !== undefined ) ) {
+
+					intersection.object.userData.raycaster.onMouseDown( raycaster, intersection, scene );
+
+				}
+*/				
+				if ( ( intersection.object.userData.isInfo !== undefined ) && !intersection.object.userData.isInfo() )
+					return;//No display information about frustum point
+				options.guiSelectPoint.select( intersection );
+/*				
+				if ( ( intersection.object.type === "Points" ) && ( axesHelper !== undefined ) )
+					axesHelper.exposePosition( intersection );
+*/					
+
+			}
 
 		}
 		points.userData.selectPlayScene = function ( t ) {
@@ -327,7 +348,7 @@ function getShaderMaterialPoints( params, onReady ) {
 	if ( typeof params.arrayFuncs === 'function' )
 		geometry = params.arrayFuncs();
 	else geometry = new THREE.BufferGeometry().setFromPoints
-		( params.options.getPoints( tMin, params.arrayFuncs, params.options.a, params.options.b ),
+		( params.options.getPoints( THREE, scene, tMin, params.arrayFuncs, params.options.a, params.options.b ),
 		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
 	var indexArrayCloud = arrayCloud === undefined ? undefined : pushArrayCloud( arrayCloud, geometry );//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
 	if ( ( params.pointsOptions === undefined ) || !params.pointsOptions.boFrustumPoints )

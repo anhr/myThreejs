@@ -186,7 +186,7 @@ returns array of mesh colors.
 		var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
 			new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } ) );
 		points.name = 'Points';
-		points.geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+		points.geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
 		points.userData.arrayFuncs = arrayFuncs;//3D object animation.
 		points.userData.raycaster = {
 

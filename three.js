@@ -7,6 +7,7 @@ import { WEBGL } from '../../three.js/dev/examples/jsm/WebGL.js';//https://githu
 
 import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';//https://github.com/anhr/three.js
 //import { OrbitControls } from 'https://raw.githack.com/anhr/three.js/dev/examples/jsm/controls/OrbitControls.js';
+//import { OrbitControls } from 'https://threejs.org/examples/jsm/controls/OrbitControls.js';
 
 import { ConvexBufferGeometry } from '../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js';//https://github.com/anhr/three.js
 //import { ConvexBufferGeometry } from 'https://raw.githack.com/anhr/three.js/dev/examples/jsm/geometries/ConvexGeometry.js';

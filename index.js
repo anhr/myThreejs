@@ -1,6 +1,5 @@
 /**
  * @module myThreejs
- * @see myPoints
  * 
  * @description I use myThreejs in my projects for displaying of my 3D objects in the canvas.
  * 
@@ -20,32 +19,6 @@ import loadScript from '../../loadScriptNodeJS/master/loadScript.js';//https://g
 import loadFile from '../../loadFileNodeJS/master/loadFile.js';//https://github.com/anhr/loadFileNodeJS
 
 //https://threejs.org/docs/#manual/en/introduction/Import-via-modules
-/*
-import {
-
-	Vector2,
-	Vector3,
-	Vector4,
-	PerspectiveCamera,
-	Scene,
-	Color,
-	Fog,
-	WebGLRenderer,
-	PointLight,
-	Group,
-	AxesHelper,
-	Raycaster,
-	SpriteText,
-	AxesHelperOptions,
-	Euler,
-
-	//light
-	BufferGeometry,
-	Points,
-	PointsMaterial,
-
-} from '../../three.js/dev/build/three.module.js';//'http://localhost/threejs/three.js/build/three.module.js';
-*/
 //import * as THREE from '../../three.js/dev/build/three.module.js';
 //import * as THREE from 'https://threejs.org/build/three.module.js';
 //import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText, SpriteTextGui } from './three.js';
@@ -65,16 +38,20 @@ import menuPlay from '../../menuPlay/master/menuPlay.js';
 
 import { FrustumPoints, cFrustumPointsF } from './frustumPoints/frustumPoints.js';
 
-import Player from './player.js';
+//import Player from './player.js';
+import Player from '../../commonNodeJS/master/player/player.js';//https://github.com/anhr/commonNodeJS
 
 //import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';
 //import OrbitControlsGui from 'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js';
-//import OrbitControlsGui from 'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js';
 import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';//https://github.com/anhr/commonNodeJS
+//import OrbitControlsGui from 'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js';
 
 //import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
 import clearThree from '../../commonNodeJS/master/clearThree.js';//https://github.com/anhr/commonNodeJS
-import ColorPicker from '../../colorpicker/master/colorpicker.js';
+
+import ColorPicker from '../../colorpicker/master/colorpicker.js';//https://github.com/anhr/colorPicker
+//import ColorPicker from 'https://raw.githack.com/anhr/colorpicker/master/colorpicker.js';
+
 import PositionController from '../../commonNodeJS/master/PositionController.js';//https://github.com/anhr/commonNodeJS
 
 import controllerPlay from '../../controllerPlay/master/controllerPlay.js';//https://github.com/anhr/controllerPlay
@@ -327,8 +304,13 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 	if ( options.palette !== undefined )
 	{
 
-		if ( options.palette instanceof ColorPicker.palette === false )
+		if ( options.palette instanceof ColorPicker.palette === false ) {
+
 			options.palette = new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } );
+			ColorPicker.palette.setTHREE( THREE );
+
+		}
+/*			
 		options.palette.toColor = function ( value, min, max ) {
 
 			if ( value instanceof THREE.Color )
@@ -339,6 +321,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 			return new THREE.Color( "rgb(" + c.r + ", " + c.g + ", " + c.b + ")" );
 
 		}
+*/		
 
 	} else options.palette = { toColor: function () { return new THREE.Color( 0xffffff ) } }//white
 
@@ -389,7 +372,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 	if ( options.scales.w === undefined )
 		options.scales.w = { name: 'W', min: -1, max: 1 };
 	options.scales.w = getAxis( options.scales.w, 'W', options.scales.w.min, options.scales.w.max );
-
+/*
 	function setColorAttribute( attributes, i, color ) {
 
 		if ( typeof color === "string" )
@@ -403,6 +386,8 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 		colorAttribute.needsUpdate = true;
 
 	}
+*/
+/*
 	function traceLine() {
 
 		//Thanks to https://stackoverflow.com/questions/31399856/drawing-a-line-with-three-js-dynamically/31411794#31411794
@@ -418,9 +403,9 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 
 				// attributes
 				var positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
-				geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+				geometry.setAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
 				var colors = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
-				geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+				geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
 
 				// draw range
 				geometry.setDrawRange( index, index );
@@ -439,7 +424,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 			//point color
 			if ( color === undefined )
 				color = new THREE.Color( 1, 1, 1 );//White
-			setColorAttribute( line.geometry.attributes, index, color );
+			Player.setColorAttribute( line.geometry.attributes, index, color );
 
 			//set draw range
 			var start = line.geometry.drawRange.start, count = index + 1 - start;
@@ -466,7 +451,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 		}
 
 	}
-
+*/
 	function getCanvasName() {
 		return typeof options.elContainer === "object" ?
 			options.elContainer.id :
@@ -521,7 +506,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 			controls, stereoEffect, player, frustumPoints,
 
 			mouseenter = false,//true - мышка находится над gui или canvasMenu
-			//В этом случае не надо обрабатывать событие elContainer 'mousedown'
+			//В этом случае не надо обрабатывать событие elContainer 'pointerdown'
 			//по которому выбирается точка на canvas.
 			//В противном случае если пользователь щелкнет на gui, то он может случайно выбрать точку на canvas.
 			//Тогда открывается папка Meshs и все органы управления сдвигаются вниз. Это неудобно.
@@ -550,13 +535,18 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 		//raycaster
 
 		elContainer.addEventListener( 'mousemove', onDocumentMouseMove, false );
-		elContainer.addEventListener( 'mousedown', onDocumentMouseDown, { capture: true } );
+
+		//ATTENTION!!! The 'mousedown' event is not fired if you use new version of the OrbitControls.
+		//See "OrbitControls: Implement Pointer events." commit https://github.com/mrdoob/three.js/commit/1422e36e9facbdc5f9d86cf6b97b005a2723a24a#diff-3285de3826a51619836a5c9adc6bee74
+		//elContainer.addEventListener( 'mousedown', onDocumentMouseDown, { capture: true } );
+		elContainer.addEventListener( 'pointerdown', onDocumentMouseDown, { capture: true } );
 
 		function isFullScreen() {
 
 			return canvasMenu.isFullScreen();
 
 		}
+/*
 		function onIntersection( intersects, mouse ) {
 
 			intersects.forEach( function ( intersection ) {
@@ -585,7 +575,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 				INTERSECTED.pop();
 
 		}
-
+*/
 		//https://www.khronos.org/webgl/wiki/HandlingContextLost
 
 
@@ -842,6 +832,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 					renderer: renderer,
 					camera: camera,
 					stereoEffect: stereoEffect,
+/*
 					onIntersection: onIntersection,
 					onIntersectionOut: onIntersectionOut,
 					onMouseDown: function ( intersects ) {
@@ -862,6 +853,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 //							axesHelper.exposePosition( getPosition( intersection ) );
 
 					}
+*/
 
 				} );
 			options.addParticle = function ( item ) {
@@ -955,7 +947,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 								if ( vector.line === undefined )
 									return;
 								vector.line.remove();
-								vector.line = new traceLine();
+								vector.line = new Player.traceLine( THREE, scene, options );
 
 							} );
 
@@ -963,11 +955,10 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 
 					},
 
-				}, function ( index ) {
+				}, function ( index, t ) {
 
-					var t = ( ( options.player.max - options.player.min ) / ( options.player.marks - 1 ) ) * index + options.player.min;
-					//					group.userData.index = index;
-					selectPlayScene( t, index, true );
+//					var t = ( ( options.player.max - options.player.min ) / ( options.player.marks - 1 ) ) * index + options.player.min;
+					Player.selectPlayScene( group, t, index, true, options );
 					if ( canvasMenu !== undefined )
 						canvasMenu.setIndex( index, options.player.name + ': ' + t );
 					if ( frustumPoints !== undefined )
@@ -1169,7 +1160,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 						return;
 					if ( point.line !== undefined )
 						return;
-					point.line = new traceLine();
+					point.line = new Player.traceLine( THREE, scene, options );
 
 					//color
 					var color = intersection.object.geometry.attributes.color;
@@ -1303,7 +1294,7 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 				options.arrayCloud.frustumPoints = frustumPoints;
 
 			}
-
+/*
 			function selectPlayScene( t, index, boPlayer ) {
 
 				group.userData.t = t;
@@ -1423,7 +1414,8 @@ options.scene.position = new THREE.Vector3();//Пока что не сдвига
 				} );
 
 			}
-			selectPlayScene( options.player === undefined ? 0 : options.player.min, 0 );
+*/
+			Player.selectPlayScene( group, options.player === undefined ? 0 : options.player.min, 0, false, options );
 
 			//default setting for each 3D object
 			group.children.forEach( function ( mesh ) {
@@ -1909,7 +1901,7 @@ if ( !axesHelper.arraySpriteText  )
 		loadScript.sync( '/anhr/dropdownMenu/master/styles/menu.css', optionsStyle );
 
 	}
-
+/*
 	function execFunc( funcs, axisName, t, a, b ) {
 
 		var func = funcs[axisName], typeofFuncs = typeof func;
@@ -1990,6 +1982,7 @@ if ( !axesHelper.arraySpriteText  )
 		return;
 
 	}
+*/
 
 	/**
 	 * Save scale, position and rotation to the userData.default of the mesh
@@ -2009,6 +2002,7 @@ if ( !axesHelper.arraySpriteText  )
 		mesh.userData.default.rotation.copy( mesh.rotation );
 
 	}
+	options.getPoints = Player.getPoints;
 	/**
 	 * Get array of THREE.Vector4 points.
 	 * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
@@ -2046,6 +2040,7 @@ if ( !axesHelper.arraySpriteText  )
 	 * @param {number} b third parameter of the arrayFuncs item function. Default is 0.
 	 * @returns array of THREE.Vector4 points.
 	 */
+/*
 	options.getPoints = function ( t, arrayFuncs, a, b ) {
 
 		if ( t === undefined )
@@ -2132,7 +2127,7 @@ if ( !axesHelper.arraySpriteText  )
 					funcs = new THREE.Vector4( funcs, 0, 0, 0 );
 				if ( ( funcs instanceof THREE.Vector2 ) || ( funcs instanceof THREE.Vector3 ) || ( funcs instanceof THREE.Vector4 ) ) {
 
-					return execFunc( funcs, axisName, t, a, b );
+					return Player.execFunc( funcs, axisName, t, a, b );
 
 				}
 				if ( funcs.vector === undefined ) {
@@ -2156,7 +2151,7 @@ if ( !axesHelper.arraySpriteText  )
 				}
 				arrayFuncs[i] = funcs.vector;
 				funcs = funcs.vector;
-				return execFunc( funcs, axisName, t, a, b );
+				return Player.execFunc( funcs, axisName, t, a, b );
 
 
 			}
@@ -2176,6 +2171,7 @@ if ( !axesHelper.arraySpriteText  )
 		return points;
 
 	}
+*/
 
 	/**
 	 * Get array of mesh colors.
@@ -2304,7 +2300,7 @@ if ( !axesHelper.arraySpriteText  )
 	 * @param {THREE.Scene} scene.
 	 * @param {THREE.Vector2} mouse mouse position.
 	 */
-	options.addSpriteTextIntersection = function ( intersection, scene, mouse ) {
+	options.addSpriteTextIntersection = function ( intersection, mouse ) {
 
 		if ( intersection.object.userData.isInfo !== undefined && !intersection.object.userData.isInfo() )
 			return;
@@ -2341,7 +2337,7 @@ if ( !axesHelper.arraySpriteText  )
 				color = !isArrayFuncs || ( func === undefined ) ?
 					undefined :
 					Array.isArray(func.w) ?
-						execFunc( func, 'w', group.userData.t, options.a, options.b ) :
+						Player.execFunc( func, 'w', group.userData.t, options.a, options.b ) :
 						func.w;
 			if ( ( color === undefined ) && ( intersection.object.geometry.attributes.ca !== undefined ) ) {
 
@@ -2450,7 +2446,7 @@ if ( !axesHelper.arraySpriteText  )
 	 * Hides a sprite text if you move mouse out an object
 	 * @param {THREE.Scene} scene.
 	 */
-	options.removeSpriteTextIntersection = function ( scene ) {
+	options.removeSpriteTextIntersection = function () {
 
 		var detected = false;
 		do {

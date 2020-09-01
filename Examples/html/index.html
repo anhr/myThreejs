@@ -108,7 +108,7 @@
 					geometryLength = 8,//( zEnd - zStart + 1 ) * xCount * yCount;
 					itemSize = 4,
 					array = new Float32Array( geometryLength * itemSize );
-				geometry.addAttribute( 'position', new THREE.BufferAttribute( array, itemSize ) );
+				geometry.setAttribute( 'position', new THREE.BufferAttribute( array, itemSize ) );
 				if ( itemSize === 3 ) {
 
 					geometry.attributes.position.setXYZ( 0, 3, 1, 1 );
@@ -238,7 +238,7 @@
 				[ -0.5, 0.5, 0.0, -1 ],//4D point.
 				//[ 0.25, 0, 0.75, -1 ],//4D point.
 //				[0, 0, 0, -1],//4D point.
-/*
+
 				{
 
 					vector: new THREE.Vector4(
@@ -254,7 +254,7 @@
 					trace: true,//Displays the trace of the point movement.
 
 				},
-*/
+
 /*
 //				[  3,  1,  1, 1 ],
 				[  -1.9607199430465698,  -0.49455657601356506,  -1.0089999437332153, 1 ],
@@ -295,7 +295,7 @@
 				//scale: new THREE.Vector3( 2, 2, 2 ),
 				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
-				shaderMaterial: {},
+				//shaderMaterial: {},
 				arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 //deprecated				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
@@ -329,14 +329,14 @@
 				//new THREE.Vector4( 0.25, 0, 0, new THREE.Color( "rgb(255, 127, 0)" ) ),//yellow point
 				new THREE.Vector4( 0.25, 0, 0, new THREE.Color( "rgb(255, 0, 0)" ) ),//red point
 			]
-			var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
+			var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( THREE, group, tMin, arrayFuncs, options ), 4 ),
 				new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } ) );
 			points.geometry.setAttribute( 'color',
 				new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
 			points.name = 'Points1';
 
 			//непонятно зачем эта строка
-			//points.geometry.addAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+			//points.geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
 			
 			points.userData.arrayFuncs = arrayFuncs;//3D object animation.
 			points.userData.raycaster = {
@@ -449,9 +449,9 @@
 
 			sizes = new Float32Array( arrayFuncs.length );
 /*
-			var geometry = new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 );
-			geometry.addAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1 ) );
-			geometry.addAttribute( 'ca', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+			var geometry = new THREE.BufferGeometry().setFromPoints( options.getPoints( THREE, scene, tMin, arrayFuncs, a, b ), 4 );
+			geometry.setAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1 ) );
+			geometry.setAttribute( 'ca', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
 			geometry.getPointSize = function ( index ) {
 
 				var scale = group.parent.scale;
@@ -759,7 +759,7 @@
 
 				dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
 				axesHelper: true,
-				scales: { display: true, },
+				scales: { display: true, x: {} },
 				menuPlay: true,
 				//axesHelperGui: true,
 				/*

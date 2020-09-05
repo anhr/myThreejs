@@ -118,7 +118,7 @@ Hides a [sprite text](https://github.com/anhr/three.js/blob/dev/src/objects/Spri
 | --- | --- | --- | --- |
 | scene | <code>THREE.Scene</code> |  | scene. |
 
-### options.getPoints( t, arrayFuncs, a, b )
+### options.getPoints( THREE, arrayFuncs, optionsPoints )
 
 Get array of THREE.Vector4 points.
 
@@ -126,20 +126,19 @@ Get array of THREE.Vector4 points.
 | --- | --- | --- | --- |
 | t | <code>number</code> |  | first parameter of the [arrayFuncs](#arrayfuncs-item) item function. Start time of animation. |
 | arrayFuncs | <code>THREE.Vector4 or THREE.Vector3 or THREE.Vector2</code> |  | points.geometry.attributes.position array. See [arrayFuncs](#arrayfuncs-item) for details |
-| a | <code>number</code> | 1 | second parameter of the [arrayFuncs](#arrayfuncs-item) item function. |
-| b | <code>number</code> | 0 | third parameter of the [arrayFuncs](#arrayfuncs-item) item function. |
+| optionsPoints.options.a | <code>number</code> | 1 | second parameter of the [arrayFuncs](#arrayfuncs-item) item function. |
+| optionsPoints.options.b | <code>number</code> | 0 | third parameter of the [arrayFuncs](#arrayfuncs-item) item function. |
 
 returns array of THREE.Vector4 points.
 
-### options.getColors( t, arrayFuncs, scale )
+### options.getColors( THREE, arrayFuncs, optionsColor )
 
 Get array of mesh colors.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| t | <code>number</code> |  | first parameter of the [arrayFuncs](#arrayfuncs-item) item function. Start time of animation. |
 | arrayFuncs | <code>THREE.Vector4 or THREE.Vector3 or THREE.Vector2</code> |  | points.geometry.attributes.position array. See [arrayFuncs](#arrayfuncs-item) for details |
-| scale | <code>object</code> |  | options.scales.w |
+| optionsColor | <code>object</code> |  |  |
 
 returns array of mesh colors.
 
@@ -183,10 +182,12 @@ returns array of mesh colors.
 			},
 			new THREE.Vector4( 0, 0, 0, new Function( 't', 'return 1-2*t' ) ),//color is f(t)
 		]
-		var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( tMin, arrayFuncs, a, b ), 4 ),
+		var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( THREE, tMin, arrayFuncs, a, b ), 4 ),
 			new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } ) );
 		points.name = 'Points';
-		points.geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( tMin, arrayFuncs, options.scales.w ), 3 ) );
+//		points.geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( THREE, tMin, arrayFuncs, options.scales.w ), 3 ) );
+		points.geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( THREE, arrayFuncs,
+			{ scale: options.scales.w } ), 3 ) );
 		points.userData.arrayFuncs = arrayFuncs;//3D object animation.
 		points.userData.raycaster = {
 

@@ -147,7 +147,9 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 		var points = new THREE.Points(
 
 			typeof arrayFuncs === 'function' ? arrayFuncs() :
-				new THREE.BufferGeometry().setFromPoints( options.getPoints( THREE, group, pointsOptions.tMin, arrayFuncs, options ), 4 ),
+//				new THREE.BufferGeometry().setFromPoints( options.getPoints( THREE, group, pointsOptions.tMin, arrayFuncs, options ), 4 ),
+				new THREE.BufferGeometry().setFromPoints( options.getPoints( THREE, arrayFuncs,
+					{ options: options, group: group, t: pointsOptions.tMin } ), 4 ),
 			new THREE.PointsMaterial( { size: options.point.size / options.point.sizePointsMaterial, vertexColors: THREE.VertexColors } )
 
 		);
@@ -157,9 +159,14 @@ function create( arrayFuncs, group, options, pointsOptions ) {
 				indexArray: pushArrayCloud( pointsOptions.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
 
 			}
+/*
 		points.geometry.setAttribute( 'color',
-			new THREE.Float32BufferAttribute( options.getColors( pointsOptions.tMin, arrayFuncs, options.scales.w,
+			new THREE.Float32BufferAttribute( options.getColors( THREE, pointsOptions.tMin, arrayFuncs, options.scales.w,
 				{ positions: points.geometry.attributes.position }), 4 ) );
+*/
+		points.geometry.setAttribute( 'color',
+			new THREE.Float32BufferAttribute( options.getColors( THREE, arrayFuncs,
+				{ positions: points.geometry.attributes.position, scale: options.scales.w } ), 4 ) );
 		Points( points );
 
 	}
@@ -348,12 +355,24 @@ function getShaderMaterialPoints( params, onReady ) {
 	if ( typeof params.arrayFuncs === 'function' )
 		geometry = params.arrayFuncs();
 	else geometry = new THREE.BufferGeometry().setFromPoints
-		( params.options.getPoints( THREE, scene, tMin, params.arrayFuncs, params.options.a, params.options.b ),
+		//		( params.options.getPoints( THREE, scene, tMin, params.arrayFuncs, params.options.a, params.options.b ),
+		( params.options.getPoints( THREE, params.arrayFuncs,
+			{ options: { a: params.options.a, b: params.options.b }, group: scene, t: tMin, } ),
 		params.arrayFuncs[0] instanceof THREE.Vector3 ? 3 : 4 );
 	var indexArrayCloud = arrayCloud === undefined ? undefined : pushArrayCloud( arrayCloud, geometry );//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
 	if ( ( params.pointsOptions === undefined ) || !params.pointsOptions.boFrustumPoints )
 		geometry.setAttribute( 'ca', new THREE.Float32BufferAttribute( params.options.getColors
-			( tMin, params.arrayFuncs, params.options.scales.w,
+			( THREE, params.arrayFuncs,
+				{
+
+					opacity: params.pointsOptions === undefined ? undefined : params.pointsOptions.opacity,
+					positions: geometry.attributes.position,
+					scale: params.options.scales.w,
+
+				} ),
+			4 ) );
+/*
+ 			( THREE, tMin, params.arrayFuncs, params.options.scales.w,
 				{
 
 					opacity: params.pointsOptions === undefined ? undefined : params.pointsOptions.opacity,
@@ -361,6 +380,7 @@ function getShaderMaterialPoints( params, onReady ) {
 
 				} ),
 			4 ) );
+*/
 
 	var texture = new THREE.TextureLoader().load( "/anhr/myThreejs/master/textures/point.png" );
 	texture.wrapS = THREE.RepeatWrapping;

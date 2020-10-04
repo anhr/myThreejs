@@ -10,17 +10,16 @@
 
 	<meta name="author" content="Andrej Hristoliubov https://anhr.github.io/AboutMe/">
 
-	<!--<script src="https://raw.githack.com/anhr/loadScriptNodeJS/master/build/loadScript.js"></script>-->
-	<!--<script src="https://raw.githack.com/anhr/loadScriptNodeJS/master/build/loadScript.min.js"></script>-->
-	<script src="/anhr/loadScriptNodeJS/master/build/loadScript.js"></script>
+	<!--<script src="https://raw.githack.com/anhr/commonNodeJS/master/loadScriptNodeJS/build/loadScript.js"></script>-->
+	<!--<script src="https://raw.githack.com/anhr/commonNodeJS/master/loadScriptNodeJS/build/loadScript.min.js"></script>-->
+	<script src="/anhr/commonNodeJS/master/loadScriptNodeJS/build/loadScript.js"></script>
 	<!--<script src="build/loadScript.min.js"></script>-->
-
 	<!--<script src="https://raw.githack.com/anhr/three.js/dev/examples/js/libs/dat.gui.js"></script>-->
 	<!--<script src="https://raw.githack.com/anhr/three.js/dev/examples/js/libs/dat.gui.min.js"></script>-->
 	<!--<script src="../../../../three.js/examples/js/libs/dat.gui.min.js"></script>-->
 	<!--<script src="/anhr/three.js/dev/examples/js/libs/dat.gui.js"></script>-->
 	<!--<script src="/anhr/myThreejs/master/Examples/js/libs/dat.gui.js"></script>-->
-	<script src="/anhr/dat.gui/CustomController/build/dat.gui.js"></script>
+	<script src="/anhr/commonNodeJS/master/dat.gui/CustomController/build/dat.gui.js"></script>
 
 	<script src="/anhr/commonNodeJS/master/dat.js"></script>
 
@@ -84,6 +83,7 @@
 
 			marks: 110,//Number of scenes of 3D objects animation.
 			name: 'Time (sec.)',
+			interval: 25,//Ticks per seconds.
 			/*
 			repeat: true,
 			zoomMultiplier: 1.1,
@@ -295,7 +295,7 @@
 				//scale: new THREE.Vector3( 2, 2, 2 ),
 				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
-				//shaderMaterial: {},
+				shaderMaterial: {},
 				arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 //deprecated				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
@@ -342,37 +342,50 @@
 				new THREE.Float32BufferAttribute( options.getColors( THREE, tMin, arrayFuncs, options.scales.w ), 3 ) );
 */
 			points.geometry.setAttribute( 'color',
-				new THREE.Float32BufferAttribute( options.getColors( THREE, arrayFuncs, { scale: options.scales.w } ), 3 ) );
+				new THREE.Float32BufferAttribute( options.getColors( THREE, arrayFuncs, {
+
+					scale: options.scales.w,
+					palette: options.palette,
+
+				} ), 3 ) );
 			points.name = 'Points1';
 
 			//непонятно зачем эта строка
 			//points.geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( THREE, arrayFuncs, { scale: options.scales.w } ), 3 ) );
 			
-			points.userData.arrayFuncs = arrayFuncs;//3D object animation.
 			points.userData.raycaster = {
 
 				onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-					options.addSpriteTextIntersection( intersection, scene, mouse );
+					options.raycaster.onIntersection( intersection, scene, mouse );
 
 				},
 				onIntersectionOut: function ( scene ) {
 
-					options.removeSpriteTextIntersection( scene );
+					options.raycaster.onIntersectionOut( scene );
 
 				},
 
 			}
-			points.userData.selectPlayScene = function ( t ) {
+			points.userData.player = {
 
-				/*
-				var angle = t * Math.PI * 2 * 1.2;// + Math.PI / 4;//45 degree
-				points.rotation.set( angle, 0, 0 );
-				myThreejs.limitAngles( points.rotation );
-				*/
-				//				setAttributes( a, b );
+				arrayFuncs: arrayFuncs,
+				selectPlayScene: function ( t ) {
+
+					/*
+					var angle = t * Math.PI * 2 * 1.2;// + Math.PI / 4;//45 degree
+					points.rotation.set( angle, 0, 0 );
+					myThreejs.limitAngles( points.rotation );
+					*/
+					//				setAttributes( a, b );
+
+				}
 
 			}
+/*
+			points.userData.arrayFuncs = arrayFuncs;//3D object animation.
+			points.userData.selectPlayScene = function ( t ) {}
+*/
 
 			//ATTENTION!!! You can adding of the cloud into points only if you want add points into group "group.add( points );"
 			// if you do not want to see a cloud without appropriate point. 
@@ -386,7 +399,7 @@
 				if ( options.arrayCloud !== undefined )
 					points.userData.cloud = {
 
-						indexArray: myThreejs.pushArrayCloud( options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
+						indexArray: MyPoints.pushArrayCloud( THREE, options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
 
 					}
 				
@@ -508,34 +521,31 @@
 
 	//			var points = shaderMaterialPoints.points;
 				points.name = 'ShaderMaterial';
-				points.userData.arrayFuncs = arrayFuncs;//3D object animation.
 				points.userData.raycaster = {
 
 					onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-						options.addSpriteTextIntersection( intersection, scene, mouse );
+						options.raycaster.onIntersection( intersection, scene, mouse );
 
 					},
 					onIntersectionOut: function ( scene ) {
 
-						options.removeSpriteTextIntersection( scene );
+						options.raycaster.onIntersectionOut( scene );
 
 					},
 
 				}
-				points.userData.selectPlayScene = function ( t ) {
+				points.userData.player = {
 
-					//var angle = t * Math.PI * 2;// + Math.PI / 4;//45 degree
-					//points.rotation.set( angle, 0, 0 );
-					//myThreejs.limitAngles( points.rotation );
-
-					//points.geometry.attributes.size.setX( 1, 0.1 * ( t + 1 ) );
-					//points.geometry.attributes.size.needsUpdate = true;
+					arrayFuncs: arrayFuncs,
+					selectPlayScene: function ( t ) {}
 
 				}
+//				points.userData.arrayFuncs = arrayFuncs;//3D object animation.
+//				points.userData.selectPlayScene = function ( t ) {}
 				group.add( points );
 				options.guiSelectPoint.addMesh( points );
-				options.addParticle( points );
+				options.raycaster.addParticle( points );
 				
 			});
 			*/
@@ -565,14 +575,14 @@
 						if ( cube.userData.currentHex === undefined )
 							cube.userData.currentHex = cube.material.emissive.getHex();
 						cube.material.emissive.setHex( 0xff0000 );
-						options.addSpriteTextIntersection( intersection, scene, mouse );
+						options.raycaster.onIntersection( intersection, scene, mouse );
 
 					},
 					onIntersectionOut: function ( scene, INTERSECTED ) {
 
 						if ( cube.userData.currentHex !== undefined ) cube.material.emissive.setHex( cube.userData.currentHex );
 						cube.userData.currentHex = undefined;
-						options.removeSpriteTextIntersection( scene );
+						options.raycaster.onIntersectionOut( scene );
 
 					},
 					onMouseDown: function ( raycaster, intersection, scene ) {
@@ -644,7 +654,7 @@
 			//if ( options.arrayCloud !== undefined )
 			//	points.userData.cloud = {
 			//
-			//		indexArray: myThreejs.pushArrayCloud( options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
+			//		indexArray: MyPoints.pushArrayCloud( THREE, options.arrayCloud, points.geometry ),//индекс массива точек в pointsOptions.arrayCloud которые принадлежат этому points
 			//
 			//	}
 			arrayCloud: [],

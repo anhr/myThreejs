@@ -3,7 +3,7 @@
  * 
  * @description I use myThreejs in my projects for displaying of my 3D objects in the canvas.
  * 
- * @author Andrej Hristoliubov https://anhr.github.io/AboutMe/
+ * @author [Andrej Hristoliubov]{@link https://anhr.github.io/AboutMe/}
  *
  * @copyright 2011 Data Arts Team, Google Creative Lab
  *
@@ -14,27 +14,32 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import loadScript from '../../loadScriptNodeJS/master/loadScript.js';//https://github.com/anhr/loadScriptNodeJS
+import loadScript from '../../commonNodeJS/master/loadScriptNodeJS/loadScript.js';//https://github.com/anhr/commonNodeJS/tree/master/loadScriptNodeJS
 
-import loadFile from '../../loadFileNodeJS/master/loadFile.js';//https://github.com/anhr/loadFileNodeJS
+import loadFile from '../../commonNodeJS/master/loadFileNodeJS/loadFile.js';//https://github.com/anhr/commonNodeJS/tree/master/loadFileNodeJS
 
 //https://threejs.org/docs/#manual/en/introduction/Import-via-modules
 //import * as THREE from '../../three.js/dev/build/three.module.js';
 //import * as THREE from 'https://threejs.org/build/three.module.js';
-//import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperOptions, SpriteText, SpriteTextGui } from './three.js';
-import { THREE, OrbitControls, StereoEffect, spatialMultiplexsIndexs, AxesHelper, AxesHelperGui, SpriteText, SpriteTextGui } from './three.js';
+//import { THREE, OrbitControls, StereoEffect, AxesHelper, AxesHelperOptions, SpriteText, SpriteTextGui } from './three.js';
+import { THREE, OrbitControls, StereoEffect, AxesHelper, AxesHelperGui, SpriteText, SpriteTextGui } from './three.js';
 
 //import { GUI } from '../../three.js/dev/examples/jsm/libs/dat.gui.module.js';
 import { dat } from '../../commonNodeJS/master/dat/dat.module.js';//https://github.com/anhr/commonNodeJS
 
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
-import cookie from '../../cookieNodeJS/master/cookie.js';
+//import cookie from 'https://raw.githack.com/anhr/commonNodeJS/master/cookieNodeJS/cookie.js';
+import cookie from '../../commonNodeJS/master/cookieNodeJS/cookie.js';
 
 import { getLanguageCode } from '../../commonNodeJS/master/lang.js';//https://github.com/anhr/commonNodeJS
 //import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
 
-//import menuPlay from 'https://raw.githack.com/anhr/menuPlay/master/menuPlay.js';
-import menuPlay from '../../menuPlay/master/menuPlay.js';
+/*
+//import menuPlay from 'https://raw.githack.com/anhr/commonNodeJS/master/menuPlay/menuPlay.js';
+import menuPlay from '../../commonNodeJS/master/menuPlay/menuPlay.js';
+*/
+//import CanvasMenu from 'https://raw.githack.com/anhr/commonNodeJS/master/canvasMenu/canvasMenu.js';
+import CanvasMenu from '../../commonNodeJS/master/canvasMenu/canvasMenu.js';
 
 import { FrustumPoints, cFrustumPointsF } from './frustumPoints/frustumPoints.js';
 
@@ -49,22 +54,22 @@ import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';//h
 //import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
 import clearThree from '../../commonNodeJS/master/clearThree.js';//https://github.com/anhr/commonNodeJS
 
-import ColorPicker from '../../colorpicker/master/colorpicker.js';//https://github.com/anhr/colorPicker
-//import ColorPicker from 'https://raw.githack.com/anhr/colorpicker/master/colorpicker.js';
+import ColorPicker from '../../commonNodeJS/master/colorpicker/colorpicker.js';//https://github.com/anhr/commonNodeJS/tree/master/colorpicker
+//import ColorPicker from 'https://raw.githack.com/anhr/commonNodeJS/master/colorpicker/colorpicker.js';
 
 import PositionController from '../../commonNodeJS/master/PositionController.js';//https://github.com/anhr/commonNodeJS
 
-import controllerPlay from '../../controllerPlay/master/controllerPlay.js';//https://github.com/anhr/controllerPlay
-//import controllerPlay from 'https://raw.githack.com/anhr/controllerPlay/master/controllerPlay.js';
+import controllerPlay from '../../commonNodeJS/master/controllerPlay/controllerPlay.js';//https://github.com/anhr/controllerPlay
+//import controllerPlay from 'https://raw.githack.com/anhr/commonNodeJS/master/controllerPlay/controllerPlay.js';
 
 //import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 
 import { GuiSelectPoint, getWorldPosition, getObjectLocalPosition, getObjectPosition } from '../../commonNodeJS/master/guiSelectPoint/guiSelectPoint.js';//https://github.com/anhr/commonNodeJS
 //import { GuiSelectPoint, getWorldPosition } from 'https://raw.githack.com/anhr/commonNodeJS/master/guiSelectPoint/guiSelectPoint.js';
 
-//import { StereoEffect, spatialMultiplexsIndexs } from '../../three.js/dev/examples/jsm/effects/StereoEffect.js';
 //import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
-import { myPoints } from './myPoints/myPoints.js';
+//import { myPoints } from './myPoints/myPoints.js';
+import MyPoints from '../../commonNodeJS/master/myPoints/myPoints.js';
 
 import { MoveGroup } from '../../commonNodeJS/master/MoveGroup.js';
 
@@ -127,7 +132,7 @@ var arrayCreates = [];
 
 /**
  * @callback createXDobjects
- * @param {Group} group group of my 3d or 4d objects. https://threejs.org/docs/index.html#api/en/objects/Group
+ * @param {THREE.Group} group group of my 3d or 4d objects. [THREE.Group]{@link https://threejs.org/docs/index.html#api/en/objects/Group}
  */
 
 /**
@@ -144,7 +149,7 @@ var arrayCreates = [];
  * @param {THREE.Vector3} [options.camera.scale] camera scale. Default is new THREE.Vector3( 1, 1, 1 ).
  * @param {object} [options.scene] scene
  * @param {THREE.Vector3} [options.scene.position] scene position. Default is new THREE.Vector3( 0, 0, 0 )
- * @param {object} [options.orbitControls] use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
+ * @param {object} [options.orbitControls] use orbit controls allow the camera to orbit around a target. [OrbitControls]{@link https://threejs.org/docs/index.html#examples/en/controls/OrbitControls}
  * @param {boolean} [options.orbitControls.gui] true - displays the orbit controls gui. Default is false.
  * @param {object} [options.axesHelper] add the AxesHelper. Default the axes is not visible.
  * @param {number} [options.axesHelper.dimensions] 1 - visualize the X axes
@@ -156,9 +161,9 @@ var arrayCreates = [];
  * @param {number} [options.axesHelper.position] axesHelper position. Default is new THREE.Vector3( 0, 0, 0 )
  * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.
  * @param {object} [options.spriteText] spriteText options. See SpriteText options for details. Default undefined.
- * @param {boolean} [options.stereoEffect] true - use stereoEffect https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js. Default is false.
- * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui Default is false.
- * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui](https://github.com/anhr/dat.gui) for playing of 3D objects in my projects.
+ * @param {boolean} [options.stereoEffect] true - use [StereoEffect]{@link https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js}. Default is false.
+ * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. [dat.gui]{@link https://github.com/dataarts/dat.gui}. Default is false.
+ * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui]{@link https://github.com/anhr/dat.gui} for playing of 3D objects in my projects.
  * See nodejs\menuPlay\index.js Default is false.
  * @param {array} [options.arrayCloud] Array of points with cloud.
  * <pre>
@@ -177,9 +182,7 @@ var arrayCreates = [];
  * object - palette is new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } )
  * Default is undefined - White color of all points.
  * </pre>
- * @param {object} [options.player] 3D objects animation.
- * @param {number} [options.player.min] Animation start time. Default is 0.
- * @param {number} [options.player.max] Animation end time. Default is 1.
+ * @param {object} [options.player] 3D objects animation. See options.settings param of the [Player]{@link https://raw.githack.com/anhr/commonNodeJS/master/player/jsdoc/module-Player.html}.
  * @param {object} [options.canvas] canvas properties
  * @param {number} [options.canvas.width] width of the canvas
  * @param {number} [options.canvas.height] height of the canvas
@@ -190,11 +193,11 @@ var arrayCreates = [];
  *
  * @param {object} [options.point] point settings. Applies to points with ShaderMaterial.
  * <pre>
- * See https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial for details.
+ * See [ShaderMaterial]{@link https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial} for details.
  * The size of the point seems constant and does not depend on the distance to the camera.
  * </pre>
  * @param {number} [options.point.size] The apparent angular size of a point in radians. Default is 0.02.
- * @param {object} [options.stats] Use JavaScript Performance Monitor. https://github.com/mrdoob/stats.js/ . Dafault is not defined.
+ * @param {object} [options.stats] Use JavaScript Performance Monitor. [stats]{@link https://github.com/mrdoob/stats.js/} . Dafault is not defined.
  * @param {object} [options.scales] axes scales. Default is {}
  * @param {boolean} [options.scales.display] true - displays the label and scale of the axes. Default is false.
  * @param {number} [options.scales.precision] Formats a scale marks into a specified length. Default is 4
@@ -239,7 +242,7 @@ var arrayCreates = [];
  * @param {number} [options.scales.t.marks] Number of scenes of 3D objects animation. Default is 2.
  * @param {boolean} [options.scales.t.repeat] true - Infinite repeat of animation.. Default is false.
  *
- * @todo If you want to use raycaster (working out what objects in the 3d space the mouse is over) https://threejs.org/docs/index.html#api/en/core/Raycaster,
+ * @todo If you want to use raycaster (working out what objects in the 3d space the mouse is over) [Raycaster]{@link https://threejs.org/docs/index.html#api/en/core/Raycaster},
  * please add following object into your 3D Object userdata:
  * your3dObject.userData.raycaster = {
 
@@ -248,7 +251,7 @@ var arrayCreates = [];
 			//Mouse is over of your 3D object event
 			//TO DO something
 			//For example you can use
-			options.addSpriteTextIntersection( intersection, scene );
+			options.raycaster.onIntersection( intersection, scene );
 			//for displaying of the position of your 3D object
 			//ATTENTION!!! Use onIntersection and onIntersectionOut togethe!
 
@@ -258,7 +261,7 @@ var arrayCreates = [];
 			//Mouse is out of your 3D object event
 			//TO DO something
 			//For example you can use
-			options.removeSpriteTextIntersection( scene );
+			options.raycaster.onIntersectionOut( scene );
 			//for hide of the position of your 3D object that was displayed in onIntersection
 			//ATTENTION!!! Use onIntersection and onIntersectionOut togethe!
 
@@ -276,7 +279,7 @@ var arrayCreates = [];
 		},
 
 	}
- * Example: https://raw.githack.com/anhr/myThreejs/master/Examples/html/
+ * [Example]{@link https://raw.githack.com/anhr/myThreejs/master/Examples/html/}
  */
 export function create( createXDobjects, options ) {
 
@@ -543,16 +546,17 @@ export function create( createXDobjects, options ) {
 					var cookieName = getCanvasName();
 					stereoEffect = new StereoEffect( THREE, renderer, {
 
-						spatialMultiplex: spatialMultiplexsIndexs.Mono, //.SbS,
+						spatialMultiplex: StereoEffect.spatialMultiplexsIndexs.Mono, //.SbS,
 						far: camera.far,
 						camera: camera,
 						//stereoAspect: 1,
 						cookie: options.cookie,
 						cookieName: cookieName === '' ? '' : '_' + cookieName,
 						elParent: canvas.parentElement,
+						rememberSize: true,
 
 					} );
-					stereoEffect.options.spatialMultiplex = spatialMultiplexsIndexs.Mono;
+					stereoEffect.options.spatialMultiplex = StereoEffect.spatialMultiplexsIndexs.Mono;
 
 				} else console.warn( 'stereoEffect = ' + stereoEffect );
 
@@ -705,15 +709,16 @@ export function create( createXDobjects, options ) {
 					renderer: renderer,
 					camera: camera,
 					stereoEffect: stereoEffect,
+					raycasterEvents: false,
 
 				} );
-			options.addParticle = function ( item ) {
+			options.raycaster.addParticle = function ( item ) {
 
 				if ( raycaster.stereo !== undefined )
 					raycaster.stereo.addParticle( item );
 
 			}
-			options.removeParticle = function ( item ) {
+			options.raycaster.removeParticle = function ( item ) {
 
 				if ( raycaster.stereo !== undefined )
 					raycaster.stereo.removeParticle( item );
@@ -777,7 +782,16 @@ export function create( createXDobjects, options ) {
 
 			if ( options.player !== undefined ) {
 
-				player = new Player( {
+				player = new Player( function ( index, t ) {
+
+					options.boPlayer = true;
+					Player.selectPlayScene( THREE, group, t, index, options );
+					if ( canvasMenu !== undefined )
+						canvasMenu.setIndex( index, options.player.name + ': ' + t );
+					if ( frustumPoints !== undefined )
+						frustumPoints.updateCloudPoints();
+
+				}, {
 
 					settings: options.player,
 					cookie: options.cookie,
@@ -802,15 +816,6 @@ export function create( createXDobjects, options ) {
 						} );
 
 					},
-
-				}, function ( index, t ) {
-
-					options.boPlayer = true;
-					Player.selectPlayScene( THREE, group, t, index, options );
-					if ( canvasMenu !== undefined )
-						canvasMenu.setIndex( index, options.player.name + ': ' + t );
-					if ( frustumPoints !== undefined )
-						frustumPoints.updateCloudPoints();
 
 				} );
 				if ( ( gui !== undefined ) && ( typeof controllerPlay !== 'undefined' ) ) {
@@ -867,11 +872,11 @@ export function create( createXDobjects, options ) {
 						var fullScreen = true;
 						switch ( mode ) {
 
-							case spatialMultiplexsIndexs.Mono:
+							case StereoEffect.spatialMultiplexsIndexs.Mono:
 								fullScreen = false;
 								break;
-							case spatialMultiplexsIndexs.SbS:
-							case spatialMultiplexsIndexs.TaB:
+							case StereoEffect.spatialMultiplexsIndexs.SbS:
+							case StereoEffect.spatialMultiplexsIndexs.TaB:
 								break;
 							default: console.error( 'myThreejs: Invalid spatialMultiplexIndex = ' + mode );
 								return;
@@ -879,7 +884,7 @@ export function create( createXDobjects, options ) {
 						}
 						//rendererSizeDefault.onFullScreenToggle( !fullScreen );
 
-						canvasMenu.setSpatialMultiplexs( mode, { renderer: renderer, camera: camera } );
+//						canvasMenu.setSpatialMultiplexs( mode );
 						if ( frustumPoints !== undefined )
 							frustumPoints.setSpatialMultiplexs( mode );
 
@@ -893,19 +898,28 @@ export function create( createXDobjects, options ) {
 
 				if ( ( canvasMenu === undefined ) ) {
 
-					canvasMenu = new menuPlay.create( elContainer, {
+					canvasMenu = new CanvasMenu( elContainer, {
 
+						stereoEffect: stereoEffect,
+/*
 						stereoEffect: stereoEffect === undefined ? stereoEffect :
-							{ stereoEffect: stereoEffect, spatialMultiplexsIndexs: spatialMultiplexsIndexs },
+							{ stereoEffect: stereoEffect, spatialMultiplexsIndexs: StereoEffect.spatialMultiplexsIndexs },
+*/							
 						player: player,
-						onFullScreenToggle: function ( fullScreen ) {
+						fullScreen: {
 
-							return rendererSizeDefault.onFullScreenToggle( fullScreen );
+							renderer: renderer,
+							camera: camera,
+							onFullScreenToggle: function ( fullScreen ) {
 
-						},
-						onFullScreen: function ( fullScreen, elContainer ) {
+								rendererSizeDefault.onFullScreenToggle( fullScreen );
 
-							rendererSizeDefault.onFullScreenToggle( !fullScreen );
+							},
+							onFullScreen: function ( fullScreen, elContainer ) {
+
+								rendererSizeDefault.onFullScreenToggle( !fullScreen );
+
+							},
 
 						},
 						onOver: function ( _mouseenter ) {
@@ -917,6 +931,7 @@ export function create( createXDobjects, options ) {
 
 					} );
 					options.canvasMenu = canvasMenu;
+//					if ( player ) player.addCanvasMenuItem( canvasMenu );
 
 				} else canvasMenu.setPlayer( player );
 
@@ -1306,7 +1321,7 @@ export function create( createXDobjects, options ) {
 					onFullScreenToggle: function ( fs ) {
 
 						arrayContainers.display( elContainer.parentElement, !fs );//fullScreen );
-						return { renderer: renderer, camera: camera };
+						//return { renderer: renderer, camera: camera };
 
 					},
 
@@ -1426,8 +1441,10 @@ export function create( createXDobjects, options ) {
 
 			requestId = requestAnimationFrame( animate );
 
+/*			
 			if ( player !== undefined )
 				player.animate();
+*/				
 			render();
 
 			if ( stats !== undefined )
@@ -1542,10 +1559,34 @@ export function create( createXDobjects, options ) {
 
 	if ( options.dat !== undefined ) {
 
-		loadScript.sync( '/anhr/dropdownMenu/master/styles/gui.css', optionsStyle );
+
+		//Thanks to https://stackoverflow.com/a/27369985/5175935
+		//Такая же функция есть в frustumPoints.js но если ее использовать то она будет возвращать путь на frustumPoints.js
+		const getCurrentScript = function () {
+
+			if ( document.currentScript && ( document.currentScript.src !== '' ) )
+				return document.currentScript.src;
+			const scripts = document.getElementsByTagName( 'script' ),
+				str = scripts[scripts.length - 1].src;
+			if ( str !== '' )
+				return src;
+			//Thanks to https://stackoverflow.com/a/42594856/5175935
+			return new Error().stack.match( /(https?:[^:]*)/ )[0];
+
+		};
+		//Thanks to https://stackoverflow.com/a/27369985/5175935
+		const getCurrentScriptPath = function () {
+			const script = getCurrentScript(),
+				path = script.substring( 0, script.lastIndexOf( '/' ) );
+			return path;
+		};
+		//console.warn( 'getCurrentScriptPath = ' + getCurrentScriptPath() );
+		const currentScriptPath = getCurrentScriptPath();
+
+		loadScript.sync( currentScriptPath + '/../../commonNodeJS/master/DropdownMenu/styles/gui.css', optionsStyle );
 
 		//for .container class
-		loadScript.sync( '/anhr/dropdownMenu/master/styles/menu.css', optionsStyle );
+		loadScript.sync( currentScriptPath + '/../../commonNodeJS/master/DropdownMenu/styles/menu.css', optionsStyle );
 
 	}
 
@@ -1570,220 +1611,114 @@ export function create( createXDobjects, options ) {
 	options.getPoints = Player.getPoints;
 	options.getColors = Player.getColors;
 
-	/**
-	 * Get array of mesh colors.
-	 * @param {number} t first parameter of the arrayFuncs item function. Start time of animation.
-	 * @param {[THREE.Vector4|THREE.Vector3|THREE.Vector2]} arrayFuncs points.geometry.attributes.position array
-	 * <pre>
-	 * THREE.Vector4: 4D point.
-	 * THREE.Vector3: 3D point. w = 1. Default is white color
-	 * THREE.Vector2: 2D point. w = 1, z = 0. Default is white color
-	 * Vector's x, y, z, w is position of the point.
-	 * Can be as:
-	 * float - position of the point.
-	 * [float] - array of positions of the point.
-	 * Function - position of the point is function of the t. Example: new Function( 't', 'a', 'b', 'return Math.sin(t*a*2*Math.PI)*0.5+b' )
-	 * Vector.w can be as THREE.Color. Example: new THREE.Color( "rgb(255, 127, 0)" )
-	 *
-	 * object: {
-	 *   vector: THREE.Vector4|THREE.Vector3|THREE.Vector2 - point position
-	 *   [name]: point name. Default is undefined.
-	 *   [trace]: true - displays the trace of the point movement. Default is undefined.
-	 * }
-	 * </pre>
-	 * @param {object} scale options.scales.w
-	 * @param {object} [optionsColor] followed options is available:
-	 * @param {THREE.BufferAttribute} [optionsColor.positions] geometry.attributes.position of the new mesh. Default is undefined.
-	 * @param {[]} [optionsColor.colors] array for mesh colors. Default is undefined.
-	 * @param {boolean} [optionsColor.opacity] if true then opacity of the point is depend from distance to all  meshes points from the group with defined mesh.userData.cloud. Default is undefined.
-	 * @returns array of mesh colors.
-	 */
-/*
-	options.getColors = function ( t, arrayFuncs, scale, optionsColor ) {
+	//for Raycaster https://threejs.org/docs/index.html#api/en/core/Raycaster
+	options.raycaster = {
 
-		if ( t === undefined )
-			console.error( 'getColors: t = ' + t );
+		/**
+		 * Displays a sprite text if you move mouse over an 3D object
+		 * @param {object} intersection. See https://threejs.org/docs/index.html#api/en/core/Raycaster.intersectObject for details.
+		 * @param {THREE.Scene} scene.
+		 * @param {THREE.Vector2} mouse mouse position.
+		*/
+		//options.addSpriteTextIntersection = function ( intersection, mouse )
+		onIntersection: function ( intersection, mouse ) {
 
-		optionsColor = optionsColor || {};
-		if ( ( optionsColor.positions !== undefined ) && Array.isArray( arrayFuncs ) && ( arrayFuncs.length !== optionsColor.positions.count ) ) {
+			if ( intersection.object.userData.isInfo !== undefined && !intersection.object.userData.isInfo() )
+				return;
+			var spriteTextIntersection = findSpriteTextIntersection( scene );
+			var textColor = 'rgb( 128, 128, 128 )',
+				position = getPosition( intersection );
 
-			console.error( 'getColors failed! arrayFuncs.length: ' + arrayFuncs.length + ' != positions.count: ' + optionsColor.positions.count );
-			return optionsColor.colors;
+			// Make the spriteText follow the mouse
+			//https://stackoverflow.com/questions/36033879/three-js-object-follows-mouse-position
+			var vector = new THREE.Vector3( mouse.x, mouse.y, 0 );
+			vector.unproject( camera );
+			var dir = vector.sub( camera.position ).normalize();
+			var pos = camera.position.clone().add( dir.multiplyScalar( 1 ) );
 
-		}
-		optionsColor.colors = optionsColor.colors || [];
-		var length = Array.isArray( arrayFuncs ) ? arrayFuncs.length : optionsColor.positions.count;
+			var parent = intersection.object.parent;
+			while ( parent !== null ) {
 
-		for( var i = 0; i < length; i++ ) {
-
-			var funcs = Array.isArray(arrayFuncs) ? arrayFuncs[i] : undefined,
-				vector;
-			if (
-				( funcs instanceof THREE.Vector4 ) ||//w of the funcs is color of the point
-				( optionsColor.positions.itemSize === 4 )//w position of the positions is color of the point
-			 ) {
-
-				var min, max;
-				if ( scale !== undefined ) {
-
-					min = scale.min; max = scale.max;
-
-				} else {
-
-					max = funcs instanceof THREE.Vector4 ? funcs.w : 1;
-					min = max - 1;
-
-				}
-				var color = options.palette.toColor( funcs === undefined ? new THREE.Vector4().fromBufferAttribute( optionsColor.positions, i ).w : funcs.w, min, max );
-				optionsColor.colors.push( color.r, color.g, color.b );
-
-			} else if ( optionsColor.colors instanceof THREE.Float32BufferAttribute )
-				vector = new THREE.Vector3( 1, 1, 1 );
-			else optionsColor.colors.push( 1, 1, 1 );//white
-
-			//opacity
-			if ( optionsColor.opacity !== undefined ) {
-
-				var opacity = 0,
-					standardNormalDistributionZero = getStandardNormalDistribution( 0 );
-				group.children.forEach( function ( mesh ) {
-
-					if ( !mesh.userData.cloud )
-						return;
-					for ( var iMesh = 0; iMesh < mesh.geometry.attributes.position.count; iMesh++ ) {
-
-						var position = getObjectPosition( mesh, iMesh );
-						opacity += getStandardNormalDistribution(
-							getWorldPosition(//myThreejs.getWorldPosition(
-								camera, new THREE.Vector3().fromBufferAttribute( optionsColor.positions, i )
-							).distanceTo( position ) * 5
-						) / standardNormalDistributionZero;
-
-					}
-
-				} );
-
-				if ( debug.opacity !== undefined )
-					opacity = debug.opacity;
-					
-				if ( optionsColor.colors instanceof THREE.Float32BufferAttribute ) {
-
-					optionsColor.colors.setXYZW( i, vector.x, vector.y, vector.z, opacity );
-
-				}
-				else optionsColor.colors.push( opacity );
-
-			} else optionsColor.colors.push( 1 );
-
-		}
-		return optionsColor.colors;
-
-	}
-*/	
-	/**
-	 * Displays a sprite text if you move mouse over an 3D object
-	 * @param {object} intersection. See https://threejs.org/docs/index.html#api/en/core/Raycaster.intersectObject for details.
-	 * @param {THREE.Scene} scene.
-	 * @param {THREE.Vector2} mouse mouse position.
-	 */
-	options.addSpriteTextIntersection = function ( intersection, mouse ) {
-
-		if ( intersection.object.userData.isInfo !== undefined && !intersection.object.userData.isInfo() )
-			return;
-		var spriteTextIntersection = findSpriteTextIntersection( scene );
-		var textColor = 'rgb( 128, 128, 128 )',
-			position = getPosition( intersection );
-
-		// Make the spriteText follow the mouse
-		//https://stackoverflow.com/questions/36033879/three-js-object-follows-mouse-position
-		var vector = new THREE.Vector3( mouse.x, mouse.y, 0 );
-		vector.unproject( camera );
-		var dir = vector.sub( camera.position ).normalize();
-		var pos = camera.position.clone().add( dir.multiplyScalar( 1 ) );
-
-		var parent = intersection.object.parent;
-		while ( parent !== null ) {
-
-			pos.sub( parent.position );
-			pos.divide( parent.scale );
-			parent = parent.parent;
-
-		}
-
-		if ( spriteTextIntersection === undefined ) {
-
-			var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
-				funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
-				func = ( funcs === undefined ) || ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
-				pointName = !isArrayFuncs ?
-					undefined :
-					intersection.object.userData.pointName === undefined ?
-						func === undefined ? undefined : func.name :
-						intersection.object.userData.pointName( intersection.index ),
-				color = !isArrayFuncs || ( func === undefined ) ?
-					undefined :
-					Array.isArray(func.w) ?
-						Player.execFunc( func, 'w', group.userData.t, options.a, options.b ) :
-						func.w;
-			if ( ( color === undefined ) && ( intersection.object.geometry.attributes.ca !== undefined ) ) {
-
-				var vector = new THREE.Vector3().fromArray(intersection.object.geometry.attributes.ca.array, intersection.index * intersection.object.geometry.attributes.ca.itemSize);
-				color = new THREE.Color( vector.x, vector.y, vector.z );
+				pos.sub( parent.position );
+				pos.divide( parent.scale );
+				parent = parent.parent;
 
 			}
-			var cookieName = getCanvasName();
 
-			/**
-			 * Converting World coordinates to Screen coordinates
-			 * https://stackoverflow.com/questions/11586527/converting-world-coordinates-to-screen-coordinates-in-three-js-using-projection
-			 */
-			function worldToScreen( world ) {
+			if ( spriteTextIntersection === undefined ) {
 
-				var width = canvas.width, height = canvas.height;
-				var widthHalf = width / 2, heightHalf = height / 2;
+				var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
+					funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
+					func = ( funcs === undefined ) || ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
+					pointName = !isArrayFuncs ?
+						undefined :
+						intersection.object.userData.pointName === undefined ?
+							func === undefined ? undefined : func.name :
+							intersection.object.userData.pointName( intersection.index ),
+					color = !isArrayFuncs || ( func === undefined ) ?
+						undefined :
+						Array.isArray( func.w ) ?
+							Player.execFunc( func, 'w', group.userData.t, options.a, options.b ) :
+							func.w;
+				if ( ( color === undefined ) && ( intersection.object.geometry.attributes.ca !== undefined ) ) {
 
-				var pos = world.clone();
-				pos.project(camera);
-				pos.x = ( pos.x * widthHalf ) + widthHalf;
-				pos.y = - ( pos.y * heightHalf ) + heightHalf;
-				return pos;
+					var vector = new THREE.Vector3().fromArray( intersection.object.geometry.attributes.ca.array, intersection.index * intersection.object.geometry.attributes.ca.itemSize );
+					color = new THREE.Color( vector.x, vector.y, vector.z );
 
-			}
-			var screenPos = worldToScreen( pos );
+				}
+				var cookieName = getCanvasName();
 
-			var rect = options.spriteText.rect ? JSON.parse( JSON.stringify( options.spriteText.rect ) ) : {};
-			rect.displayRect = true;
-			rect.backgroundColor = 'rgba(0, 0, 0, 1)';
-			spriteTextIntersection = new SpriteText(
-				( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
-				( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
-				( !options.scales.x ? '' : options.scales.x.name + ': ' + position.x ) +
-				( !options.scales.y ? '' : '\n' + options.scales.y.name + ': ' + position.y ) +
-				( !options.scales.z ? '' : '\n' + options.scales.z.name + ': ' + position.z ) +
-				(//w
-					!isArrayFuncs ?
-						'' :
-						funcs[intersection.index] instanceof THREE.Vector4 ||
-						funcs[intersection.index] instanceof THREE.Vector3 ||
-						typeof funcs === "function" ?
-							color instanceof THREE.Color ?
-								'\n' + lang.color + ': ' + new THREE.Color( color.r, color.g, color.b ).getHexString() :
-								'\n' + options.scales.w.name + ': ' + position.w :
-							''
+				/**
+				 * Converting World coordinates to Screen coordinates
+				 * https://stackoverflow.com/questions/11586527/converting-world-coordinates-to-screen-coordinates-in-three-js-using-projection
+				 */
+				function worldToScreen( world ) {
 
-				) +
-				(//opacity
-					( intersection.object.geometry.attributes.ca === undefined ) ||
-					( intersection.object.geometry.attributes.ca.itemSize < 4 ) ?
-						'' :
-						'\n' + lang.opacity + ': ' + new THREE.Vector4().fromArray(
+					var width = canvas.width, height = canvas.height;
+					var widthHalf = width / 2, heightHalf = height / 2;
 
-							intersection.object.geometry.attributes.ca.array,
-							intersection.index * intersection.object.geometry.attributes.ca.itemSize
+					var pos = world.clone();
+					pos.project( camera );
+					pos.x = ( pos.x * widthHalf ) + widthHalf;
+					pos.y = - ( pos.y * heightHalf ) + heightHalf;
+					return pos;
 
-						).w
-				)
-				, pos, {
+				}
+				var screenPos = worldToScreen( pos );
+
+				var rect = options.spriteText.rect ? JSON.parse( JSON.stringify( options.spriteText.rect ) ) : {};
+				rect.displayRect = true;
+				rect.backgroundColor = 'rgba(0, 0, 0, 1)';
+				spriteTextIntersection = new SpriteText(
+					( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
+					( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
+					( !options.scales.x ? '' : options.scales.x.name + ': ' + position.x ) +
+					( !options.scales.y ? '' : '\n' + options.scales.y.name + ': ' + position.y ) +
+					( !options.scales.z ? '' : '\n' + options.scales.z.name + ': ' + position.z ) +
+					(//w
+						!isArrayFuncs ?
+							'' :
+							funcs[intersection.index] instanceof THREE.Vector4 ||
+								funcs[intersection.index] instanceof THREE.Vector3 ||
+								typeof funcs === "function" ?
+								color instanceof THREE.Color ?
+									'\n' + lang.color + ': ' + new THREE.Color( color.r, color.g, color.b ).getHexString() :
+									'\n' + options.scales.w.name + ': ' + position.w :
+								''
+
+					) +
+					(//opacity
+						( intersection.object.geometry.attributes.ca === undefined ) ||
+							( intersection.object.geometry.attributes.ca.itemSize < 4 ) ?
+							'' :
+							'\n' + lang.opacity + ': ' + new THREE.Vector4().fromArray(
+
+								intersection.object.geometry.attributes.ca.array,
+								intersection.index * intersection.object.geometry.attributes.ca.itemSize
+
+							).w
+					)
+					, pos, {
 
 					textHeight: options.spriteText.textHeight,// || 0.2,
 					fontColor: options.spriteText.fontColor,// || textColor,
@@ -1791,35 +1726,38 @@ export function create( createXDobjects, options ) {
 					center: new THREE.Vector2( screenPos.x < ( canvas.width / 2 ) ? 0 : 1, screenPos.y < ( canvas.height / 2 ) ? 1 : 0 ),
 
 				}
-			);
-			spriteTextIntersection.name = spriteTextIntersectionName;
-			spriteTextIntersection.scale.divide( scene.scale );
-			scene.add( spriteTextIntersection );
+				);
+				spriteTextIntersection.name = spriteTextIntersectionName;
+				spriteTextIntersection.scale.divide( scene.scale );
+				scene.add( spriteTextIntersection );
 
-		} else spriteTextIntersection.position.copy( pos );
+			} else spriteTextIntersection.position.copy( pos );
 
-	}
+		},
 
-	/**
-	 * Hides a sprite text if you move mouse out an object
-	 * @param {THREE.Scene} scene.
-	 */
-	options.removeSpriteTextIntersection = function () {
+		/**
+		 * Hides a sprite text if you move mouse out an object
+		 * @param {THREE.Scene} scene.
+		 */
+		//options.removeSpriteTextIntersection = function () 
+		onIntersectionOut: function () {
 
-		var detected = false;
-		do {
+			var detected = false;
+			do {
 
-			var spriteTextIntersection = findSpriteTextIntersection( scene );
-			if ( spriteTextIntersection !== undefined ) {
+				var spriteTextIntersection = findSpriteTextIntersection( scene );
+				if ( spriteTextIntersection !== undefined ) {
 
-				scene.remove( spriteTextIntersection );
-				if ( detected )
-					console.error( 'Duplicate spriteTextIntersection' );
-				detected = true;
+					scene.remove( spriteTextIntersection );
+					if ( detected )
+						console.error( 'Duplicate spriteTextIntersection' );
+					detected = true;
 
-			}
+				}
 
-		} while ( spriteTextIntersection !== undefined )
+			} while ( spriteTextIntersection !== undefined )
+
+		}
 
 	}
 	onloadScripts();
@@ -1850,6 +1788,7 @@ var lang = {
 	defaultButton: 'Default',
 	defaultTitle: 'Restore Orbit controls settings.',
 
+	mesh: 'Mesh',
 	pointName: 'Point Name',
 	settings: 'Settings',
 	webglcontextlost: 'The user agent has detected that the drawing buffer associated with a WebGLRenderingContext object has been lost.',
@@ -1868,6 +1807,8 @@ var lang = {
 	traceTitle: 'Display the trace of the point movement.',
 	traceAllTitle: 'Display the trace of the movement of all points of the mesh.',
 
+	opacity: 'Opacity',
+
 };
 
 switch ( getLanguageCode() ) {
@@ -1876,6 +1817,7 @@ switch ( getLanguageCode() ) {
 		lang.defaultButton = 'Восстановить';
 		lang.defaultTitle = 'Восстановить положение осей координат по умолчанию.';
 
+		lang.mesh = '3D объект';
 		lang.pointName = 'Имя точки';
 		lang.name = 'Имя';
 		lang.settings = 'Настройки';
@@ -1895,6 +1837,7 @@ switch ( getLanguageCode() ) {
 		lang.traceTitle = 'Показать трек перемещения точки.';
 		lang.traceAllTitle = 'Показать трек перемещения всех точек выбранного 3D объекта.';
 
+		lang.opacity = 'Непрозрачность';
 		break;
 
 }
@@ -1990,7 +1933,9 @@ export { getWorldPosition }
  */
 export function points( arrayFuncs, group, options, pointsOptions ) {
 
-	myPoints.create( arrayFuncs, group, options, pointsOptions);
+//	myPoints.create( arrayFuncs, group, options, pointsOptions);
+	MyPoints( THREE, arrayFuncs, group,// Player,
+		{ options: options, pointsOptions: pointsOptions } );
 
 }
 

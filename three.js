@@ -12,8 +12,8 @@ import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitCon
 import { ConvexBufferGeometry } from '../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js';//https://github.com/anhr/three.js
 //import { ConvexBufferGeometry } from 'https://raw.githack.com/anhr/three.js/dev/examples/jsm/geometries/ConvexGeometry.js';
 
-import { StereoEffect, spatialMultiplexsIndexs } from '../../commonNodeJS/master/StereoEffect/StereoEffect.js';//https://github.com/anhr/commonNodeJS
-//import { StereoEffect, spatialMultiplexsIndexs } from 'https://raw.githack.com/anhr/commonNodeJS/master/StereoEffect/StereoEffect.js';
+import StereoEffect from '../../commonNodeJS/master/StereoEffect/StereoEffect.js';//https://github.com/anhr/commonNodeJS
+//import StereoEffect from 'https://raw.githack.com/anhr/commonNodeJS/master/StereoEffect/StereoEffect.js';
 
 import { SpriteText } from '../../SpriteText/master/SpriteText.js';//https://github.com/anhr/SpriteText
 //import { SpriteText } from 'https://raw.githack.com/anhr/SpriteText/master/SpriteText.js';
@@ -35,7 +35,7 @@ export {
 	WEBGL,
 	OrbitControls,
 	ConvexBufferGeometry,
-	StereoEffect, spatialMultiplexsIndexs,
+	StereoEffect,// spatialMultiplexsIndexs,
 	SpriteText, SpriteTextGui,
 	AxesHelper,
 	AxesHelperGui,

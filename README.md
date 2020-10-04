@@ -100,7 +100,7 @@ Creates new canvas with my 3D objects.
 
 ## You can use the following functions in your code:
 
-### options.addSpriteTextIntersection( intersection, scene, mouse )
+### options.raycaster.onIntersection( intersection, scene, mouse )
 
 Displays a [sprite text](https://github.com/anhr/three.js/blob/dev/src/objects/SpriteText.js) if you move mouse over an 3D object.
 
@@ -110,7 +110,7 @@ Displays a [sprite text](https://github.com/anhr/three.js/blob/dev/src/objects/S
 | scene | <code>THREE.Scene</code> |  | scene. |
 | mouse | <code>THREE.Vector2</code> |  | mouse position. |
 
-* options.removeSpriteTextIntersection( scene )
+* options.raycaster.onIntersectionOut( scene )
 
 Hides a [sprite text](https://github.com/anhr/three.js/blob/dev/src/objects/SpriteText.js) if you move mouse out an object.
 
@@ -185,29 +185,32 @@ returns array of mesh colors.
 		var points = new THREE.Points( new THREE.BufferGeometry().setFromPoints( options.getPoints( THREE, tMin, arrayFuncs, a, b ), 4 ),
 			new THREE.PointsMaterial( { size: options.point.size, vertexColors: THREE.VertexColors } ) );
 		points.name = 'Points';
-//		points.geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( THREE, tMin, arrayFuncs, options.scales.w ), 3 ) );
 		points.geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( options.getColors( THREE, arrayFuncs,
 			{ scale: options.scales.w } ), 3 ) );
-		points.userData.arrayFuncs = arrayFuncs;//3D object animation.
 		points.userData.raycaster = {
 
 			onIntersection: function ( raycaster, intersection, scene, mouse ) {
 
-				options.addSpriteTextIntersection( raycaster, intersection, scene, mouse );
+				options.raycaster.onIntersection( raycaster, intersection, scene, mouse );
 
 			},
 			onIntersectionOut: function ( scene ) {
 
-				options.removeSpriteTextIntersection( scene );
+				options.raycaster.onIntersectionOut( scene );
 
 			},
 
 		}
-		points.userData.selectPlayScene = function ( t ) {
+		points.userData.player = {
 
-			var angle = t * Math.PI * 2 * 1.2;
-			points.rotation.set( angle, 0, 0 );
-			myThreejs.limitAngles( points.rotation );
+			arrayFuncs: arrayFuncs,
+			selectPlayScene: function ( t, setAttributes ) {
+
+				var angle = t * Math.PI * 2 * 1.2;
+				points.rotation.set( angle, 0, 0 );
+				myThreejs.limitAngles( points.rotation );
+
+			}
 
 		}
 		points.position.copy( new THREE.Vector3( 0.1, 0.2, 0.3 ) );

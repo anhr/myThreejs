@@ -62,9 +62,8 @@ import {
 } from '../../../three.js/dev/build/three.module.js';
 */
 import { myThreejs, THREE } from './../myThreejs.js';
-import cookie from '../../../cookieNodeJS/master/cookie.js';
+import cookie from '../../../commonNodeJS/master/cookieNodeJS/cookie.js';
 import clearThree from '../../../commonNodeJS/master/clearThree.js';
-//import { spatialMultiplexsIndexs } from '../../../three.js/dev/examples/jsm/effects/StereoEffect.js';
 
 //memory limit
 //import roughSizeOfObject from '../../commonNodeJS/master/SizeOfObject.js';
@@ -460,7 +459,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 				group.remove( points );
 				group.remove( groupFrustumPoints );
-				options.removeParticle( points );
+				options.raycaster.removeParticle( points );
 
 			}
 			clearTimeout( timeoutControls );
@@ -468,7 +467,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 				group.add( groupFrustumPoints );
 				if ( shaderMaterial.info )
-					options.addParticle( points );
+					options.raycaster.addParticle( points );
 
 				clearTimeout( timeoutControls );
 				timeoutControls = undefined;
@@ -731,11 +730,11 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 		//Thanks to https://stackoverflow.com/a/27369985/5175935
 		//Такая же функция есть в myPoints.js но если ее использовать то она будет возвращать путь на myPoints.js
-		var getCurrentScript = function () {
+		const getCurrentScript = function () {
 
 			if ( document.currentScript && ( document.currentScript.src !== '' ) )
 				return document.currentScript.src;
-			var scripts = document.getElementsByTagName( 'script' ),
+			const scripts = document.getElementsByTagName( 'script' ),
 				str = scripts[scripts.length - 1].src;
 			if ( str !== '' )
 				return src;
@@ -744,11 +743,12 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 		};
 		//Thanks to https://stackoverflow.com/a/27369985/5175935
-		var getCurrentScriptPath = function () {
-			var script = getCurrentScript(),
+		const getCurrentScriptPath = function () {
+			const script = getCurrentScript(),
 				path = script.substring( 0, script.lastIndexOf( '/' ) );
 			return path;
 		};
+		//console.warn( 'getCurrentScriptPath = ' + getCurrentScriptPath() );
 		var path = getCurrentScriptPath();
 		var cameraPositionDefault = new THREE.Vector3( camera.position.x, camera.position.y, camera.position.z );
 		var cameraQuaternionDefault = new THREE.Vector4(camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w);
@@ -891,7 +891,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 					
 					saveSettings();
 					if ( shaderMaterial.info )
-						options.addParticle( points );
+						options.raycaster.addParticle( points );
 
 					if ( !shaderMaterial.display )
 						removePoints();
@@ -1138,7 +1138,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 			} else {
 
-				options.removeParticle( points );
+				options.raycaster.removeParticle( points );
 				removePoints();
 
 			}
@@ -1159,11 +1159,11 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 
 			}
 			if ( shaderMaterial.info )
-				options.addParticle( points );
+				options.raycaster.addParticle( points );
 			else {
 
 				options.guiSelectPoint.selectPoint( -1 );
-				options.removeParticle( points );
+				options.raycaster.removeParticle( points );
 
 			}
 			saveSettings();
@@ -1247,7 +1247,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 			//Поэтому не удаляю points из списка cMeshs а только получаю индекс points в этом списке.
 			var index = options.guiSelectPoint.getMeshIndex( points );
 
-			options.removeParticle( points );
+			options.raycaster.removeParticle( points );
 			removePoints( true );
 
 			_this.update( function() {

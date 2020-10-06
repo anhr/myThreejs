@@ -41,7 +41,7 @@ Creates new canvas with my 3D objects.
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | createXDobjects | <code>callback</code> |  | creates my 3D objects. callback function ( group ) group: [group](https://threejs.org/docs/index.html#api/en/objects/Group) of my 3d or 4d objects. |
-| [options] | <code>object</code> |  | followed options is available: |
+| [options] | <code>object</code> |  | the following options are available: |
 | [options.elContainer] | <code>HTMLElement or string</code> | document.getElementById( "containerDSE" ) or a div element, child of body. | If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui. If a string, then is id of the HTMLElement.|
 | [options.orbitControls] | <code>object</code> |  | use [orbitControls](https://threejs.org/docs/index.html#examples/en/controls/OrbitControls) allow the camera to orbit around a target.|
 | [options.orbitControls.gui] | <code>boolean</code> | false | true - displays the orbit controls gui. |

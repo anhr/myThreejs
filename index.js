@@ -138,7 +138,7 @@ var arrayCreates = [];
 /**
  * Creates new canvas with my 3D objects
  * @param {createXDobjects} createXDobjects callback creates my 3D objects.
- * @param {object} [options] followed options is available:
+ * @param {object} [options] the following options are available:
  * @param {HTMLElement|string} [options.elContainer] If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui.
  * <pre>
  * If a string, then is id of the HTMLElement.
@@ -512,31 +512,8 @@ export function create( createXDobjects, options ) {
 				canvas: canvas,
 
 			} );
-			renderer.setPixelRatio( window.devicePixelRatio );
+//			renderer.setPixelRatio( window.devicePixelRatio );
 			options.renderer = renderer;
-
-			//resize
-			renderer.setSizeOld = renderer.setSize;
-			renderer.setSize = function ( width, height, updateStyle ) {
-
-				renderer.setSizeOld( width, height, updateStyle );
-
-				timeoutControls = setTimeout( function () {
-
-					elContainer.style.height = canvas.style.height;
-					elContainer.style.width = canvas.style.width;
-					elContainer.style.left = canvas.style.left;
-					elContainer.style.top = canvas.style.top;
-					elContainer.style.position = canvas.style.position;
-
-					if ( canvasMenu !== undefined )
-						canvasMenu.setSize( width, height );
-
-				}, 0 );
-
-			};
-			renderer.setSize( ( options.canvas !== undefined ) && ( options.canvas.width !== undefined ) ? options.canvas.width : canvas.clientWidth,
-				( options.canvas !== undefined ) && ( options.canvas.height !== undefined ) ? options.canvas.height : canvas.clientHeight );
 
 			//StereoEffect. https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js
 			if ( options.stereoEffect ) {
@@ -560,7 +537,7 @@ export function create( createXDobjects, options ) {
 
 				} else console.warn( 'stereoEffect = ' + stereoEffect );
 
-			}
+			} else StereoEffect.setTHREE( THREE );
 
 			//Light
 
@@ -782,24 +759,28 @@ export function create( createXDobjects, options ) {
 
 			if ( options.player !== undefined ) {
 
-				player = new Player( function ( index, t ) {
+				player = new Player( THREE, group, {
 
-					options.boPlayer = true;
-					Player.selectPlayScene( THREE, group, t, index, options );
-					if ( canvasMenu !== undefined )
-						canvasMenu.setIndex( index, options.player.name + ': ' + t );
-					if ( frustumPoints !== undefined )
-						frustumPoints.updateCloudPoints();
+					onSelectScene: function ( index, t ) {
 
-				}, {
+						options.boPlayer = true;
+//						player.setIndex( index, options.player.name + ': ' + t );
+						if ( frustumPoints !== undefined )
+							frustumPoints.updateCloudPoints();
 
+					},
+					selectPlaySceneOptions: options,
 					settings: options.player,
 					cookie: options.cookie,
 					cookieName: '_' + getCanvasName(),
 					onChangeScaleT: function ( scale ) {
 
+						if ( player !== undefined )
+							player.onChangeScale( scale );
+/*
 						if ( canvasMenu !== undefined )
 							canvasMenu.onChangeScale( scale );
+*/							
 						group.children.forEach( function ( mesh ) {
 
 							if ( ( mesh.userData.arrayFuncs === undefined ) || ( typeof mesh.userData.arrayFuncs === "function" ) )
@@ -820,7 +801,7 @@ export function create( createXDobjects, options ) {
 				} );
 				if ( ( gui !== undefined ) && ( typeof controllerPlay !== 'undefined' ) ) {
 
-					var playController = controllerPlay.create( player );
+					var playController = controllerPlay.create( player, gui );
 					gui.add( playController );
 
 				}
@@ -898,8 +879,9 @@ export function create( createXDobjects, options ) {
 
 				if ( ( canvasMenu === undefined ) ) {
 
-					canvasMenu = new CanvasMenu( elContainer, {
+					canvasMenu = new CanvasMenu( renderer, {
 
+						getLanguageCode: getLanguageCode,
 						stereoEffect: stereoEffect,
 /*
 						stereoEffect: stereoEffect === undefined ? stereoEffect :
@@ -908,8 +890,8 @@ export function create( createXDobjects, options ) {
 						player: player,
 						fullScreen: {
 
-							renderer: renderer,
 							camera: camera,
+							THREE: THREE,
 							onFullScreenToggle: function ( fullScreen ) {
 
 								rendererSizeDefault.onFullScreenToggle( fullScreen );
@@ -927,15 +909,49 @@ export function create( createXDobjects, options ) {
 							mouseenter = _mouseenter;
 
 						},
-						THREE: THREE,
 
 					} );
 					options.canvasMenu = canvasMenu;
 //					if ( player ) player.addCanvasMenuItem( canvasMenu );
 
 				} else canvasMenu.setPlayer( player );
+/*
+				//resize
+				renderer.setSizeOld = renderer.setSize;
+				renderer.setSize = function ( width, height, updateStyle ) {
 
+					renderer.setSizeOld( width, height, updateStyle );
+					const style = {
+
+						height: canvas.style.height,
+						width: canvas.style.width,
+						left: canvas.style.left,
+						top: canvas.style.top,
+						position: canvas.style.position,
+
+					}
+
+					//				timeoutControls =
+					setTimeout( function () {
+
+						elContainer.style.height = style.height;
+						elContainer.style.width = style.width;
+						elContainer.style.left = style.left;
+						elContainer.style.top = style.top;
+						elContainer.style.position = style.position;
+
+						if ( canvasMenu !== undefined )
+							canvasMenu.setSize( width, height );
+
+					}, 0 );
+
+				};
+				renderer.setSize( ( options.canvas !== undefined ) && ( options.canvas.width !== undefined ) ? options.canvas.width : canvas.clientWidth,
+					( options.canvas !== undefined ) && ( options.canvas.height !== undefined ) ? options.canvas.height : canvas.clientHeight );
+*/
 			}
+			renderer.setSize( ( options.canvas !== undefined ) && ( options.canvas.width !== undefined ) ? options.canvas.width : canvas.clientWidth,
+				( options.canvas !== undefined ) && ( options.canvas.height !== undefined ) ? options.canvas.height : canvas.clientHeight );
 
 			//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
 			if ( options.orbitControls ) {
@@ -1095,8 +1111,9 @@ export function create( createXDobjects, options ) {
 
 			if ( options.arrayCloud ) {//Array of points with cloud
 
-				frustumPoints = FrustumPoints.create( camera, controls//, guiSelectPoint
-					, group, 'FrustumPoints_' + getCanvasName(), stereoEffect.options.spatialMultiplex, renderer, options,
+				frustumPoints = FrustumPoints.create( camera, controls,// guiSelectPoint
+					group, 'FrustumPoints_' + getCanvasName(), stereoEffect ? stereoEffect.options.spatialMultiplex : undefined,
+					renderer, options,
 					{//points and lines options.Default is { }
 
 						point: {//points options.Default is {}
@@ -1297,8 +1314,12 @@ export function create( createXDobjects, options ) {
 
 				if ( item.userData.raycaster !== undefined ) {
 
-					if ( raycaster.stereo !== undefined )
-						raycaster.stereo.addParticle( item );
+					if ( raycaster.stereo !== undefined ) {
+
+						if ( !raycaster.stereo.isAddedToParticles( item ) )//Если добавляются точки myPoints то в них particle уже добавлен
+							raycaster.stereo.addParticle( item );
+
+					}
 
 				}
 
@@ -1362,11 +1383,13 @@ export function create( createXDobjects, options ) {
 			camera.aspect = size.x / size.y;
 			camera.updateProjectionMatrix();
 
+			renderer.setSize( size.x, size.y );
+/*
 			if ( typeof se === 'undefined' )
 				renderer.setSize( size.x, size.y );
 			else
 				stereoEffect.setSize( size.x, size.y );
-
+*/
 			if ( frustumPoints !== undefined )
 				frustumPoints.update();
 
@@ -1456,7 +1479,7 @@ export function create( createXDobjects, options ) {
 			if ( typeof stereoEffect === 'undefined' )
 				renderer.render( scene, camera );
 			else stereoEffect.render( scene, camera );
-
+/*
 			if ( ( raycaster !== undefined ) && ( raycaster.stereo === undefined ) ) {
 
 				raycaster.setFromCamera( mouse, camera );
@@ -1464,15 +1487,15 @@ export function create( createXDobjects, options ) {
 				if ( intersects.length > 0 ) {
 
 					onIntersection( intersects, mouse );
-
 				} else {
 
 					onIntersectionOut( intersects );
+//					options.raycaster.onIntersectionOut();
 
 				}
 
 			}
-
+*/
 			if( cameraPosition === undefined )
 				cameraPosition = new THREE.Vector3(); 
 			if ( pointSize === undefined )
@@ -1541,7 +1564,7 @@ export function create( createXDobjects, options ) {
 
 		}
 
-		var timeoutControls;
+//		var timeoutControls;
 
 		arrayCreates.shift();
 		var params = arrayCreates.shift();

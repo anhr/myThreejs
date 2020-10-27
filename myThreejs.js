@@ -58,4 +58,4 @@ var myThreejs =
 
 }
 //export default MYTHREEJS;
-export { myThreejs, THREE, WEBGL, ConvexBufferGeometry }
+export { myThreejs, THREE, WEBGL, ConvexBufferGeometry, MyPoints }

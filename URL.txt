@@ -1,4 +1,24 @@
-﻿-------------------------------------------
+﻿--------------------------------
+isdoc https://github.com/jsdoc/jsdoc
+Getting Started with JSDoc 3 https://jsdoc.app/about-getting-started.html
+Generating a website:
+	Download https://github.com/jsdoc/jsdoc into D:\My documents\MyProjects\webgl\three.js\GitHub\jsdoc
+	Open "Node.js command prompt"
+
+	d:
+	cd "D:\My documents\MyProjects\webgl\three.js\GitHub\jsdoc"
+	npm install -g jsdoc
+	/////////////////////////////////////////////////////////////
+	//myThreejs doc
+
+	//remove all files from "D:\My documents\MyProjects\webgl\three.js\GitHub\myThreejs\master\jsdoc"
+
+	jsdoc -R "..\myThreejs\master\myThreejs.md" "..\myThreejs\master\index.js" -d "..\myThreejs\master\jsdoc"
+
+	//See results in "D:\My documents\MyProjects\webgl\three.js\GitHub\AxesHelper\master\jsdoc"
+
+	/////////////////////////////////////////////////////////////
+-------------------------------------------
 ВНИМАНИЕ!!!! обязательно вставить файл .babelrc в
 D:\My documents\MyProjects\webgl\three.js\GitHub\nodejs\myThreejs
 Иначе будет появляться ошибка 

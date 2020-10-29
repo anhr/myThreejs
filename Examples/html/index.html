@@ -43,6 +43,29 @@
 	<script type="module">
 
 //		import * as THREE from '/anhr/three.js/dev/build/three.module.js';
+/*
+		import {
+
+			Vector2,
+			Vector3,
+			Vector4,
+			Color,
+			BufferGeometry,
+			Points,
+			PointsMaterial,
+			VertexColors,
+			Float32BufferAttribute,
+			Mesh,
+			CubeGeometry,
+			MeshLambertMaterial,
+			//			Euler,
+
+			//for ShaderMaterial
+			TextureLoader, RepeatWrapping, ShaderMaterial//, BufferAttribute,
+
+		} from '/anhr/three.js/dev/build/three.module.js';
+*/
+//		import { ConvexBufferGeometry } from '/anhr/three.js/dev/examples/jsm/geometries/ConvexGeometry.js';
 
 		//import myThreejs from 'https://raw.githack.com/anhr/myThreejs/master/myThreejs.js';
 //		import myThreejs from '/anhr/myThreejs/master/myThreejs.js';
@@ -52,6 +75,7 @@
 
 		} from '../../myThreejs.js';
 
+//		import { WEBGL } from '/anhr/three.js/dev/examples/jsm/WebGL.js';
 		if ( WEBGL.isWebGLAvailable() === false ) {
 
 			document.body.appendChild( WEBGL.getWebGLErrorMessage() );
@@ -231,7 +255,7 @@
 						//new THREE.Color( "rgb( 0, 0, 255)" ),//w
 						//1,//w
 					),//Animated 3D point
-					//trace: true,//Displays the trace of the point movement.
+					trace: true,//Displays the trace of the point movement.
 
 				},
 
@@ -275,8 +299,8 @@
 				//scale: new THREE.Vector3( 2, 2, 2 ),
 				//rotation: new THREE.Vector3( new Function( 't', 'return Math.PI / 2 + t * Math.PI * 2' ), Math.PI / 4 ),
 				//rotation: new THREE.Vector3( Math.PI / 2, 0 ),
-				//shaderMaterial: {},
-				//arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
+				shaderMaterial: {},
+				arrayCloud: options.arrayCloud,//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 //deprecated				cloud: {},//position of the each point of this points array is cloud of random positions according with normal distribution. See https://en.wikipedia.org/wiki/Normal_distribution for details.
 
 			} );
@@ -611,10 +635,10 @@
 			moveScene: {},
 			cookie: true,
 			orbitControls: { gui: true, },//OrbitControls,//use orbit controls allow the camera to orbit around a target. https://threejs.org/docs/index.html#examples/en/controls/OrbitControls
-			//axesHelper: true,
-			//axesHelperGui: true,
-			//stereoEffect: true,
-			menuPlay: true,
+			axesHelper: true,
+			axesHelperGui: true,
+			stereoEffect: true,
+			canvasMenu: true,
 
 			//Array of points with cloud.
 			//If you define the array of points with cloud, then you can define a points with cloud.
@@ -760,7 +784,7 @@
 				dat: true,//use dat-gui JavaScript Controller Library. https://github.com/dataarts/dat.gui
 				axesHelper: true,
 				scales: { display: true, x: {} },
-				menuPlay: true,
+				canvasMenu: true,
 				//axesHelperGui: true,
 				/*
 				player: {},//3D objects animation.

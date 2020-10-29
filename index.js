@@ -34,10 +34,6 @@ import cookie from '../../commonNodeJS/master/cookieNodeJS/cookie.js';
 import { getLanguageCode } from '../../commonNodeJS/master/lang.js';//https://github.com/anhr/commonNodeJS
 //import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
 
-/*
-//import menuPlay from 'https://raw.githack.com/anhr/commonNodeJS/master/menuPlay/menuPlay.js';
-import menuPlay from '../../commonNodeJS/master/menuPlay/menuPlay.js';
-*/
 //import CanvasMenu from 'https://raw.githack.com/anhr/commonNodeJS/master/canvasMenu/canvasMenu.js';
 import CanvasMenu from '../../commonNodeJS/master/canvasMenu/canvasMenu.js';
 
@@ -139,32 +135,30 @@ var arrayCreates = [];
  * Creates new canvas with my 3D objects
  * @param {createXDobjects} createXDobjects callback creates my 3D objects.
  * @param {object} [options] the following options are available:
- * @param {HTMLElement|string} [options.elContainer] If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui.
+ * @param {HTMLElement|string} [options.elContainer=document.getElementById( "containerDSE" ) or a div element, child of body] If an HTMLElement, then a HTMLElement, contains a canvas and HTMLElement with id="iframe-goes-in-here" for gui.
  * <pre>
  * If a string, then is id of the HTMLElement.
- * Default is document.getElementById( "containerDSE" ) or a div element, child of body.
  * </pre>
  * @param {object} [options.camera] camera
- * @param {THREE.Vector3} [options.camera.position] camera position. Default is new THREE.Vector3( 0.4, 0.4, 2 ).
- * @param {THREE.Vector3} [options.camera.scale] camera scale. Default is new THREE.Vector3( 1, 1, 1 ).
+ * @param {THREE.Vector3} [options.camera.position=new THREE.Vector3( 0.4, 0.4, 2 )] camera position.
+ * @param {THREE.Vector3} [options.camera.scale=new THREE.Vector3( 1, 1, 1 )] camera scale.
  * @param {object} [options.scene] scene
- * @param {THREE.Vector3} [options.scene.position] scene position. Default is new THREE.Vector3( 0, 0, 0 )
+ * @param {THREE.Vector3} [options.scene.position=new THREE.Vector3( 0, 0, 0 )] scene position.
  * @param {object} [options.orbitControls] use orbit controls allow the camera to orbit around a target. [OrbitControls]{@link https://threejs.org/docs/index.html#examples/en/controls/OrbitControls}
- * @param {boolean} [options.orbitControls.gui] true - displays the orbit controls gui. Default is false.
+ * @param {boolean} [options.orbitControls.gui=false] true - displays the orbit controls gui.
  * @param {object} [options.axesHelper] add the AxesHelper. Default the axes is not visible.
- * @param {number} [options.axesHelper.dimensions] 1 - visualize the X axes
+ * @param {number} [options.axesHelper.dimensions=3] 1 - visualize the X axes
  * <pre>
  * 2 - visualize the X and Y axes
  * 3 - visualize the X, Y and Z axes
- * Default is 3.
  * </pre>
  * @param {number} [options.axesHelper.position] axesHelper position. Default is new THREE.Vector3( 0, 0, 0 )
- * @param {boolean} [options.axesHelperGui] true - displays the AxesHelper gui. Default is false.
+ * @param {boolean} [options.axesHelperGui=false] true - displays the AxesHelper gui.
  * @param {object} [options.spriteText] spriteText options. See SpriteText options for details. Default undefined.
- * @param {boolean} [options.stereoEffect] true - use [StereoEffect]{@link https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js}. Default is false.
- * @param {boolean} [options.dat] true - use dat-gui JavaScript Controller Library. [dat.gui]{@link https://github.com/dataarts/dat.gui}. Default is false.
- * @param {boolean} [options.menuPlay] true - use my dropdown menu for canvas in my version of [dat.gui]{@link https://github.com/anhr/dat.gui} for playing of 3D objects in my projects.
- * See nodejs\menuPlay\index.js Default is false.
+ * @param {boolean} [options.stereoEffect=false] true - use [StereoEffect]{@link https://github.com/anhr/three.js/blob/dev/examples/js/effects/StereoEffect.js}.
+ * @param {boolean} [options.dat=false] true - use dat-gui JavaScript Controller Library. [dat.gui]{@link https://github.com/dataarts/dat.gui}.
+ * @param {boolean} [options.canvasMenu=false] true - use my dropdown menu for canvas in my version of [dat.gui]{@link https://github.com/anhr/dat.gui} for playing of 3D objects in my projects.
+ * See ..\..\commonNodeJS\master\canvasMenu\canvasMenu.js
  * @param {array} [options.arrayCloud] Array of points with cloud.
  * <pre>
  * If you define the array of points with cloud, then you can define a points with cloud.
@@ -176,19 +170,18 @@ var arrayCreates = [];
  * on the pointsOptions of the myThreejs.points function.
  * Default is undefined
  * </pre>
- * @param {ColorPicker.palette|object} [options.palette] Color of points.
+ * @param {ColorPicker.palette|object} [options.palette=White color of all points] Color of points.
  * <pre>
  * ColorPicker.palette - custom palette
  * object - palette is new ColorPicker.palette( { palette: ColorPicker.paletteIndexes.bidirectional } )
- * Default is undefined - White color of all points.
  * </pre>
  * @param {object} [options.player] 3D objects animation. See options.settings param of the [Player]{@link https://raw.githack.com/anhr/commonNodeJS/master/player/jsdoc/module-Player.html}.
  * @param {object} [options.canvas] canvas properties
  * @param {number} [options.canvas.width] width of the canvas
  * @param {number} [options.canvas.height] height of the canvas
  * @param {object} [options.axesHelper.scales] axes scales. See three.js\src\helpers\AxesHelper.js
- * @param {number} [options.a] Can be use as 'a' parameter of the Function. See arrayFuncs for details. Default is 1.
- * @param {number} [options.b] Can be use as 'b' parameter of the Function. See arrayFuncs for details. Default is 0.
+ * @param {number} [options.a=1] Can be use as 'a' parameter of the Function. See arrayFuncs for details.
+ * @param {number} [options.b=0] Can be use as 'b' parameter of the Function. See arrayFuncs for details.
  * @param {boolean} [options.cookie] true - save settings to cookie
  *
  * @param {object} [options.point] point settings. Applies to points with ShaderMaterial.
@@ -196,53 +189,54 @@ var arrayCreates = [];
  * See [ShaderMaterial]{@link https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial} for details.
  * The size of the point seems constant and does not depend on the distance to the camera.
  * </pre>
- * @param {number} [options.point.size] The apparent angular size of a point in radians. Default is 0.02.
+ * @param {number} [options.point.size=0.02] The apparent angular size of a point in radians.
  * @param {object} [options.stats] Use JavaScript Performance Monitor. [stats]{@link https://github.com/mrdoob/stats.js/} . Dafault is not defined.
  * @param {object} [options.scales] axes scales. Default is {}
- * @param {boolean} [options.scales.display] true - displays the label and scale of the axes. Default is false.
- * @param {number} [options.scales.precision] Formats a scale marks into a specified length. Default is 4
+ * @param {boolean} [options.scales.display=false] true - displays the label and scale of the axes.
+ * @param {number} [options.scales.precision=4] Formats a scale marks into a specified length.
  *
  * @param {object} [options.scales.x] X axis options.
- * @param {number} [options.scales.x.zoomMultiplier] zoom multiplier. Default is 1.1
- * @param {number} [options.scales.x.offset] position offset. Default is 0.1
- * @param {string} [options.scales.x.name] axis name. Default is "X".
- * @param {number} [options.scales.x.min] Minimum range of the x axis. Default is -1.
- * @param {number} [options.scales.x.max] Maximum range of the x axis. Default is 1.
- * @param {number} [options.scales.x.marks] Number of x scale marks. Default is 5.
+ * @param {number} [options.scales.x.zoomMultiplier=1.1] zoom multiplier.
+ * @param {number} [options.scales.x.offset=0.1] position offset. Default
+ * @param {string} [options.scales.x.name="X"] axis name.
+ * @param {number} [options.scales.x.min=-1] Minimum range of the x axis.
+ * @param {number} [options.scales.x.max=1] Maximum range of the x axis.
+ * @param {number} [options.scales.x.marks=5] Number of x scale marks.
  *
  * @param {object} [options.scales.y] Y axis options.
- * @param {number} [options.scales.y.zoomMultiplier] zoom multiplier. Default is 1.1
- * @param {number} [options.scales.y.offset] position offset. Default is 0.1
- * @param {string} [options.scales.y.name] axis name. Default is "Y".
- * @param {number} [options.scales.y.min] Minimum range of the y axis. Default is -1.
- * @param {number} [options.scales.y.max] Maximum range of the y axis. Default is 1.
- * @param {number} [options.scales.y.marks] Number of y scale marks. Default is 5.
+ * @param {number} [options.scales.y.zoomMultiplier=1.1] zoom multiplier.
+ * @param {number} [options.scales.y.offset=0.1] position offset.
+ * @param {string} [options.scales.y.name="Y"] axis name.
+ * @param {number} [options.scales.y.min=-1] Minimum range of the y axis.
+ * @param {number} [options.scales.y.max=1] Maximum range of the y axis.
+ * @param {number} [options.scales.y.marks=5] Number of y scale marks.
  *
  * @param {object} [options.scales.z] Z axis options.
- * @param {number} [options.scales.z.zoomMultiplier] zoom multiplier. Default is 1.1
- * @param {number} [options.scales.z.offset] position offset. Default is 0.1
- * @param {string} [options.scales.z.name] axis name. Default is "Z".
- * @param {number} [options.scales.z.min] Minimum range of the z axis. Default is -1.
- * @param {number} [options.scales.z.max] Maximum range of the z axis. Default is 1.
- * @param {number} [options.scales.z.marks] Number of z scale marks. Default is 5.
+ * @param {number} [options.scales.z.zoomMultiplier=1.1] zoom multiplier.
+ * @param {number} [options.scales.z.offset=0.1] position offset.
+ * @param {string} [options.scales.z.name="Z"] axis name.
+ * @param {number} [options.scales.z.min=-1] Minimum range of the z axis.
+ * @param {number} [options.scales.z.max=1] Maximum range of the z axis.
+ * @param {number} [options.scales.z.marks=5] Number of z scale marks.
  *
  * @param {object} [options.scales.w] w axis options.
- * @param {number} [options.scales.w.zoomMultiplier] zoom multiplier. Default is 1.1
- * @param {number} [options.scales.w.offset] position offset. Default is 0.1
- * @param {string} [options.scales.w.name] axis name. Default is "W".
- * @param {number} [options.scales.w.min] Minimum range of the w axis. Default is -1.
- * @param {number} [options.scales.w.max] Maximum range of the w axis. Default is 1.
+ * @param {number} [options.scales.w.zoomMultiplier=1.1] zoom multiplier.
+ * @param {number} [options.scales.w.offset=0.1] position offset.
+ * @param {string} [options.scales.w.name="W"] axis name.
+ * @param {number} [options.scales.w.min=-1] Minimum range of the w axis.
+ * @param {number} [options.scales.w.max=1] Maximum range of the w axis.
  *
- * @param {object} [options.scales.t] Animation time. Default is {}
- * @param {number} [options.scales.t.zoomMultiplier] zoom multiplier. Default is 2
- * @param {number} [options.scales.t.offset] position offset. Default is 1
- * @param {string} [options.scales.t.name] Time name. Default is "T".
- * @param {number} [options.scales.t.min] Animation start time. Default is 0.
- * @param {number} [options.scales.t.max] Animation stop time. Default is 1.
- * @param {number} [options.scales.t.marks] Number of scenes of 3D objects animation. Default is 2.
- * @param {boolean} [options.scales.t.repeat] true - Infinite repeat of animation.. Default is false.
+ * @param {object} [options.scales.t={}] Animation time.
+ * @param {number} [options.scales.t.zoomMultiplier=2] zoom multiplier.
+ * @param {number} [options.scales.t.offset=1] position offset.
+ * @param {string} [options.scales.t.name="T"] Time name.
+ * @param {number} [options.scales.t.min=0] Animation start time. Default is 0.
+ * @param {number} [options.scales.t.max=1] Animation stop time. Default is 1.
+ * @param {number} [options.scales.t.marks=2] Number of scenes of 3D objects animation.
+ * @param {boolean} [options.scales.t.repeat=false] true - Infinite repeat of animation.
  *
  * @todo If you want to use raycaster (working out what objects in the 3d space the mouse is over) [Raycaster]{@link https://threejs.org/docs/index.html#api/en/core/Raycaster},
+ * <pre>
  * please add following object into your 3D Object userdata:
  * your3dObject.userData.raycaster = {
 
@@ -279,6 +273,7 @@ var arrayCreates = [];
 		},
 
 	}
+ * </pre>
  * [Example]{@link https://raw.githack.com/anhr/myThreejs/master/Examples/html/}
  */
 export function create( createXDobjects, options ) {
@@ -816,7 +811,7 @@ export function create( createXDobjects, options ) {
 			}
 
 			//Settings for all SpriteText added to scene and child groups
-			if ( typeof SpriteTextGui !== "undefined" )
+			if ( ( typeof SpriteTextGui !== "undefined" ) && ( fOptions ) )
 				SpriteTextGui( SpriteText, fOptions, scene, {
 
 					getLanguageCode: getLanguageCode,
@@ -875,7 +870,7 @@ export function create( createXDobjects, options ) {
 
 			}
 
-			if ( options.menuPlay ) {
+			if ( options.canvasMenu ) {
 
 				if ( ( canvasMenu === undefined ) ) {
 
@@ -1559,7 +1554,7 @@ export function create( createXDobjects, options ) {
 				} );
 
 			}
-			if ( options.guiSelectPoint.render !== undefined )
+			if ( options.guiSelectPoint && options.guiSelectPoint.render )
 				options.guiSelectPoint.render();
 
 		}

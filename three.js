@@ -1,4 +1,11 @@
+//import * as THREE from 'https://threejs.org/build/three.module.js';
+
+//Если использовать релиз THREE.REVISION = "120dev" то будут предупреждения 
+//three.module.js:21440 THREE.WebGLRenderer: EXT_frag_depth extension not supported.
+//three.module.js:21440 THREE.WebGLRenderer: EXT_shader_texture_lod extension not supported.
+//если рисовать линию new THREE.Line(...)
 import { THREE } from '../../commonNodeJS/master/three.js';//https://github.com/anhr/commonNodeJS
+
 //import { THREE } from 'https://raw.githack.com/anhr/commonNodeJS/master/three.js';
 //import * as THREE from '../../three.js/dev/build/three.module.js';//https://github.com/anhr/three.js
 

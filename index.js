@@ -42,10 +42,13 @@ import { FrustumPoints, cFrustumPointsF } from './frustumPoints/frustumPoints.js
 //import Player from './player.js';
 import Player from '../../commonNodeJS/master/player/player.js';//https://github.com/anhr/commonNodeJS
 
-//import OrbitControlsGui from '../cookieNodeJS/OrbitControlsGui.js';
-//import OrbitControlsGui from 'http://localhost/threejs/commonNodeJS/master/OrbitControlsGui.js';
+//import OrbitControlsGui from 'http://localhost/anhr/commonNodeJS/master/OrbitControlsGui.js';
 import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';//https://github.com/anhr/commonNodeJS
 //import OrbitControlsGui from 'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js';
+
+//import CameraGui from 'http://localhost/anhr/commonNodeJS/master/CameraGui.js';
+import CameraGui from '../../commonNodeJS/master/CameraGui.js';
+//import CameraGui from 'https://raw.githack.com/anhr/commonNodeJS/master/CameraGui.js';
 
 //import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
 import clearThree from '../../commonNodeJS/master/clearThree.js';//https://github.com/anhr/commonNodeJS
@@ -766,8 +769,8 @@ export function create( createXDobjects, options ) {
 					},
 					selectPlaySceneOptions: options,
 					settings: options.player,
-					cookie: options.cookie,
-					cookieName: '_' + getCanvasName(),
+//					cookie: options.cookie,
+//					cookieName: '_' + getCanvasName(),
 					onChangeScaleT: function ( scale ) {
 
 						if ( player !== undefined )
@@ -796,8 +799,11 @@ export function create( createXDobjects, options ) {
 				} );
 				if ( ( gui !== undefined ) && ( typeof controllerPlay !== 'undefined' ) ) {
 
+					controllerPlay.create( player, gui );
+/*
 					var playController = controllerPlay.create( player, gui );
 					gui.add( playController );
+*/					
 
 				}
 
@@ -806,7 +812,13 @@ export function create( createXDobjects, options ) {
 
 				fOptions = gui.addFolder( lang.settings );
 				if ( player !== undefined )
-					player.gui( fOptions, getLanguageCode );
+					player.gui( fOptions, {
+
+						getLanguageCode: getLanguageCode,
+						cookie: options.cookie,
+						cookieName: '_' + getCanvasName(),
+
+					} );
 
 			}
 
@@ -956,6 +968,7 @@ export function create( createXDobjects, options ) {
 				controls.update();
 				controls.addEventListener( 'change', function () {
 
+					//console.log( 'controls.target: ' + controls.target.x + ' ' + controls.target.y + ' ' + controls.target.z )
 					/*
 					console.warn('camera.position = ' + camera.position.x + ' ' + camera.position.y + ' ' + camera.position.z
 						+ '\r\ncamera.quaternion = ' + camera.quaternion.x + ' ' + camera.quaternion.y + ' ' + camera.quaternion.z
@@ -1155,7 +1168,7 @@ export function create( createXDobjects, options ) {
 
 			}
 			options.boPlayer = false;
-			Player.selectPlayScene( THREE, group, options.player === undefined ? 0 : options.player.min, 0, options );
+//			player.selectPlayScene( THREE, group, options.player === undefined ? 0 : options.player.min, 0, options );
 
 			//default setting for each 3D object
 			group.children.forEach( function ( mesh ) {
@@ -1206,6 +1219,17 @@ export function create( createXDobjects, options ) {
 
 						getLanguageCode: getLanguageCode,
 						scales: options.scales,
+
+					} );
+
+				//camera gui
+
+				if ( options.cameraGui )
+					CameraGui( fOptions, camera, {
+
+						getLanguageCode: getLanguageCode,
+						scales: options.scales,
+						orbitControls: controls,
 
 					} );
 
@@ -1644,9 +1668,11 @@ export function create( createXDobjects, options ) {
 			if ( intersection.object.userData.isInfo !== undefined && !intersection.object.userData.isInfo() )
 				return;
 			var spriteTextIntersection = findSpriteTextIntersection( scene );
+/*
 			var textColor = 'rgb( 128, 128, 128 )',
 				position = getPosition( intersection );
-
+*/
+/*
 			// Make the spriteText follow the mouse
 			//https://stackoverflow.com/questions/36033879/three-js-object-follows-mouse-position
 			var vector = new THREE.Vector3( mouse.x, mouse.y, 0 );
@@ -1662,51 +1688,82 @@ export function create( createXDobjects, options ) {
 				parent = parent.parent;
 
 			}
-
+*/
 			if ( spriteTextIntersection === undefined ) {
 
-				var isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
+/*
+				const isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
 					funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
-					func = ( funcs === undefined ) || ( typeof funcs === "function" ) ? undefined : funcs[intersection.index],
+					func = ( funcs === undefined ) || ( typeof funcs === "function" ) ? undefined : funcs[intersection.index];
+*/
+					/*Кажется это устарело. Сейчас имя точки беру из intersection.object.userData.player
 					pointName = !isArrayFuncs ?
 						undefined :
 						intersection.object.userData.pointName === undefined ?
-							func === undefined ? undefined : func.name :
+							func === undefined ?
+								undefined :
+								func.name :
 							intersection.object.userData.pointName( intersection.index ),
+					*/
+//					pointName = intersection.object.userData.player.arrayFuncs[intersection.index].name,
+/*
 					color = !isArrayFuncs || ( func === undefined ) ?
 						undefined :
 						Array.isArray( func.w ) ?
 							Player.execFunc( func, 'w', group.userData.t, options.a, options.b ) :
 							func.w;
+*/
+/*
 				if ( ( color === undefined ) && ( intersection.object.geometry.attributes.ca !== undefined ) ) {
 
-					var vector = new THREE.Vector3().fromArray( intersection.object.geometry.attributes.ca.array, intersection.index * intersection.object.geometry.attributes.ca.itemSize );
+					const vector = new THREE.Vector3().fromArray( intersection.object.geometry.attributes.ca.array, intersection.index * intersection.object.geometry.attributes.ca.itemSize );
 					color = new THREE.Color( vector.x, vector.y, vector.z );
 
 				}
-				var cookieName = getCanvasName();
+*/
+//				var cookieName = getCanvasName();
 
-				/**
-				 * Converting World coordinates to Screen coordinates
-				 * https://stackoverflow.com/questions/11586527/converting-world-coordinates-to-screen-coordinates-in-three-js-using-projection
-				 */
-				function worldToScreen( world ) {
-
-					var width = canvas.width, height = canvas.height;
-					var widthHalf = width / 2, heightHalf = height / 2;
-
-					var pos = world.clone();
-					pos.project( camera );
-					pos.x = ( pos.x * widthHalf ) + widthHalf;
-					pos.y = - ( pos.y * heightHalf ) + heightHalf;
-					return pos;
-
-				}
-				var screenPos = worldToScreen( pos );
-
-				var rect = options.spriteText.rect ? JSON.parse( JSON.stringify( options.spriteText.rect ) ) : {};
+				const rect = options.spriteText.rect ? JSON.parse( JSON.stringify( options.spriteText.rect ) ) : {};
 				rect.displayRect = true;
 				rect.backgroundColor = 'rgba(0, 0, 0, 1)';
+				spriteTextIntersection = StereoEffect.getTextIntersection( intersection, {
+
+					scales: options.scales,
+					spriteOptions: {
+
+						textHeight: options.spriteText.textHeight,
+						fontColor: options.spriteText.fontColor,
+						rect: rect,
+						center: {
+
+							camera: camera,
+							canvas: canvas,
+
+						}
+
+					}
+
+				} );
+/*
+				spriteTextIntersection = new SpriteText(
+					StereoEffect.getTextIntersection( intersection ),
+					pos, {
+
+					textHeight: options.spriteText.textHeight,// || 0.2,
+					fontColor: options.spriteText.fontColor,// || textColor,
+					rect: rect,
+					center: {
+
+						camera: camera,
+						canvas: canvas,
+
+					}
+					//					center: new THREE.Vector2( screenPos.x < ( canvas.width / 2 ) ? 0 : 1, screenPos.y < ( canvas.height / 2 ) ? 1 : 0 ),
+
+				}
+				);
+*/
+/*
 				spriteTextIntersection = new SpriteText(
 					( intersection.object.name === '' ? '' : lang.mesh + ': ' + intersection.object.name + '\n' ) +
 					( pointName === undefined ? '' : lang.pointName + ': ' + pointName + '\n' ) +
@@ -1741,10 +1798,17 @@ export function create( createXDobjects, options ) {
 					textHeight: options.spriteText.textHeight,// || 0.2,
 					fontColor: options.spriteText.fontColor,// || textColor,
 					rect: rect,
-					center: new THREE.Vector2( screenPos.x < ( canvas.width / 2 ) ? 0 : 1, screenPos.y < ( canvas.height / 2 ) ? 1 : 0 ),
+					center : {
+
+						camera: camera,
+						canvas: canvas,
+
+					}
+//					center: new THREE.Vector2( screenPos.x < ( canvas.width / 2 ) ? 0 : 1, screenPos.y < ( canvas.height / 2 ) ? 1 : 0 ),
 
 				}
 				);
+*/
 				spriteTextIntersection.name = spriteTextIntersectionName;
 				spriteTextIntersection.scale.divide( scene.scale );
 				scene.add( spriteTextIntersection );
@@ -1801,13 +1865,13 @@ function findSpriteTextIntersection( scene ) {
 
 //Localization
 
-var lang = {
+const lang = {
 
 	defaultButton: 'Default',
 	defaultTitle: 'Restore Orbit controls settings.',
 
-	mesh: 'Mesh',
-	pointName: 'Point Name',
+//	mesh: 'Mesh',
+//	pointName: 'Point Name',
 	settings: 'Settings',
 	webglcontextlost: 'The user agent has detected that the drawing buffer associated with a WebGLRenderingContext object has been lost.',
 
@@ -1835,8 +1899,8 @@ switch ( getLanguageCode() ) {
 		lang.defaultButton = 'Восстановить';
 		lang.defaultTitle = 'Восстановить положение осей координат по умолчанию.';
 
-		lang.mesh = '3D объект';
-		lang.pointName = 'Имя точки';
+//		lang.mesh = '3D объект';
+//		lang.pointName = 'Имя точки';
 		lang.name = 'Имя';
 		lang.settings = 'Настройки';
 		lang.webglcontextlost = 'Пользовательский агент обнаружил, что буфер рисунка, связанный с объектом WebGLRenderingContext, потерян.';

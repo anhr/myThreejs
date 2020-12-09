@@ -78,7 +78,7 @@ var debug = {
 
 /**
  * Create FrustumPoints
- * @param {THREE.PerspectiveCamera} camera
+ * @param {THREE.PerspectiveCamera} camera [PerspectiveCamera]{@link https://threejs.org/docs/index.html#api/en/cameras/PerspectiveCamera}
  * @param {THREE.OrbitControls} controls
  * @param {THREE.Group} group group of objects to which a new FrustumPoints will be added
  * @param {string} cookieName cookie name

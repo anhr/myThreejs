@@ -22,7 +22,8 @@ import { ConvexBufferGeometry } from '../../three.js/dev/examples/jsm/geometries
 import StereoEffect from '../../commonNodeJS/master/StereoEffect/StereoEffect.js';//https://github.com/anhr/commonNodeJS
 //import StereoEffect from 'https://raw.githack.com/anhr/commonNodeJS/master/StereoEffect/StereoEffect.js';
 
-import { SpriteText } from '../../SpriteText/master/SpriteText.js';//https://github.com/anhr/SpriteText
+//import { SpriteText } from '../../SpriteText/master/SpriteText.js';//https://github.com/anhr/SpriteText
+import { SpriteText } from '../../commonNodeJS/master/SpriteText/SpriteText.js';//https://github.com/anhr/SpriteText
 //import { SpriteText } from 'https://raw.githack.com/anhr/SpriteText/master/SpriteText.js';
 SpriteText.setTHREE( THREE );
 

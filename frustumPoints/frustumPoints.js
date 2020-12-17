@@ -414,19 +414,19 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 		if ( points === undefined )
 			return;
 		if( !notRemoveMesh )
-			options.guiSelectPoint.removeMesh( points );//не удаляю frustumPoints из сиска Meshs потому что сюда попадает только если пользователь изменил число точек frustumPoints.
-		//В этом случае создается новый frustumPoints, который надо присоеденить к старому frustumPoints из списка Meshs.
-		//Если я удалю frustumPoints из сиска Meshs а потом добавлю туда новый frustumPoints,
-		//то изменится индекс frustumPoints в списке Meshs
-		//и тогда неверно будет выполняться function update() в frustumPoints и как результат буде неверный список Ponts списке Meshs
+			options.guiSelectPoint.removeMesh( points );//не удаляю frustumPoints из списка Meshes потому что сюда попадает только если пользователь изменил число точек frustumPoints.
+		//В этом случае создается новый frustumPoints, который надо присоеденить к старому frustumPoints из списка Meshes.
+		//Если я удалю frustumPoints из списка Meshes а потом добавлю туда новый frustumPoints,
+		//то изменится индекс frustumPoints в списке Meshes
+		//и тогда неверно будет выполняться function update() в frustumPoints и как результат буде неверный список Ponts списке Meshes
 		//for testing
 		//Select in the canvas any point, but not frustum point.
-		//Now you can see your selected point in the in the Meshs/Points/Select list in the gui.
+		//Now you can see your selected point in the in the Meshes/Points/Select list in the gui.
 		//Change Settings/Frustum Points/Z count in the gui.
 		//Now your selected point is deselected.
 		//Select in the canvas your point again.
 		//Now yiou can see "Cannot read property 'selected' of undefined" error message in the console.
-		//Try to select your point in the gui. You can not to do it because your point is not exists in the Meshs/Points/Select list. Instead you see all Frustum Points in the Meshs/Points/Select list.
+		//Try to select your point in the gui. You can not to do it because your point is not exists in the Meshes/Points/Select list. Instead you see all Frustum Points in the Meshs/Points/Select list.
 
 		group.remove( points );
 		renderer.renderLists.dispose();

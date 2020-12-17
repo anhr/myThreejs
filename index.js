@@ -416,7 +416,7 @@ export function create( createXDobjects, options ) {
 			//В этом случае не надо обрабатывать событие elContainer 'pointerdown'
 			//по которому выбирается точка на canvas.
 			//В противном случае если пользователь щелкнет на gui, то он может случайно выбрать точку на canvas.
-			//Тогда открывается папка Meshs и все органы управления сдвигаются вниз. Это неудобно.
+			//Тогда открывается папка Meshes и все органы управления сдвигаются вниз. Это неудобно.
 			//И вообще нехорошо когда выбирается точка когда пользователь не хочет это делать.
 
 			canvasMenu, raycaster = new THREE.Raycaster(), INTERSECTED = [], scale = options.scale, axesHelper, colorsHelper = 0x80, fOptions,
@@ -1071,6 +1071,12 @@ export function create( createXDobjects, options ) {
 					axesHelper: axesHelper,
 					options: options,
 					getLanguageCode: getLanguageCode,
+					cameraTarget: {
+
+						camera: camera,
+						orbitControls: controls,
+
+					},
 					setIntersection: function( _intersection ){ intersection = _intersection; },
 					//displays the trace of the movement of all points of the mesh
 					pointsControls: function( fPoints, dislayEl, getMesh ){
@@ -1969,7 +1975,7 @@ export { getWorldPosition }
  * @param {object} options see myThreejs.create options for details
  * @param {object} [pointsOptions] followed points options is availablee:
  * @param {number} [pointsOptions.tMin] start time. Uses for playing of the points. Default is 0.
- * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshs folder of the dat.gui. Default is "".
+ * @param {string} [pointsOptions.name] Name of the points. Used for displaying of items of the Select drop down control of the Meshes folder of the dat.gui. Default is "".
  * @param {object} [pointsOptions.shaderMaterial] creates the THREE.Points with THREE.ShaderMaterial material.
  * <pre>
  * The size of the each point of the THREE.Points seems the same on canvas

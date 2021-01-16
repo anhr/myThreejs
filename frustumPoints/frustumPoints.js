@@ -64,6 +64,8 @@ import {
 import { myThreejs, THREE } from './../myThreejs.js';
 import cookie from '../../../commonNodeJS/master/cookieNodeJS/cookie.js';
 import clearThree from '../../../commonNodeJS/master/clearThree.js';
+import { dat } from '../../../commonNodeJS/master/dat/dat.module.js';
+
 
 //memory limit
 //import roughSizeOfObject from '../../commonNodeJS/master/SizeOfObject.js';
@@ -1079,7 +1081,7 @@ function create( camera, controls, group, cookieName, spatialMultiplex, renderer
 				lang.hideTitle = 'Скрыть близкие к камере точки в процентах ко всем точкам для более удобной визуализации.';
 
 				lang.opacity = 'Непрозрачность';
-				lang.opacityTitle = 'Число в диапазоне 0.0 - 1.0, указывающий, насколько прозрачены линии. Значение 0.0 означает полностью прозрачный, 1.0 - полностью непрозрачный.';
+				lang.opacityTitle = 'Число в диапазоне 0.0 - 1.0, указывающее, насколько прозрачены линии. Значение 0.0 означает полностью прозрачный, 1.0 - полностью непрозрачный.';
 
 				lang.near = 'Ближний слой';
 				lang.nearTitle = 'Смещение ближайшего к камере слоя точек в процентах.';

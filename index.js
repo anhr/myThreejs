@@ -14,9 +14,9 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import loadScript from '../../commonNodeJS/master/loadScriptNodeJS/loadScript.js';//https://github.com/anhr/commonNodeJS/tree/master/loadScriptNodeJS
+import loadScript from '../../commonNodeJS/master/loadScriptNodeJS/loadScript.js';
 
-import loadFile from '../../commonNodeJS/master/loadFileNodeJS/loadFile.js';//https://github.com/anhr/commonNodeJS/tree/master/loadFileNodeJS
+import loadFile from '../../commonNodeJS/master/loadFileNodeJS/loadFile.js';
 
 //https://threejs.org/docs/#manual/en/introduction/Import-via-modules
 //import * as THREE from '../../three.js/dev/build/three.module.js';
@@ -25,13 +25,13 @@ import loadFile from '../../commonNodeJS/master/loadFileNodeJS/loadFile.js';//ht
 import { THREE, OrbitControls, StereoEffect, AxesHelper, AxesHelperGui, SpriteText, SpriteTextGui } from './three.js';
 
 //import { GUI } from '../../three.js/dev/examples/jsm/libs/dat.gui.module.js';
-import { dat } from '../../commonNodeJS/master/dat/dat.module.js';//https://github.com/anhr/commonNodeJS
+import { dat } from '../../commonNodeJS/master/dat/dat.module.js';
 
 //import cookie from 'https://raw.githack.com/anhr/cookieNodeJS/master/cookie.js';
 //import cookie from 'https://raw.githack.com/anhr/commonNodeJS/master/cookieNodeJS/cookie.js';
 import cookie from '../../commonNodeJS/master/cookieNodeJS/cookie.js';
 
-import { getLanguageCode } from '../../commonNodeJS/master/lang.js';//https://github.com/anhr/commonNodeJS
+import { getLanguageCode } from '../../commonNodeJS/master/lang.js';
 //import { getLanguageCode } from 'https://raw.githack.com/anhr/commonNodeJS/master/lang.js';
 
 //import CanvasMenu from 'https://raw.githack.com/anhr/commonNodeJS/master/canvasMenu/canvasMenu.js';
@@ -40,10 +40,11 @@ import CanvasMenu from '../../commonNodeJS/master/canvasMenu/canvasMenu.js';
 import { FrustumPoints, cFrustumPointsF } from './frustumPoints/frustumPoints.js';
 
 //import Player from './player.js';
-import Player from '../../commonNodeJS/master/player/player.js';//https://github.com/anhr/commonNodeJS
+import Player from '../../commonNodeJS/master/player/player.js';
+Player.setTHREE( THREE );
 
 //import OrbitControlsGui from 'http://localhost/anhr/commonNodeJS/master/OrbitControlsGui.js';
-import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';//https://github.com/anhr/commonNodeJS
+import OrbitControlsGui from '../../commonNodeJS/master/OrbitControlsGui.js';
 //import OrbitControlsGui from 'https://raw.githack.com/anhr/commonNodeJS/master/OrbitControlsGui.js';
 
 //import CameraGui from 'http://localhost/anhr/commonNodeJS/master/CameraGui.js';
@@ -51,19 +52,19 @@ import CameraGui from '../../commonNodeJS/master/CameraGui.js';
 //import CameraGui from 'https://raw.githack.com/anhr/commonNodeJS/master/CameraGui.js';
 
 //import AxesHelperGui from '../../commonNodeJS/master/AxesHelperGui.js';
-import clearThree from '../../commonNodeJS/master/clearThree.js';//https://github.com/anhr/commonNodeJS
+import clearThree from '../../commonNodeJS/master/clearThree.js';
 
-import ColorPicker from '../../commonNodeJS/master/colorpicker/colorpicker.js';//https://github.com/anhr/commonNodeJS/tree/master/colorpicker
+import ColorPicker from '../../commonNodeJS/master/colorpicker/colorpicker.js';
 //import ColorPicker from 'https://raw.githack.com/anhr/commonNodeJS/master/colorpicker/colorpicker.js';
 
-import PositionController from '../../commonNodeJS/master/PositionController.js';//https://github.com/anhr/commonNodeJS
+import PositionController from '../../commonNodeJS/master/PositionController.js';
 
-import controllerPlay from '../../commonNodeJS/master/controllerPlay/controllerPlay.js';//https://github.com/anhr/controllerPlay
+import controllerPlay from '../../commonNodeJS/master/controllerPlay/controllerPlay.js';
 //import controllerPlay from 'https://raw.githack.com/anhr/commonNodeJS/master/controllerPlay/controllerPlay.js';
 
 //import ScaleController from '../../commonNodeJS/master/ScaleController.js';
 
-import { GuiSelectPoint, getWorldPosition, getObjectLocalPosition, getObjectPosition } from '../../commonNodeJS/master/guiSelectPoint/guiSelectPoint.js';//https://github.com/anhr/commonNodeJS
+import { GuiSelectPoint, getWorldPosition, getObjectLocalPosition, getObjectPosition } from '../../commonNodeJS/master/guiSelectPoint/guiSelectPoint.js';
 //import { GuiSelectPoint, getWorldPosition } from 'https://raw.githack.com/anhr/commonNodeJS/master/guiSelectPoint/guiSelectPoint.js';
 
 //import { OrbitControls } from '../../three.js/dev/examples/jsm/controls/OrbitControls.js';
@@ -757,7 +758,7 @@ export function create( createXDobjects, options ) {
 
 			if ( options.player !== undefined ) {
 
-				player = new Player( THREE, group, {
+				player = new Player( /*THREE, */group, {
 
 					onSelectScene: function ( index, t ) {
 
@@ -781,14 +782,14 @@ export function create( createXDobjects, options ) {
 */							
 						group.children.forEach( function ( mesh ) {
 
-							if ( ( mesh.userData.arrayFuncs === undefined ) || ( typeof mesh.userData.arrayFuncs === "function" ) )
+							if ( ( mesh.userData.player === undefined ) || ( mesh.userData.player.arrayFuncs === undefined ) || ( typeof mesh.userData.player.arrayFuncs === "function" ) )
 								return;
-							mesh.userData.arrayFuncs.forEach( function ( vector ) {
+							mesh.userData.player.arrayFuncs.forEach( function ( vector ) {
 
 								if ( vector.line === undefined )
 									return;
 								vector.line.remove();
-								vector.line = new Player.traceLine( THREE, scene, options );
+								vector.line = new Player.traceLine( /*THREE, scene, */options );
 
 							} );
 
@@ -1032,12 +1033,13 @@ export function create( createXDobjects, options ) {
 			}
 			if ( gui ) {
 
+/*
 				function visibleTraceLine( intersection, value, getMesh ) {
 
-					if ( intersection.object.userData.arrayFuncs === undefined )
+					if ( intersection.object.userData.player.arrayFuncs === undefined )
 						return;
 					var index = intersection.index || 0,
-						point = intersection.object.userData.arrayFuncs[index],
+						point = intersection.object.userData.player.arrayFuncs[index],
 						line = point === undefined ? undefined : point.line;
 					if ( line !== undefined )
 						line.visible( value );
@@ -1045,7 +1047,7 @@ export function create( createXDobjects, options ) {
 						return;
 					if ( point.line !== undefined )
 						return;
-					point.line = new Player.traceLine( THREE, scene, options );
+					point.line = new Player.traceLine( options );
 
 					//color
 					var color = intersection.object.geometry.attributes.color;
@@ -1058,13 +1060,15 @@ export function create( createXDobjects, options ) {
 
 					point.line.addPoint(
 
-						getObjectPosition( getMesh(), index ),
-						player.getSelectSceneIndex(),
+//						getObjectPosition( getMesh(), index ),
+						getMesh(), index,
+//						player.getSelectSceneIndex(),
 						color
 
 					);
 
 				}
+*/
 				var cTrace, intersection;
 				options.guiSelectPoint = new GuiSelectPoint( THREE, {
 
@@ -1081,6 +1085,7 @@ export function create( createXDobjects, options ) {
 					//displays the trace of the movement of all points of the mesh
 					pointsControls: function( fPoints, dislayEl, getMesh ){
 
+/*						
 						const cTraceAll = fPoints.add( { trace: false }, 'trace' ).onChange( function ( value ) {
 
 							var mesh = getMesh();
@@ -1093,11 +1098,13 @@ export function create( createXDobjects, options ) {
 						dat.controllerNameAndTitle( cTraceAll, lang.trace, lang.traceAllTitle );
 						dislayEl( cTraceAll, options.player === undefined ? false : true );
 						return cTraceAll;
+*/						
 
 					},
 					//displays the trace of the point movement
 					pointControls: function( fPoint, dislayEl, getMesh ){
 
+/*
 						cTrace = fPoint.add( { trace: false }, 'trace' ).onChange( function ( value ) {
 
 							visibleTraceLine( intersection, value, getMesh );
@@ -1106,6 +1113,7 @@ export function create( createXDobjects, options ) {
 						dat.controllerNameAndTitle( cTrace, lang.trace, lang.traceTitle );
 						dislayEl( cTrace, options.player === undefined ? false : true );
 						return cTrace;
+*/						
 
 					},
 
@@ -1658,6 +1666,7 @@ export function create( createXDobjects, options ) {
 	}
 	options.getPoints = Player.getPoints;
 	options.getColors = Player.getColors;
+	options.getItemSize = Player.getItemSize;
 
 	//for Raycaster https://threejs.org/docs/index.html#api/en/core/Raycaster
 	options.raycaster = {
@@ -1698,8 +1707,8 @@ export function create( createXDobjects, options ) {
 			if ( spriteTextIntersection === undefined ) {
 
 /*
-				const isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.arrayFuncs !== undefined ) ),
-					funcs = !isArrayFuncs ? undefined : intersection.object.userData.arrayFuncs,
+				const isArrayFuncs = ( ( intersection.index !== undefined ) && ( intersection.object.userData.player.arrayFuncs !== undefined ) ),
+					funcs = !isArrayFuncs ? undefined : intersection.object.userData.player.arrayFuncs,
 					func = ( funcs === undefined ) || ( typeof funcs === "function" ) ? undefined : funcs[intersection.index];
 */
 					/*Кажется это устарело. Сейчас имя точки беру из intersection.object.userData.player
@@ -1890,11 +1899,11 @@ const lang = {
 	size: 'Size',
 	sizeTitle: 'Size of the point with "ShaderMaterial" material',
 	defaultPointTitle: 'Restore point.',
-	
+/*	
 	trace: 'Trace',
 	traceTitle: 'Display the trace of the point movement.',
 	traceAllTitle: 'Display the trace of the movement of all points of the mesh.',
-
+*/
 	opacity: 'Opacity',
 
 };
@@ -1920,11 +1929,11 @@ switch ( getLanguageCode() ) {
 		lang.size = 'Размер';
 		lang.sizeTitle = 'Размер точки с материалом типа "ShaderMaterial"';
 		lang.defaultPointTitle = 'Восстановить точку';
-
+/*
 		lang.trace = 'Трек';
 		lang.traceTitle = 'Показать трек перемещения точки.';
 		lang.traceAllTitle = 'Показать трек перемещения всех точек выбранного 3D объекта.';
-
+*/
 		lang.opacity = 'Непрозрачность';
 		break;
 
@@ -2027,18 +2036,26 @@ export function points( arrayFuncs, group, options, pointsOptions ) {
 
 }
 
-/**
- * Converts the mesh.geometry.attributes.position to mesh.userData.arrayFuncs.
+/*кажктся не используется*
+ * Converts the mesh.geometry.attributes.position to mesh.userData.player.arrayFuncs.
  * Used to restore the default point position.
  * @param {THREE.Mesh} mesh
  */
+/*
 export function setArrayFuncs( mesh ) {
 
-	mesh.userData.arrayFuncs = [];//Display the "Restore default local position" button.
+	if ( !mesh.userData.player ) {
+
+		console.error( 'setArrayFuncs(): mesh.userData.player = ' + mesh.userData.player );
+		return;
+
+	}
+	mesh.userData.player.arrayFuncs = [];//Display the "Restore default local position" button.
 	for ( var i = 0; i < mesh.geometry.attributes.position.count; i++ )
-		mesh.userData.arrayFuncs.push( getObjectLocalPosition( mesh, i ) );
+		mesh.userData.player.arrayFuncs.push( getObjectLocalPosition( mesh, i ) );
 
 }
+*/
 /**
  * Limits angles of rotations of the mesh between 0 and 360 degrees.
  * @param {THREE.Euler} rotation angles for limitation

@@ -16,7 +16,7 @@
 
 import {
 
-    create, points, setArrayFuncs, limitAngles, getWorldPosition
+    create, points, limitAngles, getWorldPosition//, setArrayFuncs
 
 } from './index.js';
 
@@ -38,7 +38,7 @@ var myThreejs =
 
 	create: create,
     points: points,
-	setArrayFuncs: setArrayFuncs,
+//	setArrayFuncs: setArrayFuncs,
 	limitAngles: limitAngles,
     getWorldPosition: getWorldPosition,
     /**

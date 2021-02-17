@@ -758,7 +758,7 @@ export function create( createXDobjects, options ) {
 
 			if ( options.player !== undefined ) {
 
-				player = new Player( /*THREE, */group, {
+				player = new Player( group, {
 
 					onSelectScene: function ( index, t ) {
 
@@ -770,6 +770,7 @@ export function create( createXDobjects, options ) {
 					},
 					selectPlaySceneOptions: options,
 					settings: options.player,
+					cameraTarget: { camera: camera, },
 //					cookie: options.cookie,
 //					cookieName: '_' + getCanvasName(),
 					onChangeScaleT: function ( scale ) {
@@ -966,7 +967,9 @@ export function create( createXDobjects, options ) {
 
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.target.set( scene.position.x * 2, scene.position.y * 2, scene.position.z * 2 );
+				controls.saveState();//For reset of the orbitControls settings in the CameraGui and OrbitControlsGui
 				controls.update();
+				if ( typeof Player !== 'undefined' ) Player.orbitControls = controls;//for cameraTarget
 				controls.addEventListener( 'change', function () {
 
 					//console.log( 'controls.target: ' + controls.target.x + ' ' + controls.target.y + ' ' + controls.target.z )
@@ -1239,7 +1242,7 @@ export function create( createXDobjects, options ) {
 				//camera gui
 
 				if ( options.cameraGui )
-					CameraGui( fOptions, camera, {
+					CameraGui( fOptions, camera, THREE, Player, {
 
 						getLanguageCode: getLanguageCode,
 						scales: options.scales,

@@ -33,7 +33,11 @@
 
 		import {
 
-			myThreejs, THREE, WEBGL, ConvexBufferGeometry, MyPoints
+			myThreejs,
+			THREE,
+			WEBGL,
+			//ConvexBufferGeometry,Uncaught SyntaxError: The requested module '../../../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js' does not provide an export named 'ConvexBufferGeometry'
+			//MyPoints
 
 		} from '../../myThreejs.js';
 
@@ -527,7 +531,8 @@
 			var cubeType = 'cube';
 			function addCube( cubePosition, color, selectPlayScene, name ) {
 
-				var cube = new THREE.Mesh( new ConvexBufferGeometry( new THREE.BoxGeometry( 0.4, 0.4, 0.4 ).vertices ),
+//				var cube = new THREE.Mesh( new ConvexBufferGeometry( new THREE.BoxGeometry( 0.4, 0.4, 0.4 ).vertices ),
+				var cube = new THREE.Mesh( new THREE.BoxGeometry( 0.4, 0.4, 0.4 ),
 					new THREE.MeshLambertMaterial( {
 
 						color: color,
@@ -709,7 +714,13 @@
 //		import * as THREE from '/anhr/three.js/dev/build/three.module.js';
 //		import myThreejs from '/anhr/myThreejs/master/myThreejs.js';
 //		import { ConvexBufferGeometry } from '/anhr/three.js/dev/examples/jsm/geometries/ConvexGeometry.js';
-		import { myThreejs, THREE, ConvexBufferGeometry } from '../../myThreejs.js';
+		import {
+
+			myThreejs,
+			THREE,
+			//ConvexBufferGeometry,Uncaught SyntaxError: The requested module '../../../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js' does not provide an export named 'ConvexBufferGeometry'
+
+		} from '../../myThreejs.js';
 
 		myThreejs.create( function ( group, options ) {
 
@@ -741,7 +752,8 @@
 			var cubeType = 'cube';
 			function addCube( cubePosition, color ) {
 
-				var cube = new THREE.Mesh( new ConvexBufferGeometry( new THREE.BoxGeometry( 0.4, 0.4, 0.4 ).vertices ),
+//				var cube = new THREE.Mesh( new ConvexBufferGeometry( new THREE.BoxGeometry( 0.4, 0.4, 0.4 ).vertices ),
+				var cube = new THREE.Mesh( new THREE.BoxGeometry( 0.4, 0.4, 0.4 ),
 					new THREE.MeshLambertMaterial( {
 						color: color,
 					} ) );

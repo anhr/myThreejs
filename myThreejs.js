@@ -31,7 +31,13 @@ import * as THREE from '../../three.js/dev/build/three.module.js';
 import { WEBGL } from '../../three.js/dev/examples/jsm/WebGL.js';
 */
 //import { THREE, WEBGL, ConvexBufferGeometry } from '../../nodejs/three.js';
-import { THREE, WEBGL, ConvexBufferGeometry } from './three.js';
+import {
+
+    THREE,
+    WEBGL,
+    //ConvexBufferGeometry, Uncaught SyntaxError: The requested module '../../../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js' does not provide an export named 'ConvexBufferGeometry'
+
+} from './three.js';
 //var MYTHREEJS =
 var myThreejs =
 {
@@ -58,4 +64,12 @@ var myThreejs =
 
 }
 //export default MYTHREEJS;
-export { myThreejs, THREE, WEBGL, ConvexBufferGeometry, MyPoints }
+export {
+
+    myThreejs,
+    THREE,
+    WEBGL,
+    //ConvexBufferGeometry,Uncaught SyntaxError: The requested module '../../../../three.js/dev/examples/jsm/geometries/ConvexGeometry.js' does not provide an export named 'ConvexBufferGeometry'
+    MyPoints
+
+}
